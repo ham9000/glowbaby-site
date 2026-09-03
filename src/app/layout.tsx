@@ -18,14 +18,14 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Glowbaby — A softer start to every night",
+    default: "Glowbaby — Made to be seen. Built to be theirs.",
     template: "%s | Glowbaby",
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Glowbaby — A softer start to every night",
+    title: "Glowbaby — Made to be seen. Built to be theirs.",
     description: siteConfig.description,
     type: "website",
     siteName: siteConfig.name,
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Glowbaby — A softer start to every night",
+    title: "Glowbaby — Made to be seen. Built to be theirs.",
     description: siteConfig.description,
   },
 };

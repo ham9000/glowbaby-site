@@ -3,33 +3,52 @@ type ProductVisualProps = {
 };
 
 export function ProductVisual({ compact = false }: ProductVisualProps) {
+  const leds = Array.from({ length: 13 });
+
   return (
     <div
       className={`product-stage ${compact ? "product-stage-compact" : ""}`}
-      aria-label="Conceptual Glowbaby product illustration"
+      aria-label="Concept illustration of a Glowbaby-lit helmet, controller, and mobile app"
       role="img"
     >
-      <span className="product-orbit product-orbit-one" />
-      <span className="product-orbit product-orbit-two" />
-      <span className="product-spark product-spark-one" />
-      <span className="product-spark product-spark-two" />
-      <span className="product-spark product-spark-three" />
-      <div className="product-device">
-        <div className="product-halo" />
-        <div className="product-face">
-          <span className="product-moon" />
-          <span className="product-status">
-            <i />
-            <i />
-            <i />
+      <span className="product-lightwash product-lightwash-one" />
+      <span className="product-lightwash product-lightwash-two" />
+      <div className="gear-scene">
+        <div className="helmet">
+          <span className="helmet-vent helmet-vent-one" />
+          <span className="helmet-vent helmet-vent-two" />
+          <span className="helmet-vent helmet-vent-three" />
+          <span className="helmet-panel" />
+          <span className="helmet-visor" />
+          <span className="helmet-led-track">
+            {leds.map((_, index) => (
+              <i key={index} />
+            ))}
           </span>
         </div>
-        <div className="product-neck" />
-        <div className="product-base">
-          <span />
+        <div className="product-controller">
+          <span className="controller-status" />
+          <span className="controller-mark">G</span>
+          <span className="controller-port" />
+        </div>
+        <div className="product-phone">
+          <span className="phone-speaker" />
+          <div className="phone-screen">
+            <span className="phone-kicker">GLOWBABY</span>
+            <span className="phone-preview">
+              <i />
+            </span>
+            <span className="phone-mode">Color flow</span>
+            <span className="phone-colors">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+          </div>
         </div>
       </div>
-      <p className="product-caption">Concept form · details in development</p>
+      <p className="product-caption">Lighting system concept · hardware and app in development</p>
     </div>
   );
 }

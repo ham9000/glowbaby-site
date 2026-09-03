@@ -2,7 +2,7 @@ import { CatalogSection } from "@/components/home/catalog-section";
 import { CtaSection } from "@/components/home/cta-section";
 import { HeroSection } from "@/components/home/hero-section";
 import { PrinciplesSection } from "@/components/home/principles-section";
-import { RoadmapSection } from "@/components/home/roadmap-section";
+import { PlatformSection } from "@/components/home/platform-section";
 import { StorySection } from "@/components/home/story-section";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -36,7 +36,7 @@ export default function Home() {
         <HeroSection product={product} />
         <PrinciplesSection product={product} />
         <StorySection />
-        <RoadmapSection />
+        <PlatformSection product={product} />
         <CatalogSection product={product} />
         <CtaSection />
       </main>

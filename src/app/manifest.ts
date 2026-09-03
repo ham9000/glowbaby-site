@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Glowbaby",
     short_name: "Glowbaby",
-    description: "A softer start to every night.",
+    description: "Modular, app-controlled lighting for family gear.",
     start_url: "/",
     display: "standalone",
     background_color: "#f7f1e7",

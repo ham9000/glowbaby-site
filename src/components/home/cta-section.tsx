@@ -10,11 +10,11 @@ export function CtaSection() {
       <Container className="relative text-center">
         <p className="eyebrow eyebrow-strong justify-center">Follow along</p>
         <h2 className="mx-auto mt-5 max-w-4xl text-balance font-display text-[clamp(3.5rem,8vw,7.5rem)] leading-[0.9] tracking-[-0.065em] text-ink">
-          See Glowbaby take shape.
+          Light up what comes next.
         </h2>
         <p className="mx-auto mt-7 max-w-xl text-lg leading-8 text-ink">
-          The public repository is the honest source of what exists today, what
-          is changing, and what still needs to be built.
+          Glowbaby is being developed as an expandable family lighting platform.
+          Follow the public build as the hardware, app, and first accessories take shape.
         </p>
         <Link
           href={siteConfig.githubUrl}

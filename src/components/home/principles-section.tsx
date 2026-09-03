@@ -7,9 +7,9 @@ export function PrinciplesSection({ product }: { product: Product }) {
     <section id="approach" className="bg-white py-24 sm:py-32">
       <Container>
         <SectionHeading
-          eyebrow="The approach"
-          title="Less noise. More knowing."
-          description="These are design directions, not finished feature claims. They keep the product focused while Glowbaby moves from idea to something families can meaningfully test."
+          eyebrow="Visibility meets expression"
+          title="Practical light with a playful side."
+          description="Glowbaby is being built for parents who want family gear to stand out after dark—and for kids who want that light to feel colorful, animated, and completely their own."
         />
         <div className="mt-16 grid gap-5 lg:grid-cols-3">
           {product.principles.map((principle, index) => (

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Glowbaby — A softer start to every night";
+export const alt = "Glowbaby — Made to be seen. Built to be theirs.";
 export const size = {
   width: 1200,
   height: 630,
@@ -50,48 +50,56 @@ export default function OpenGraphImage() {
               marginTop: "52px",
             }}
           >
-            A softer start to every night.
+            Made to be seen. Built to be theirs.
           </div>
           <div style={{ display: "flex", fontSize: "22px", marginTop: "38px", opacity: 0.6 }}>
-            Thoughtful care, after dark.
+            Modular, app-controlled lighting for family gear.
           </div>
         </div>
         <div
           style={{
             alignItems: "center",
-            background: "#fffaf0",
-            borderRadius: "48% 52% 46% 54%",
+            background: "linear-gradient(145deg, #fffdf8, #c5ccc7)",
+            borderRadius: "58% 52% 22% 20% / 62% 57% 36% 28%",
             boxShadow: "0 30px 60px rgba(28,41,35,.18)",
             display: "flex",
-            height: "300px",
+            height: "250px",
             justifyContent: "center",
             position: "relative",
-            width: "260px",
+            width: "340px",
             zIndex: 3,
           }}
         >
           <div
             style={{
-              background: "#f3b65c",
+              alignItems: "center",
+              background: "#1c2923",
               borderRadius: "999px",
+              bottom: "34px",
               display: "flex",
-              height: "74px",
+              gap: "13px",
+              height: "34px",
+              justifyContent: "center",
+              left: "22px",
               position: "relative",
-              width: "74px",
+              width: "295px",
             }}
           >
-            <div
-              style={{
-                background: "#fffaf0",
-                borderRadius: "999px",
-                display: "flex",
-                height: "74px",
-                left: "27px",
-                position: "absolute",
-                top: "-8px",
-                width: "74px",
-              }}
-            />
+            {["#45d4df", "#7657e8", "#ef8168", "#b5e85c", "#45d4df", "#7657e8", "#ef8168"].map(
+              (color, index) => (
+                <span
+                  key={`${color}-${index}`}
+                  style={{
+                    background: color,
+                    borderRadius: "999px",
+                    boxShadow: `0 0 12px ${color}`,
+                    display: "flex",
+                    height: "12px",
+                    width: "12px",
+                  }}
+                />
+              ),
+            )}
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ export function GET() {
         title: "Glowbaby public product discovery API",
         version: "1.0.0",
         description:
-          "Read-only public information about Glowbaby products. Unpublished specifications, pricing, availability, and customer data are not included.",
+          "Read-only public information about the Glowbaby modular lighting platform, compatible product concepts, and system components. Unpublished specifications, pricing, availability, certifications, and customer data are not included.",
       },
       servers: [{ url: siteConfig.url }],
       security: [],

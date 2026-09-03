@@ -1,7 +1,9 @@
 # Glowbaby
 
-A reusable, product-first website for the Glowbaby concept. It is built with
-Next.js, React, TypeScript, Tailwind CSS, and Vercel Analytics.
+A reusable, product-first website for Glowbaby: a modular, app-controlled
+lighting platform that adds visibility, personality, and playful lighting
+effects to everyday family gear. It is built with Next.js, React, TypeScript,
+Tailwind CSS, and Vercel Analytics.
 
 ## Run locally
 
@@ -41,6 +43,20 @@ content beyond the shared product model.
 
 These routes expose only published marketing content. They do not add an agent,
 chatbot, database, MCP server, or customer-data workflow.
+
+## Product positioning
+
+The site presents Glowbaby as one connected ecosystem:
+
+- flexible LED lighting for compatible family gear;
+- a compact Bluetooth controller;
+- an external USB-C power source;
+- a companion app for colors, animations, and lighting modes;
+- an expandable path from helmets and character-ear headbands to strollers,
+  wagons, and future accessories.
+
+Product specifications, pricing, certifications, launch timing, and
+availability are intentionally omitted until they are established.
 
 ## Deployment
 

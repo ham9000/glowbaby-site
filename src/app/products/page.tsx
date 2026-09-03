@@ -7,7 +7,7 @@ import { products } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Products",
-  description: "Explore current and future Glowbaby products.",
+  description: "Explore the Glowbaby connected lighting platform and its growing family of compatible products.",
   alternates: { canonical: "/products" },
 };
 
@@ -19,11 +19,11 @@ export default function ProductsPage() {
         <Container>
           <p className="eyebrow">Product catalogue</p>
           <h1 className="mt-5 max-w-4xl text-balance font-display text-[clamp(4rem,9vw,8rem)] leading-[0.88] tracking-[-0.07em] text-ink">
-            Products with a reason to exist.
+            One platform. More ways to glow.
           </h1>
           <p className="mt-8 max-w-2xl text-lg leading-8 text-ink/70">
-            Glowbaby is the first concept. This catalogue is structured to grow
-            as new products move from exploration to something ready to share.
+            Glowbaby brings modular LED lighting, Bluetooth control, USB-C power,
+            and a companion app together in a system designed to grow across family gear.
           </p>
           <div className="mt-16 grid gap-6">
             {products.map((product) => (

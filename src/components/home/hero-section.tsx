@@ -11,12 +11,11 @@ export function HeroSection({ product }: { product: Product }) {
       <Container className="relative grid items-center gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8">
         <div className="relative z-10 max-w-2xl py-6 lg:py-14">
           <p className="eyebrow">{product.eyebrow}</p>
-          <h1 className="mt-5 text-balance font-display text-[clamp(4.5rem,10vw,8.8rem)] leading-[0.82] tracking-[-0.075em] text-ink">
-            A softer
-            <span className="block pl-[0.45em] text-coral">start</span>
-            <span className="block">
-              to every<span className="sm:hidden"><br /></span> night.
-            </span>
+          <h1 className="mt-5 text-balance font-display text-[clamp(4.1rem,9vw,8rem)] leading-[0.84] tracking-[-0.075em] text-ink">
+            Made to be
+            <span className="block text-coral">seen.</span>
+            <span className="block pl-[0.32em]">Built to be</span>
+            <span className="block pl-[0.68em] text-violet">theirs.</span>
           </h1>
           <p className="mt-8 max-w-xl text-pretty text-lg leading-8 text-ink/70">
             {product.description}
@@ -27,7 +26,7 @@ export function HeroSection({ product }: { product: Product }) {
               <span aria-hidden="true">→</span>
             </Link>
             <Link href="#approach" className="button button-light">
-              See the approach
+              See how it works
             </Link>
           </div>
         </div>
@@ -38,9 +37,9 @@ export function HeroSection({ product }: { product: Product }) {
       <Container className="relative mt-6">
         <div className="grid gap-px overflow-hidden rounded-[1.75rem] border border-ink/10 bg-ink/10 sm:grid-cols-3">
           {[
-            ["Early-stage concept", "Openly in development"],
-            ["Thoughtful by design", "Calm, clear, and useful"],
-            ["Built to evolve", "A platform for future products"],
+            ["Flexible LED light", "Designed to adapt to family gear"],
+            ["App-controlled", "Colors, animations, and modes"],
+            ["Expandable platform", "One ecosystem, more ways to glow"],
           ].map(([title, detail]) => (
             <div key={title} className="bg-cream/90 px-6 py-5 backdrop-blur">
               <p className="text-sm font-bold text-ink">{title}</p>

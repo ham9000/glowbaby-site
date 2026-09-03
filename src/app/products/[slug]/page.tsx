@@ -57,6 +57,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             "@type": "Brand",
             name: siteConfig.name,
           },
+          category: "Modular app-controlled lighting system",
         }}
       />
       <SiteHeader />
@@ -74,10 +75,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="mt-7 max-w-xl text-lg leading-8 text-ink/70">
                 {product.description}
               </p>
-              <div className="mt-8 flex items-center gap-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-coral" />
-                <span className="text-sm font-bold text-ink">{product.status}</span>
-                <span className="text-sm text-ink/70">· {product.statusDetail}</span>
+              <div className="mt-8">
+                <div className="flex items-center gap-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-coral" />
+                  <span className="text-sm font-bold text-ink">{product.status}</span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-ink/70">
+                  {product.statusDetail}
+                </p>
               </div>
             </div>
             <div className="relative min-h-[500px] sm:min-h-[640px]">
@@ -90,9 +95,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <Container>
             <div className="grid gap-12 lg:grid-cols-[0.65fr_1fr]">
               <div>
-                <p className="eyebrow">Design principles</p>
+                <p className="eyebrow">Platform principles</p>
                 <h2 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.055em] text-ink sm:text-7xl">
-                  What guides the work.
+                  Visible. Personal. Expandable.
                 </h2>
               </div>
               <div className="border-t border-ink/15">
@@ -119,16 +124,37 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </Container>
         </section>
 
+        <section className="bg-ink py-24 text-cream sm:py-32">
+          <Container>
+            <p className="eyebrow !text-cyan">Inside the system</p>
+            <h2 className="mt-5 max-w-4xl font-display text-5xl leading-[0.95] tracking-[-0.055em] text-cream sm:text-7xl">
+              Everything works better together.
+            </h2>
+            <div className="mt-14 grid gap-px overflow-hidden rounded-[2rem] border border-cream/15 bg-cream/15 sm:grid-cols-2">
+              {product.platformParts.map((part) => (
+                <article key={part.number} className="bg-ink p-7 sm:p-9">
+                  <span className="text-xs font-bold uppercase tracking-[0.16em] text-cyan">
+                    {part.number}
+                  </span>
+                  <h3 className="mt-12 font-display text-3xl tracking-[-0.04em] text-cream">
+                    {part.title}
+                  </h3>
+                  <p className="mt-4 leading-7 text-cream/70">{part.description}</p>
+                </article>
+              ))}
+            </div>
+          </Container>
+        </section>
+
         <section className="bg-sage py-24 sm:py-32">
           <Container className="text-center">
-            <p className="eyebrow justify-center">Still taking shape</p>
+            <p className="eyebrow justify-center">Built beyond one product</p>
             <h2 className="mx-auto mt-5 max-w-4xl text-balance font-display text-[clamp(3.5rem,8vw,7rem)] leading-[0.9] tracking-[-0.065em] text-ink">
-              Honest about what is known—and what is not.
+              From helmets and character ears to the whole family ride.
             </h2>
             <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-ink/70">
-              Specifications, availability, and launch timing are intentionally
-              absent until they are real. Follow the repository for the current
-              state of the project.
+              Glowbaby is being designed as a shared lighting platform for
+              wearables, accessories, strollers, wagons, and future compatible gear.
             </p>
             <Link
               href={siteConfig.githubUrl}

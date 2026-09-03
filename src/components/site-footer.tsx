@@ -12,8 +12,8 @@ export function SiteFooter() {
           Glowbaby
         </Link>
         <p className="max-w-md text-sm leading-6 text-cream/55">
-          An early-stage product concept. Features, timing, and availability are
-          still being defined.
+          A modular, app-controlled lighting platform for more visible, more
+          expressive family gear. In development.
         </p>
         <div className="flex gap-5 text-sm font-semibold text-cream/70">
           <Link href="/products" className="hover:text-cream">
