@@ -8,14 +8,14 @@ export function HeroSection({ product }: { product: Product }) {
     <section className="hero-grid relative overflow-hidden bg-cream pb-14 pt-32 sm:pb-20 sm:pt-40">
       <div className="hero-blob hero-blob-one" />
       <div className="hero-blob hero-blob-two" />
-      <Container className="relative grid items-center gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8">
+      <Container className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
         <div className="relative z-10 max-w-2xl py-6 lg:py-14">
           <p className="eyebrow">{product.eyebrow}</p>
-          <h1 className="mt-5 text-balance font-display text-[clamp(4.1rem,9vw,8rem)] leading-[0.84] tracking-[-0.075em] text-ink">
-            Made to be
-            <span className="block text-coral">seen.</span>
-            <span className="block pl-[0.32em]">Built to be</span>
-            <span className="block pl-[0.68em] text-violet">theirs.</span>
+          <h1 className="mt-5 font-display text-[clamp(3.5rem,7vw,6.5rem)] text-ink">
+            <span className="block whitespace-nowrap">Made to be</span>
+            <span className="block whitespace-nowrap text-coral">seen.</span>
+            <span className="block whitespace-nowrap pl-[0.32em]">Built to be</span>
+            <span className="block whitespace-nowrap pl-[0.68em] text-violet">theirs.</span>
           </h1>
           <p className="mt-8 max-w-xl text-pretty text-lg leading-8 text-ink/70">
             {product.description}
