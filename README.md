@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Glowbaby
 
-## Getting Started
+A reusable, product-first website for the Glowbaby concept. It is built with
+Next.js, React, TypeScript, Tailwind CSS, and Vercel Analytics.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Validate
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run validate
+```
 
-## Learn More
+## Add another product
 
-To learn more about Next.js, take a look at the following resources:
+Product content is centralized in `src/content/site.ts`. Add a new record to the
+`products` array and it will automatically appear in:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `/products`
+- `/products/[slug]`
+- `/product-catalogue.json`
+- `/llms.txt`
+- `/sitemap.xml`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create a specialized product-detail component only when a future product needs
+content beyond the shared product model.
 
-## Deploy on Vercel
+## AI and discovery surfaces
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `/llms.txt` gives language models a concise, explicit summary.
+- `/product-catalogue.json` provides a sanitized machine-readable catalogue.
+- `/openapi.json` documents the public discovery endpoints.
+- Product and organization JSON-LD are embedded in the relevant pages.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+These routes expose only published marketing content. They do not add an agent,
+chatbot, database, MCP server, or customer-data workflow.
+
+## Deployment
+
+Deploy the repository on Vercel and set:
+
+```text
+NEXT_PUBLIC_SITE_URL=https://your-production-domain.com
+```
+
+The fallback URL is `https://glowbaby-site.vercel.app`. Update the environment
+variable if Vercel assigns a different project URL or a custom domain is added.
+
+## What was reused from the Panama site
+
+The architecture carries forward the strongest general patterns:
+
+- static server rendering and a small client footprint;
+- content passed into reusable presentational sections;
+- product data behind a local content boundary;
+- Vercel Analytics and Speed Insights;
+- metadata, sitemap, robots, JSON-LD, and generated social imagery;
+- security headers and public AI-discovery documents.
+
+Travel-specific systems were intentionally not copied: Supabase administration,
+localization, cron jobs, inquiries, staff roles, concierge AI, WebMCP, and remote
+MCP. They solve real needs in the Panama site but would be premature complexity
+for an early-stage product page.
