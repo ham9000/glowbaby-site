@@ -210,7 +210,6 @@ summary::-webkit-details-marker {
   z-index: 3;
   width: 88%;
   height: 78%;
-  animation: product-float 6s ease-in-out infinite;
 }
 
 .helmet {
@@ -317,19 +316,16 @@ summary::-webkit-details-marker {
     0 0 5px currentColor,
     0 0 12px currentColor;
   color: var(--cyan);
-  animation: led-flow 2.2s ease-in-out infinite;
 }
 
 .helmet-led-track i:nth-child(3n + 2) {
   color: var(--violet);
   background: var(--violet);
-  animation-delay: 120ms;
 }
 
 .helmet-led-track i:nth-child(3n) {
   color: var(--coral);
   background: var(--coral);
-  animation-delay: 240ms;
 }
 
 .product-controller {
@@ -616,23 +612,29 @@ summary::-webkit-details-marker {
 .demo-led-line i {
   color: var(--demo-color);
   background: var(--demo-color);
-  animation: none;
 }
 
 .lighting-demo[data-mode="pulse"] .demo-led-line i {
-  animation: demo-pulse 1.2s ease-in-out infinite;
+  transform: scale(1.12);
+  box-shadow:
+    0 0 7px currentColor,
+    0 0 20px currentColor;
 }
 
-.lighting-demo[data-mode="color-flow"] .demo-led-line i {
-  animation: demo-flow 1.7s ease-in-out infinite;
+.lighting-demo[data-mode="pulse"] .demo-led-line i:nth-child(even) {
+  opacity: 0.48;
 }
 
-.lighting-demo[data-mode="color-flow"] .demo-led-line i:nth-child(2n) {
-  animation-delay: 120ms;
+.lighting-demo[data-mode="color-flow"] .demo-led-line i:nth-child(4n + 2) {
+  filter: hue-rotate(75deg);
 }
 
-.lighting-demo[data-mode="color-flow"] .demo-led-line i:nth-child(3n) {
-  animation-delay: 240ms;
+.lighting-demo[data-mode="color-flow"] .demo-led-line i:nth-child(4n + 3) {
+  filter: hue-rotate(155deg);
+}
+
+.lighting-demo[data-mode="color-flow"] .demo-led-line i:nth-child(4n) {
+  filter: hue-rotate(235deg);
 }
 
 .demo-controls {
@@ -745,53 +747,6 @@ summary::-webkit-details-marker {
   bottom: -16rem;
   width: 36rem;
   height: 36rem;
-}
-
-@keyframes product-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-1deg);
-  }
-  50% {
-    transform: translateY(-14px) rotate(1deg);
-  }
-}
-
-@keyframes led-flow {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: scale(0.82);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-}
-
-@keyframes demo-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-    transform: scale(0.86);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.22);
-  }
-}
-
-@keyframes demo-flow {
-  0%,
-  100% {
-    filter: hue-rotate(0deg);
-    opacity: 0.55;
-  }
-  50% {
-    filter: hue-rotate(120deg);
-    opacity: 1;
-    transform: scale(1.18);
-  }
 }
 
 @media (max-width: 639px) {
