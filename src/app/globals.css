@@ -28,8 +28,8 @@
   --color-cyan: var(--cyan);
   --color-lime: var(--lime);
   --color-blush: var(--blush);
-  --font-sans: var(--font-manrope);
-  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-raleway);
+  --font-display: var(--font-raleway);
 }
 
 * {
@@ -44,7 +44,14 @@ body {
   min-width: 320px;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-raleway), Arial, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-raleway), Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.04;
 }
 
 a,

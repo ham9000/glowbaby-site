@@ -43,10 +43,11 @@ export default function OpenGraphImage() {
           <div
             style={{
               display: "flex",
-              fontFamily: "serif",
+              fontFamily: "sans-serif",
+              fontWeight: 600,
               fontSize: "94px",
-              letterSpacing: "-5px",
-              lineHeight: 0.92,
+              letterSpacing: "-3px",
+              lineHeight: 1.02,
               marginTop: "52px",
             }}
           >
