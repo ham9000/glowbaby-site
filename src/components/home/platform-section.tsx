@@ -1,5 +1,6 @@
 import { Container } from "@/components/container";
 import { SectionHeading } from "@/components/section-heading";
+import { StarOutline } from "@/components/star-outline";
 import type { Product } from "@/content/site";
 
 export function PlatformSection({ product }: { product: Product }) {
@@ -19,7 +20,7 @@ export function PlatformSection({ product }: { product: Product }) {
               key={part.number}
               className="grid gap-5 border-b border-cream/15 py-8 sm:grid-cols-[5rem_1fr] sm:items-start sm:gap-10"
             >
-              <span className="text-sm font-bold text-cream/55">{part.number}</span>
+              <StarOutline className="h-7 w-7 text-cyan" />
               <div className="grid gap-3 lg:grid-cols-[0.55fr_1fr] lg:gap-12">
                 <h3 className="font-display text-4xl tracking-[-0.045em] text-cream">
                   {part.title}

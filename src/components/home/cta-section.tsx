@@ -4,7 +4,7 @@ import { siteConfig } from "@/content/site";
 
 export function CtaSection() {
   return (
-    <section className="relative overflow-hidden bg-coral py-24 sm:py-32">
+    <section className="relative overflow-hidden bg-blush py-24 sm:py-32">
       <span className="cta-orb cta-orb-one" />
       <span className="cta-orb cta-orb-two" />
       <Container className="relative text-center">

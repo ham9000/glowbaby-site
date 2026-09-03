@@ -1,5 +1,5 @@
+import { AppShowcase } from "@/components/app-showcase";
 import { Container } from "@/components/container";
-import { LightingDemo } from "@/components/lighting-demo";
 import { SectionHeading } from "@/components/section-heading";
 
 export function StorySection() {
@@ -9,8 +9,8 @@ export function StorySection() {
         <div>
           <SectionHeading
             eyebrow="One connected ecosystem"
-            title="Hardware and app, designed as one."
-            description="The flexible lighting, Bluetooth controller, USB-C power source, and companion app are being developed as parts of the same experience. Attach the light, connect the controller, then choose how the gear should glow."
+            title="The real app is already taking shape."
+            description="The flexible lighting, Bluetooth controller, USB-C power source, and companion app are being developed as parts of the same experience. The current app connects to hardware and organizes brightness, practical modes, and playful presets in one place."
           />
           <div className="mt-10 grid gap-8 border-t border-ink/15 pt-8 sm:grid-cols-2">
             <div>
@@ -33,7 +33,7 @@ export function StorySection() {
             </div>
           </div>
         </div>
-        <LightingDemo />
+        <AppShowcase />
       </Container>
     </section>
   );

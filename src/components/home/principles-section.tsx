@@ -1,5 +1,6 @@
 import { Container } from "@/components/container";
 import { SectionHeading } from "@/components/section-heading";
+import { StarOutline } from "@/components/star-outline";
 import type { Product } from "@/content/site";
 
 export function PrinciplesSection({ product }: { product: Product }) {
@@ -17,7 +18,7 @@ export function PrinciplesSection({ product }: { product: Product }) {
               key={principle.number}
               className={`principle-card ${index === 1 ? "principle-card-accent" : ""}`}
             >
-              <span className="text-sm font-bold text-ink/65">{principle.number}</span>
+              <StarOutline className="h-7 w-7 text-violet" />
               <div className="mt-20">
                 <h3 className="font-display text-4xl leading-none tracking-[-0.045em] text-ink">
                   {principle.title}

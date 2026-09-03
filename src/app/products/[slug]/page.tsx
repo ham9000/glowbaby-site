@@ -5,6 +5,7 @@ import { Container } from "@/components/container";
 import { ProductVisual } from "@/components/product-visual";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { StarOutline } from "@/components/star-outline";
 import { StructuredData } from "@/components/structured-data";
 import { getProduct, products, siteConfig } from "@/content/site";
 
@@ -106,9 +107,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     key={principle.number}
                     className="grid gap-4 border-b border-ink/15 py-8 sm:grid-cols-[4rem_1fr]"
                   >
-                    <span className="text-sm font-bold text-ink/65">
-                      {principle.number}
-                    </span>
+                    <StarOutline className="h-7 w-7 text-violet" />
                     <div>
                       <h3 className="font-display text-3xl tracking-[-0.04em] text-ink">
                         {principle.title}
@@ -133,9 +132,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="mt-14 grid gap-px overflow-hidden rounded-[2rem] border border-cream/15 bg-cream/15 sm:grid-cols-2">
               {product.platformParts.map((part) => (
                 <article key={part.number} className="bg-ink p-7 sm:p-9">
-                  <span className="text-xs font-bold uppercase tracking-[0.16em] text-cyan">
-                    {part.number}
-                  </span>
+                  <StarOutline className="h-7 w-7 text-cyan" />
                   <h3 className="mt-12 font-display text-3xl tracking-[-0.04em] text-cream">
                     {part.title}
                   </h3>

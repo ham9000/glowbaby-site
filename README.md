@@ -58,6 +58,10 @@ The site presents Glowbaby as one connected ecosystem:
 Product specifications, pricing, certifications, launch timing, and
 availability are intentionally omitted until they are established.
 
+The visual system follows the existing app: Glowbaby purple, near-black
+surfaces, white UI, and full-spectrum color accents. Current app interface
+captures live in `public/app` and are used directly on the homepage.
+
 ## Deployment
 
 Deploy the repository on Vercel and set:

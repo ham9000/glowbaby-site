@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Modular, app-controlled lighting for family gear.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f7f1e7",
-    theme_color: "#f7f1e7",
+    background_color: "#f8f7fb",
+    theme_color: "#5a0fea",
   };
 }

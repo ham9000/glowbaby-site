@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container } from "@/components/container";
 import { ProductCard } from "@/components/product-card";
 import { SectionHeading } from "@/components/section-heading";
+import { StarOutline } from "@/components/star-outline";
 import type { Product } from "@/content/site";
 
 export function CatalogSection({ product }: { product: Product }) {
@@ -30,9 +31,7 @@ export function CatalogSection({ product }: { product: Product }) {
               key={useCase.title}
               className={`use-case-card ${index === 1 ? "use-case-card-violet" : ""} ${index === 2 ? "use-case-card-cyan" : ""}`}
             >
-              <span className="text-xs font-bold uppercase tracking-[0.16em] text-ink/65">
-                0{index + 1}
-              </span>
+              <StarOutline className="h-7 w-7 text-violet" />
               <div className="mt-20">
                 <h3 className="font-display text-3xl leading-none tracking-[-0.045em] text-ink">
                   {useCase.title}
