@@ -17,7 +17,7 @@ export function StrollerGraphic({
       height={height}
       className={className}
       role="img"
-      aria-label="Glowbaby Stroller Light concept: a compact light mounted below the stroller basket casts a soft colorful glow outward, around, and down onto the ground; a separate controller sits alongside"
+      aria-label="Glowbaby Stroller Light concept: a disc-shaped light with LEDs around its edge is mounted below the stroller basket, casting a soft colorful glow outward, around, and down onto the ground; a separate controller sits alongside"
       fill="none"
     >
       <ellipse cx="315" cy="460" rx="235" ry="23" fill="#050309" opacity=".3" />
@@ -104,12 +104,30 @@ export function StrollerGraphic({
       <circle cx="277" cy="286" r="4" fill="#c9bce1" />
 
       <rect x="303" y="395" width="16" height="12" rx="3" fill="#776a87" />
-      <rect x="279" y="402" width="64" height="22" rx="9" fill="#211a2d" stroke="#a99bbc" strokeWidth="2" />
-      <path d="M290 408h42" stroke="#70617f" strokeWidth="2" strokeLinecap="round" />
-      <ellipse cx="311" cy="422" rx="25" ry="5" fill="#c8dcff" />
-      <ellipse cx="302" cy="422" rx="15" ry="4" fill="#b0f1ff" />
-      <ellipse cx="321" cy="422" rx="13" ry="4" fill="#f5d6ec" />
-      <ellipse cx="311" cy="423" rx="13" ry="2" fill="#f2f6ff" />
+      <ellipse cx="311" cy="428" rx="49" ry="9" fill="#c8dcff" opacity=".12" />
+      <path
+        d="M265 407v10c0 7 21 12 46 12s46-5 46-12v-10Z"
+        fill="#211a2d"
+        stroke="#a99bbc"
+        strokeWidth="1.5"
+      />
+      <ellipse cx="311" cy="407" rx="46" ry="12" fill="#3c304b" stroke="#baaccd" strokeWidth="1.5" />
+      <ellipse cx="311" cy="406" rx="35" ry="7" fill="#2b2236" stroke="#655574" />
+      <path d="M267 415a44 11 0 0 0 88 0" stroke="#cbb9ef" strokeWidth="4" opacity=".35" />
+      {Array.from({ length: 13 }, (_, index) => {
+        const angle = (index * Math.PI) / 12;
+        const cx = 311 - 44 * Math.cos(angle);
+        const cy = 415 + 11 * Math.sin(angle);
+        const color = index < 5 ? "#b0f1ff" : index < 9 ? "#cab8ff" : "#f5d6ec";
+
+        return (
+          <g key={index}>
+            <circle cx={cx} cy={cy} r="4" fill={color} opacity=".2" />
+            <circle cx={cx} cy={cy} r="2.3" fill={color} />
+            <circle cx={cx} cy={cy} r=".9" fill="#ffffff" opacity=".8" />
+          </g>
+        );
+      })}
 
       <circle cx="170" cy="430" r="43" fill="#18141f" stroke="#c0b6ce" strokeWidth="9" />
       <circle cx="170" cy="430" r="29" stroke="#564b63" strokeWidth="2" />

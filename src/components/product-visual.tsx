@@ -15,7 +15,7 @@ export function ProductVisual({ compact = false }: ProductVisualProps) {
         <StrollerGraphic className="stroller-graphic" />
       </div>
       <figcaption className="product-caption">
-        Bottom-mounted light + controller concept
+        Bottom-mounted disc + controller concept
         <span>In development · final design may change</span>
       </figcaption>
     </figure>

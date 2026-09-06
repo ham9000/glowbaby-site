@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { StrollerGraphic } from "@/components/stroller-graphic";
 
 export const alt =
-  "Glowbaby Stroller Light — app-controlled stroller lighting. Concept illustration of a bottom-mounted light casting a soft glow outward, around, and down beneath a stroller, with a separate controller; in development.";
+  "Glowbaby Stroller Light — app-controlled stroller lighting. Concept illustration of a bottom-mounted disc with LEDs around its edge casting a soft glow outward, around, and down beneath a stroller, with a separate controller; in development.";
 export const size = {
   width: 1200,
   height: 630,
@@ -120,7 +120,7 @@ export default function OpenGraphImage() {
               width: "100%",
             }}
           >
-            Bottom-mounted light + controller concept
+            Bottom-mounted disc + controller concept
           </div>
         </div>
       </div>
