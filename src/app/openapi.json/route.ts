@@ -1,4 +1,4 @@
-import { siteConfig } from "@/content/site";
+import { companionApp, siteConfig } from "@/content/site";
 
 export const dynamic = "force-static";
 
@@ -10,7 +10,7 @@ export function GET() {
         title: `${siteConfig.title} — Public Discovery API`,
         version: "1.0.0",
         description:
-          `${siteConfig.description} Read-only public content for a product in development, not currently available to buy. Future stroller and wagon lighting or accessories are exploratory, not compatibility guarantees. Unpublished specifications, pricing, availability, certifications, launch dates, and customer data are not included. There are no signup or contact endpoints.`,
+          `${siteConfig.description} Read-only public content for stroller-light hardware in development, not currently available to buy. Companion app: ${companionApp.availability} Future stroller and wagon lighting or accessories are exploratory, not compatibility guarantees. Unpublished hardware specifications, pricing, availability, certifications, launch dates, and customer data are not included. There are no signup or contact endpoints.`,
       },
       servers: [{ url: siteConfig.url }],
       security: [],
@@ -54,10 +54,11 @@ export function GET() {
         schemas: {
           ProductCatalogue: {
             type: "object",
-            required: ["name", "description", "products", "limitations"],
+            required: ["name", "description", "companionApp", "products", "limitations"],
             properties: {
               name: { type: "string" },
               description: { type: "string" },
+              companionApp: { $ref: "#/components/schemas/CompanionApp" },
               products: {
                 type: "array",
                 description:
@@ -65,6 +66,16 @@ export function GET() {
                 items: { $ref: "#/components/schemas/Product" },
               },
               limitations: { $ref: "#/components/schemas/Limitations" },
+            },
+          },
+          CompanionApp: {
+            type: "object",
+            description: "Published companion-app availability, separate from hardware availability.",
+            required: ["name", "appStoreUrl", "availability"],
+            properties: {
+              name: { type: "string" },
+              appStoreUrl: { type: "string", format: "uri" },
+              availability: { type: "string" },
             },
           },
           Product: {
@@ -132,7 +143,7 @@ export function GET() {
           Limitations: {
             type: "object",
             description:
-              "Publication and claim boundaries. All flags are currently false; no missing specifications or availability should be inferred.",
+              "Hardware publication and claim boundaries, not companion-app availability. All flags are currently false; no missing hardware specifications or availability should be inferred.",
             required: [
               "specificationsPublished",
               "pricingPublished",
@@ -145,7 +156,10 @@ export function GET() {
             properties: {
               specificationsPublished: { type: "boolean" },
               pricingPublished: { type: "boolean" },
-              availabilityPublished: { type: "boolean" },
+              availabilityPublished: {
+                type: "boolean",
+                description: "Hardware purchase availability only; companion-app availability is listed separately.",
+              },
               certificationsPublished: { type: "boolean" },
               launchDatePublished: { type: "boolean" },
               compatibilityGuaranteed: { type: "boolean" },

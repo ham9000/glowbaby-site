@@ -9,6 +9,12 @@ to buy. The intended system brings together an under-stroller LED light, a compa
 Bluetooth controller, external USB-C power, and a companion app. Glowbaby is not
 safety equipment or a replacement for required lights and reflectors.
 
+The companion app is available on iOS as
+[Glowbaby LED Manager](https://apps.apple.com/us/app/glowbabyled/id6744045805);
+Android is currently in beta. This is separate from the stroller-light hardware,
+which is still in development. App Store screenshots may lag behind the latest
+interface; the site keeps its existing local app capture labeled as a preview.
+
 The site uses Next.js, React, TypeScript, Tailwind CSS, Vercel Analytics, and
 Speed Insights, retaining the purple, near-black, white, and full-spectrum visual
 identity. Stroller illustrations are labeled development representations, not
@@ -44,7 +50,8 @@ run individually with `npm run typecheck`, `npm run lint`, and `npm run build`.
   there is one public product; the redirect is excluded from the sitemap.
 - `/llms.txt` summarizes the same public product content for language models.
 - `/product-catalogue.json` exposes published product descriptions, status,
-  system parts, use cases, principles, and explicit information limitations.
+  system parts, use cases, principles, companion-app availability and App Store
+  URL, and explicit hardware information limitations.
 - `/openapi.json` documents the two read-only discovery endpoints and their
   response fields.
 - `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, and `/opengraph-image`
@@ -52,8 +59,9 @@ run individually with `npm run typecheck`, `npm run lint`, and `npm run build`.
 
 Content is centralized in `src\content\site.ts`. Metadata and discovery routes
 reuse that source; pages also include truthful JSON-LD without invented offers,
-ratings, prices, or availability. There is no signup backend, customer database,
-or form endpoint.
+ratings, prices, or hardware availability. The shared `companionApp` record
+provides the real iOS download link and Android beta status. There is no signup
+backend, customer database, or form endpoint.
 
 ### Adding a future real product
 

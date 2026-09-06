@@ -13,14 +13,14 @@ export function AppShowcase() {
         />
         <div>
           <p>Glowbaby companion app</p>
-          <span>Current interface · no device connected</span>
+          <span>Interface preview · no device connected</span>
         </div>
       </div>
 
       <div className="app-screen app-screen-main">
         <Image
           src="/app/glowbaby-main-screen.png"
-          alt="Current Glowbaby app showing connection, brightness, and lighting-mode controls with no device connected"
+          alt="Glowbaby app interface showing connection, brightness, and lighting-mode controls with no device connected"
           width={500}
           height={1024}
           sizes="(max-width: 640px) 60vw, 260px"
@@ -28,8 +28,7 @@ export function AppShowcase() {
       </div>
 
       <p className="app-showcase-note">
-        A real app interface in development. Connection, brightness, and
-        lighting presets together in one place.
+        App interface preview. Screens and controls may change as the app evolves.
       </p>
     </div>
   );

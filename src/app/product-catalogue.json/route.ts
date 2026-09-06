@@ -1,4 +1,4 @@
-import { products, siteConfig } from "@/content/site";
+import { companionApp, products, siteConfig } from "@/content/site";
 
 export const dynamic = "force-static";
 
@@ -7,6 +7,7 @@ export function GET() {
     {
       name: siteConfig.name,
       description: siteConfig.description,
+      companionApp,
       products: products.map((product) => ({
         name: product.name,
         slug: product.slug,

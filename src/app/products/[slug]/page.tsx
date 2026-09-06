@@ -10,7 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { StarOutline } from "@/components/star-outline";
 import { StructuredData } from "@/components/structured-data";
-import { getProduct, products, siteConfig } from "@/content/site";
+import { companionApp, getProduct, products, siteConfig } from "@/content/site";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -150,11 +150,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div>
               <div className="space-y-7">
                 <div>
-                  <h3 className="text-lg font-bold text-ink">An app you can preview</h3>
+                  <h3 className="text-lg font-bold text-ink">An app you can download</h3>
                   <p className="mt-2 leading-7 text-ink/70">
-                    The current companion app interface offers a look at the controls
-                    being developed. It is not a public app download or a promise
-                    of final features.
+                    {companionApp.availability} Find {companionApp.name} on
+                    the App Store. The app continues to evolve alongside the
+                    stroller-light hardware.
                   </p>
                 </div>
                 <div>
@@ -175,8 +175,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </div>
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/#app" className="button button-dark">
-                  See the app preview <span aria-hidden="true">→</span>
+                <Link
+                  href={companionApp.appStoreUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="button button-dark"
+                >
+                  Download on the App Store <span aria-hidden="true">↗</span>
                 </Link>
                 <Link
                   href={siteConfig.githubUrl}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
-import { siteConfig } from "@/content/site";
+import { companionApp, siteConfig } from "@/content/site";
 
 export function CtaSection() {
   return (
@@ -15,12 +15,13 @@ export function CtaSection() {
         <p className="mx-auto mt-7 max-w-xl text-lg leading-8 text-ink">
           Glowbaby is being developed around one focused idea: make stroller
           lighting more visible, more expressive, and easier for families to make
-          their own. Follow the build as the hardware, app, and first stroller-light
-          experience take shape.
+          their own. Follow the build as the first stroller-light hardware takes
+          shape and the companion app continues to evolve.
         </p>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-ink/75">
-          The current app interface is previewed above. Bottom mounting, compatibility,
-          and final specifications are still being evaluated. Not yet available to buy.
+          {companionApp.availability} The stroller-light hardware is not yet
+          available to buy; mounting, compatibility, and specifications are still
+          being evaluated.
         </p>
         {/* TODO: Add a launch-list CTA only when a real signup destination is configured and verified. */}
         <div className="mt-9 flex flex-wrap justify-center gap-3">

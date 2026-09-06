@@ -41,6 +41,12 @@ export const siteConfig = {
   ],
 } as const;
 
+export const companionApp = {
+  name: "Glowbaby LED Manager",
+  appStoreUrl: "https://apps.apple.com/us/app/glowbabyled/id6744045805",
+  availability: "Available on iOS. Android is currently in beta.",
+} as const;
+
 export const products: Product[] = [
   {
     slug: "glowbaby",
@@ -51,7 +57,7 @@ export const products: Product[] = [
       "Glowbaby is an app-controlled light designed to sit beneath a stroller or wagon, casting light outward, around, and down toward the ground. Colorful modes and animations make every ride feel personal.",
     status: "In development",
     statusDetail:
-      "The under-stroller light, controller, app, and bottom-mounting approach are being developed together. Glowbaby is not yet available to buy.",
+      "The under-stroller light, controller, and bottom-mounting approach are still being developed. The hardware is not yet available to buy.",
     principles: [
       {
         number: "01",
@@ -149,7 +155,12 @@ export const products: Product[] = [
       {
         question: "How is it controlled?",
         answer:
-          "The Glowbaby companion app is being developed to connect over Bluetooth and bring brightness, colors, animations, and practical and playful modes together. The current app interface is shown on this site; final features are still being refined.",
+          "The Glowbaby companion app connects over Bluetooth and brings brightness, colors, animations, and lighting modes together. The stroller-light hardware and its final feature set are still being refined.",
+      },
+      {
+        question: "Is the app available?",
+        answer:
+          `${companionApp.availability} Find ${companionApp.name} on the App Store. The stroller-light hardware is still in development.`,
       },
       {
         question: "How is it powered?",
@@ -159,7 +170,7 @@ export const products: Product[] = [
       {
         question: "Can I buy it now?",
         answer:
-          "Not yet. Glowbaby is in development, and pricing and a launch date have not been announced. You can follow the public build on GitHub as the first stroller-light experience takes shape.",
+          "The stroller-light hardware is not yet available to buy, and pricing and a launch date have not been announced. You can follow the public build on GitHub as the first stroller-light experience takes shape.",
       },
       {
         question: "Will it fit my stroller or wagon?",
