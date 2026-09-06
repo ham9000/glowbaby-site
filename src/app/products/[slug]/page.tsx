@@ -32,7 +32,7 @@ export async function generateMetadata(
 
   const title = `${product.name} — Details & Development`;
   const description =
-    "Meet Glowbaby Stroller Light: a bottom-mounted, app-controlled light that shines outward, around, and down. Explore the setup and development status.";
+    "Explore Glowbaby Stroller Light, designed to help you see nearby and be noticed at night. Learn about responsible use and hardware development.";
   const images = (await parent).openGraph?.images;
 
   return {
@@ -92,10 +92,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {product.headline}
               </p>
               <p className="mt-7 max-w-xl text-lg leading-8 text-ink/70">
-                A bottom-mounted light that shines outward, around your stroller
-                or wagon, and down toward the ground. Connected to a compact
-                Bluetooth controller, external USB-C power, and the Glowbaby
-                companion app.
+                Designed to help you see around your stroller or wagon and help
+                others notice you at night. The bottom-mounted disc directs light
+                outward and down, with a compact Bluetooth controller, external
+                USB-C power, and app controls for setting your light before you go.
               </p>
               <p className="mt-5 text-sm font-bold text-ink">
                 {product.status} · Not yet available to buy
@@ -119,9 +119,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <Container>
             <div className="[&_.eyebrow]:text-cyan [&_h2]:text-cream [&_p]:text-cream/70">
               <SectionHeading
-                eyebrow="A closer look"
-                title="Designed around the stroller."
-                description="The intended setup is straightforward. These are the parts we’re developing—and the details we’re still working through."
+                eyebrow="Safety-minded visibility"
+                title="See nearby. Be noticed."
+                description="Evening walks and after-dark outings are the reason for Glowbaby. The goal is light for the space around you and a visible presence for others—not a promise that light alone makes an outing safe."
               />
             </div>
             <div className="mt-10 grid gap-px overflow-hidden rounded-[2rem] border border-cream/15 bg-cream/15 sm:grid-cols-2">

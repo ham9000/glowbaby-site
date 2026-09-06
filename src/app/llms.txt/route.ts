@@ -1,4 +1,4 @@
-import { companionApp, products, siteConfig } from "@/content/site";
+import { companionApp, products, siteConfig, visibilityGuidance } from "@/content/site";
 
 export const dynamic = "force-static";
 
@@ -15,7 +15,7 @@ export function GET() {
       "",
       ...product.platformParts.map(({ title, description }) => `- ${title}: ${description}`),
       "",
-      "#### Practical and playful",
+      "#### Visibility first",
       "",
       ...product.principles.map(({ title, description }) => `- ${title}: ${description}`),
       "",
@@ -37,8 +37,12 @@ export function GET() {
     "",
     "Hardware specifications, pricing, availability, certifications, and launch dates have",
     "not been published and should not be inferred from the visual concepts.",
-    "Mounting and compatibility are still being evaluated. Glowbaby does not",
-    "replace required lights or reflectors and is not safety equipment.",
+    "Mounting and compatibility are still being evaluated.",
+    "",
+    "## Visibility and responsible use",
+    "",
+    visibilityGuidance.limitations,
+    visibilityGuidance.habits,
     "",
     "## Companion app",
     "",

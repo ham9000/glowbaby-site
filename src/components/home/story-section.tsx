@@ -12,7 +12,7 @@ export function StorySection() {
           <SectionHeading
             eyebrow="The Glowbaby companion app"
             title="The app. Ready on iOS."
-            description="The Glowbaby companion app brings connection, brightness, colors, practical modes, and playful presets together in one place."
+            description="Set brightness and practical lighting modes before you head out. The Glowbaby companion app brings your controls together, with colors and playful presets when you want them."
           />
           <p className="mt-5 text-sm font-semibold leading-6 text-ink/70">
             {companionApp.availability}
@@ -28,20 +28,20 @@ export function StorySection() {
           <div className="mt-10 grid gap-8 border-t border-ink/15 pt-8 sm:grid-cols-2">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.16em] text-ink/70">
-                A glow for evening walks
+                Ready before you go
               </p>
               <p className="mt-3 leading-7 text-ink/70">
-                Choose a distinctive glow beneath and around your stroller or
-                wagon, from neighborhood walks to busy family events.
+                Choose your lighting mode before the walk, check your power
+                source, and adjust brightness for the setting and people around you.
               </p>
             </div>
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.16em] text-ink/70">
-                Personality on demand
+                Practical can be personal
               </p>
               <p className="mt-3 leading-7 text-ink/70">
-                Give the ride its own colors and animations for a family
-                adventure—or simply because today calls for purple.
+                Visibility is the reason for the light. Colors and animations
+                give it a personal touch for family events and everyday adventures.
               </p>
             </div>
           </div>

@@ -45,9 +45,9 @@ export function HeroSection({ product }: { product: Product }) {
       <Container className="relative mt-6">
         <div className="grid gap-px overflow-hidden rounded-[1.75rem] border border-ink/10 bg-ink/10 sm:grid-cols-3">
           {[
-            ["Under-stroller lighting", "Light shines outward, around, and down"],
-            ["App-controlled", "Colors, animations, and modes"],
-            ["External USB-C power", "Connected through a compact controller"],
+            ["Help others notice you", "A visible presence after dark"],
+            ["See around your ride", "Light directed outward and downward"],
+            ["Simple app control", "Set brightness and modes before you go"],
           ].map(([title, detail]) => (
             <div key={title} className="bg-cream/90 px-6 py-5 backdrop-blur">
               <p className="text-sm font-bold text-ink">{title}</p>

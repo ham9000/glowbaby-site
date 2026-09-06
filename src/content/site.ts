@@ -28,9 +28,9 @@ const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
 export const siteConfig = {
   name: "Glowbaby",
-  title: "Glowbaby Stroller Light — App-Controlled Stroller Lighting",
+  title: "Glowbaby Stroller Light — Visibility After Dark",
   description:
-    "Glowbaby is an app-controlled under-stroller light for strollers and wagons, casting colorful light outward, around, and down toward the ground.",
+    "Glowbaby is an under-stroller light designed to help you see around your ride and help others notice you at night, with app-controlled brightness and modes.",
   url: configuredUrl || "https://glowbaby-site.vercel.app",
   githubUrl: "https://github.com/ham9000/glowbaby-site",
   navigation: [
@@ -47,6 +47,13 @@ export const companionApp = {
   availability: "Available on iOS. Android is currently in beta.",
 } as const;
 
+export const visibilityGuidance = {
+  habits:
+    "Keep required lights and reflectors in place, choose well-lit routes where possible, stay alert at crossings and driveways, and check your light and power source before heading out.",
+  limitations:
+    "Glowbaby is an additional visibility aid, not safety equipment. It cannot guarantee that others will see you, prevent accidents, or replace required lights and reflectors.",
+} as const;
+
 export const products: Product[] = [
   {
     slug: "glowbaby",
@@ -54,28 +61,28 @@ export const products: Product[] = [
     eyebrow: "App-controlled stroller light",
     headline: "Made to be seen. Built to be theirs.",
     description:
-      "Glowbaby is an app-controlled light designed to sit beneath a stroller or wagon, casting light outward, around, and down toward the ground. Colorful modes and animations make every ride feel personal.",
+      "Glowbaby is being designed to help you see the space around your stroller or wagon—and help others see you at night. App-controlled light shines beneath and around your ride, with safety-minded visibility at the center.",
     status: "In development",
     statusDetail:
       "The under-stroller light, controller, and bottom-mounting approach are still being developed. The hardware is not yet available to buy.",
     principles: [
       {
         number: "01",
-        title: "More noticeable after dark",
+        title: "Help others notice you",
         description:
-          "Add a distinctive glow beneath and around your stroller or wagon during evening walks, busy events, and after-dark family adventures.",
+          "Designed to help your stroller or wagon stand out to people nearby on evening walks, shared paths, and after-dark family outings.",
       },
       {
         number: "02",
-        title: "Make it unmistakably theirs",
+        title: "See the space around you",
         description:
-          "Choose colors, animations, brightness, and playful modes that let every ride reflect a child’s personality.",
+          "Downward and outward light is designed to help you see the ground and space immediately around your stroller or wagon during evening walks.",
       },
       {
         number: "03",
-        title: "Designed to grow with the ride",
+        title: "Safety comes first",
         description:
-          "One controller-and-app experience is being designed to support additional compatible stroller and wagon lighting as Glowbaby grows.",
+          "Brightness and practical lighting modes come first. Colors and playful presets add personality, alongside the need to stay alert and use required lights.",
       },
     ],
     platformParts: [
@@ -119,21 +126,21 @@ export const products: Product[] = [
       },
       {
         number: "03",
-        title: "Make it yours",
+        title: "Set your light",
         description:
-          "Adjust brightness, choose colors, and switch between practical and playful modes from the app.",
+          "Choose brightness and a practical mode before you set off. Adjust for the setting and be considerate of other people; playful colors are there when you want them.",
       },
     ],
     details: [
       {
-        title: "A glow beneath the stroller",
+        title: "Visibility in both directions",
         description:
-          "The LED light sits at the bottom of the stroller or wagon and casts light outward, around, and down toward the ground. Supported models, attachment points, and mounting hardware are not finalized.",
+          "The goal is to help you see the area around your stroller or wagon and help others notice you in low light. The disc casts light outward and down. Mounting and supported models are still being evaluated.",
       },
       {
-        title: "A small controller, a personal glow",
+        title: "Practical control before you go",
         description:
-          "A compact Bluetooth controller connects the light to the companion app, where families can choose brightness, colors, animations, and modes.",
+          "A compact Bluetooth controller connects the light to the companion app. Set brightness and lighting modes before your walk, with colors and playful presets available for personal expression.",
       },
       {
         title: "Power stays separate",
@@ -141,16 +148,20 @@ export const products: Product[] = [
           "The system is designed around external USB-C power. Power-source requirements, runtime, and included accessories are still being evaluated.",
       },
       {
-        title: "Visibility without overpromising",
-        description:
-          "Glowbaby adds a distinctive light presence. It does not guarantee visibility, prevent accidents, or replace required lights or reflectors.",
+        title: "One part of a safer outing",
+        description: visibilityGuidance.limitations,
       },
     ],
     faqs: [
       {
         question: "What is Glowbaby?",
         answer:
-          "Glowbaby Stroller Light is an app-controlled light being developed to sit beneath a stroller or wagon. It casts light outward, around, and down toward the ground, with colorful modes and animations that make the ride personal.",
+          "Glowbaby Stroller Light is being developed to help you see around your stroller or wagon and help others notice you after dark. Its bottom-mounted disc casts light outward and down, with app-controlled brightness, colors, and modes.",
+      },
+      {
+        question: "How does Glowbaby support safer outings?",
+        answer:
+          `Its purpose is visibility in both directions: helping you see the area around your ride and helping others notice you at night. ${visibilityGuidance.limitations} ${visibilityGuidance.habits}`,
       },
       {
         question: "How is it controlled?",

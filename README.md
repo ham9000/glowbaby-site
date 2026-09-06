@@ -3,8 +3,10 @@
 **Made to be seen. Built to be theirs.**
 
 Glowbaby is an app-controlled light that sits on the bottom of a stroller or
-wagon, casting light outward, around, and down. It combines practical visibility
-with colorful modes and animations. It is in development, not currently available
+wagon, casting light outward, around, and down. The site leads with safety-minded
+visibility after dark: helping families see the space around their ride and
+helping others notice them. Colors and animations are secondary to that purpose.
+The hardware is in development, not currently available
 to buy. The intended system brings together an under-stroller LED light, a compact
 Bluetooth controller, external USB-C power, and a companion app. Glowbaby is not
 safety equipment or a replacement for required lights and reflectors.
@@ -62,6 +64,11 @@ reuse that source; pages also include truthful JSON-LD without invented offers,
 ratings, prices, or hardware availability. The shared `companionApp` record
 provides the real iOS download link and Android beta status. There is no signup
 backend, customer database, or form endpoint.
+
+The shared `visibilityGuidance` copy keeps responsible-use advice and claim
+boundaries consistent across the homepage, product details/FAQ, and `/llms.txt`.
+Describe improved visibility as a design goal, not proven safety performance,
+accident prevention, certified protection, or a guarantee of being seen.
 
 ### Adding a future real product
 

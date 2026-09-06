@@ -10,13 +10,13 @@ export function CtaSection() {
       <Container className="relative text-center">
         <p className="eyebrow eyebrow-strong justify-center">In development</p>
         <h2 className="mx-auto mt-5 max-w-4xl text-balance font-display text-[clamp(3.5rem,8vw,7.5rem)] leading-[0.9] tracking-[-0.065em] text-ink">
-          See where Glowbaby goes next.
+          Put visibility first.
         </h2>
         <p className="mx-auto mt-7 max-w-xl text-lg leading-8 text-ink">
-          Glowbaby is being developed around one focused idea: make stroller
-          lighting more visible, more expressive, and easier for families to make
-          their own. Follow the build as the first stroller-light hardware takes
-          shape and the companion app continues to evolve.
+          Seeing your surroundings and being noticed by others are both part of a
+          safer outing. Glowbaby is being developed to bring light around your
+          stroller or wagon and help others notice you after dark—with personal
+          expression alongside that purpose.
         </p>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-ink/75">
           {companionApp.availability} The stroller-light hardware is not yet

@@ -9,8 +9,8 @@ export function HowItWorks({ product }: { product: Product }) {
       <Container>
         <SectionHeading
           eyebrow="How it works"
-          title="A little light. A ride of their own."
-          description="The setup we’re building pairs a bottom-mounted stroller light with simple app controls. It shines outward, around the ride, and down toward the ground. Fit and mounting details are still being refined."
+          title="Get ready before the light fades."
+          description="The setup we’re building pairs a bottom-mounted stroller light with simple app controls. Check the light and power source, set your mode, and keep visibility in mind before heading out. Fit and mounting details are still being refined."
         />
         <ol className="mt-10 grid list-none gap-8 lg:grid-cols-3">
           {product.howItWorks.map((step) => (

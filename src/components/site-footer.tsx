@@ -12,8 +12,8 @@ export function SiteFooter() {
           Glowbaby
         </Link>
         <p className="max-w-md text-sm leading-6 text-cream/55">
-          App-controlled under-stroller lighting for strollers and wagons. Made to be seen.
-          Built to be theirs. In development.
+          Under-stroller lighting designed to help you see nearby and be noticed
+          after dark. Hardware in development.
         </p>
         <div className="flex gap-5 text-sm font-semibold text-cream/70">
           <Link href="/products/glowbaby" className="hover:text-cream">

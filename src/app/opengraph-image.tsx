@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { StrollerGraphic } from "@/components/stroller-graphic";
 
 export const alt =
-  "Glowbaby Stroller Light — app-controlled stroller lighting. Concept illustration of a bottom-mounted disc with a rounded white rim and LEDs around its edge casting a colorful glow outward, around, and down beneath a stroller, with a separate controller; in development.";
+  "Glowbaby Stroller Light — designed to help you see nearby and be noticed at night. Concept illustration of a bottom-mounted disc with a rounded white rim and LEDs around its edge casting light outward, around, and down beneath a stroller, with a separate controller; in development.";
 export const size = {
   width: 1200,
   height: 630,
@@ -48,7 +48,7 @@ export default function OpenGraphImage() {
               letterSpacing: "1px",
             }}
           >
-            APP-CONTROLLED STROLLER LIGHTING
+            SEE AROUND YOUR RIDE. BE NOTICED.
           </div>
           <div
             style={{
@@ -76,7 +76,7 @@ export default function OpenGraphImage() {
             <span>Built to be theirs.</span>
           </div>
           <div style={{ color: "#5d5667", display: "flex", fontSize: "22px", marginTop: "22px" }}>
-            For strollers and wagons.
+            Light around you. Presence after dark.
           </div>
           <div
             style={{
