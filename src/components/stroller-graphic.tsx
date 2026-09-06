@@ -17,19 +17,19 @@ export function StrollerGraphic({
       height={height}
       className={className}
       role="img"
-      aria-label="Glowbaby Stroller Light concept: a disc-shaped light with LEDs around its edge is mounted below the stroller basket, casting a soft colorful glow outward, around, and down onto the ground; a separate controller sits alongside"
+      aria-label="Glowbaby Stroller Light concept: a disc-shaped light with a rounded white rim and LEDs around its edge is mounted below the stroller basket, casting a colorful glow outward, around, and down onto the ground; a separate controller sits alongside"
       fill="none"
     >
       <ellipse cx="315" cy="460" rx="235" ry="23" fill="#050309" opacity=".3" />
-      {[1, 0.88, 0.76, 0.64, 0.52, 0.4].map((scale) => (
+      {Array.from({ length: 16 }, (_, index) => 1 - index / 16).map((scale) => (
         <g key={scale}>
-          <ellipse cx="310" cy="418" rx={178 * scale} ry={40 * scale} fill="#b695ff" opacity=".035" />
-          <ellipse cx="269" cy="421" rx={130 * scale} ry={34 * scale} fill="#19bff2" opacity=".035" />
-          <ellipse cx="354" cy="421" rx={136 * scale} ry={36 * scale} fill="#f5b4a4" opacity=".025" />
-          <ellipse cx="311" cy="445" rx={135 * scale} ry={30 * scale} fill="#b695ff" opacity=".025" />
-          <ellipse cx="312" cy="465" rx={205 * scale} ry={34 * scale} fill="#a57aff" opacity=".055" />
-          <ellipse cx="255" cy="466" rx={130 * scale} ry={25 * scale} fill="#19bff2" opacity=".055" />
-          <ellipse cx="370" cy="466" rx={112 * scale} ry={25 * scale} fill="#f5b4a4" opacity=".055" />
+          <ellipse cx="310" cy="418" rx={178 * scale} ry={40 * scale} fill="#b695ff" opacity=".06" />
+          <ellipse cx="269" cy="421" rx={130 * scale} ry={34 * scale} fill="#19bff2" opacity=".06" />
+          <ellipse cx="354" cy="421" rx={136 * scale} ry={36 * scale} fill="#f5b4a4" opacity=".045" />
+          <ellipse cx="311" cy="445" rx={135 * scale} ry={30 * scale} fill="#b695ff" opacity=".055" />
+          <ellipse cx="312" cy="465" rx={205 * scale} ry={34 * scale} fill="#a57aff" opacity=".08" />
+          <ellipse cx="255" cy="466" rx={130 * scale} ry={25 * scale} fill="#19bff2" opacity=".08" />
+          <ellipse cx="370" cy="466" rx={112 * scale} ry={25 * scale} fill="#f5b4a4" opacity=".08" />
         </g>
       ))}
 
@@ -104,27 +104,30 @@ export function StrollerGraphic({
       <circle cx="277" cy="286" r="4" fill="#c9bce1" />
 
       <rect x="303" y="395" width="16" height="12" rx="3" fill="#776a87" />
-      <ellipse cx="311" cy="428" rx="49" ry="9" fill="#c8dcff" opacity=".12" />
-      <path
-        d="M265 407v10c0 7 21 12 46 12s46-5 46-12v-10Z"
-        fill="#211a2d"
-        stroke="#a99bbc"
+      <ellipse cx="311" cy="428" rx="58" ry="11" fill="#c8dcff" opacity=".24" />
+      <ellipse
+        cx="311"
+        cy="412"
+        rx="49"
+        ry="18"
+        fill="#f8f7fb"
+        stroke="#ffffff"
         strokeWidth="1.5"
       />
-      <ellipse cx="311" cy="407" rx="46" ry="12" fill="#3c304b" stroke="#baaccd" strokeWidth="1.5" />
+      <ellipse cx="311" cy="406" rx="43" ry="11" fill="#3c304b" stroke="#ffffff" strokeWidth="2.5" />
       <ellipse cx="311" cy="406" rx="35" ry="7" fill="#2b2236" stroke="#655574" />
-      <path d="M267 415a44 11 0 0 0 88 0" stroke="#cbb9ef" strokeWidth="4" opacity=".35" />
+      <path d="M267 415a44 11 0 0 0 88 0" stroke="#dad4ea" strokeWidth="5" />
       {Array.from({ length: 13 }, (_, index) => {
         const angle = (index * Math.PI) / 12;
         const cx = 311 - 44 * Math.cos(angle);
         const cy = 415 + 11 * Math.sin(angle);
-        const color = index < 5 ? "#b0f1ff" : index < 9 ? "#cab8ff" : "#f5d6ec";
+        const color = index < 5 ? "#67ddff" : index < 9 ? "#b18aff" : "#ffc3b2";
 
         return (
           <g key={index}>
-            <circle cx={cx} cy={cy} r="4" fill={color} opacity=".2" />
-            <circle cx={cx} cy={cy} r="2.3" fill={color} />
-            <circle cx={cx} cy={cy} r=".9" fill="#ffffff" opacity=".8" />
+            <circle cx={cx} cy={cy} r="6" fill={color} opacity=".3" />
+            <circle cx={cx} cy={cy} r="2.6" fill={color} />
+            <circle cx={cx} cy={cy} r="1.2" fill="#ffffff" />
           </g>
         );
       })}
