@@ -2,6 +2,7 @@ import { CatalogSection } from "@/components/home/catalog-section";
 import { CtaSection } from "@/components/home/cta-section";
 import { HeroSection } from "@/components/home/hero-section";
 import { PrinciplesSection } from "@/components/home/principles-section";
+import { RealWorldSection } from "@/components/home/real-world-section";
 import { PlatformSection } from "@/components/home/platform-section";
 import { StorySection } from "@/components/home/story-section";
 import { HowItWorks } from "@/components/how-it-works";
@@ -38,6 +39,7 @@ export default function Home() {
         <HeroSection product={product} />
         <PrinciplesSection product={product} />
         <HowItWorks product={product} />
+        <RealWorldSection />
         <StorySection />
         <PlatformSection product={product} />
         <CatalogSection product={product} />

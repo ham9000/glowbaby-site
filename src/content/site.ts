@@ -54,6 +54,54 @@ export const visibilityGuidance = {
     "Glowbaby is an additional visibility aid, not safety equipment. It cannot guarantee that others will see you, prevent accidents, or replace required lights and reflectors.",
 } as const;
 
+export const realWorldScenarios = [
+  {
+    scene: "evening-walk",
+    title: "One more lap around the block.",
+    description:
+      "A neighborhood-walk concept: light on the pavement beside your stroller and a more noticeable presence for people nearby.",
+  },
+  {
+    scene: "park-path",
+    title: "When the path gets a little dim.",
+    description:
+      "A shared-path concept, showing the intended glow around the stroller for the ground near you and the people sharing the route.",
+  },
+  {
+    scene: "family-event",
+    title: "When the celebration runs late.",
+    description:
+      "An evening-event concept: practical light around the stroller, with a little color for the gathering and the walk back.",
+  },
+] as const;
+
+export type ExampleTestimonial = {
+  id: string;
+  perspective: string;
+  quote: string;
+};
+
+export const exampleTestimonials = [
+  {
+    id: "evening-walks",
+    perspective: "The evening-walk perspective",
+    quote:
+      "I want to see the ground beside the stroller and make our evening walks easier for other people to notice. A little light around the ride is an idea I can get behind.",
+  },
+  {
+    id: "family-events",
+    perspective: "The family-event perspective",
+    quote:
+      "At an evening event, an extra glow around the stroller would be a welcome addition to the lights and reflectors we already use. The playful colors are a nice bonus.",
+  },
+  {
+    id: "before-we-go",
+    perspective: "The before-we-go perspective",
+    quote:
+      "I like the idea of setting a practical glow before we leave, then choosing a playful color when we reach the celebration. Visibility first, with room to make it ours.",
+  },
+] as const satisfies readonly [ExampleTestimonial, ...ExampleTestimonial[]];
+
 export const products: Product[] = [
   {
     slug: "glowbaby",

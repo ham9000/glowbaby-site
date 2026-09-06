@@ -70,6 +70,20 @@ boundaries consistent across the homepage, product details/FAQ, and `/llms.txt`.
 Describe improved visibility as a design goal, not proven safety performance,
 accident prevention, certified protection, or a guarantee of being seen.
 
+### Concept scenes and testimonial demo
+
+The homepage includes original, static illustrations of evening walks, park paths,
+and family events. These are labeled concepts, not product photos or evidence of
+tested performance.
+
+The testimonial carousel uses explicitly labeled fictional example quotes from
+`exampleTestimonials`, not real customer reviews. It advances every eight seconds
+only while visible, pauses on hover or keyboard focus, and stops when a visitor
+chooses a slide or presses Pause. Reduced-motion preferences disable automatic
+rotation. These examples are not included in review/rating structured data or the
+product catalogue. Replace them with permissioned, genuine feedback before
+presenting the section as customer testimonials.
+
 ### Adding a future real product
 
 Only add a record to `products` when a real, publicly described product warrants

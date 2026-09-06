@@ -2,12 +2,14 @@ type StrollerGraphicProps = {
   className?: string;
   width?: number;
   height?: number;
+  showController?: boolean;
 };
 
 export function StrollerGraphic({
   className,
   width = 640,
   height = 520,
+  showController = true,
 }: StrollerGraphicProps) {
   return (
     <svg
@@ -17,7 +19,7 @@ export function StrollerGraphic({
       height={height}
       className={className}
       role="img"
-      aria-label="Glowbaby Stroller Light concept: a disc-shaped light with a rounded white rim and LEDs around its edge is mounted below the stroller basket, casting a colorful glow outward, around, and down onto the ground; a separate controller sits alongside"
+      aria-label={`Glowbaby Stroller Light concept: a disc-shaped light with a rounded white rim and LEDs around its edge is mounted below the stroller basket, casting a colorful glow outward, around, and down onto the ground${showController ? "; a separate controller sits alongside" : ""}`}
       fill="none"
     >
       <ellipse cx="315" cy="460" rx="235" ry="23" fill="#050309" opacity=".3" />
@@ -139,18 +141,22 @@ export function StrollerGraphic({
       <circle cx="440" cy="426" r="20" stroke="#564b63" strokeWidth="2" />
       <circle cx="440" cy="426" r="8" fill="#a295b3" />
 
-      <ellipse cx="541" cy="448" rx="52" ry="10" fill="#050309" opacity=".3" />
-      <rect x="494" y="353" width="94" height="77" rx="20" fill="#19141f" stroke="#9685ad" strokeWidth="2" />
-      <path d="M509 361h62c5 0 9 4 9 9" stroke="#c9b8df" strokeWidth="2" opacity=".45" strokeLinecap="round" />
-      <circle cx="574" cy="368" r="4" fill="#82e7b0" />
-      <path
-        d="M546 380a13 13 0 1 0 2 20v-9h-11"
-        stroke="#e5dcfb"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <rect x="529" y="421" width="24" height="7" rx="3.5" fill="#08060c" stroke="#655775" />
+      {showController && (
+        <g>
+          <ellipse cx="541" cy="448" rx="52" ry="10" fill="#050309" opacity=".3" />
+          <rect x="494" y="353" width="94" height="77" rx="20" fill="#19141f" stroke="#9685ad" strokeWidth="2" />
+          <path d="M509 361h62c5 0 9 4 9 9" stroke="#c9b8df" strokeWidth="2" opacity=".45" strokeLinecap="round" />
+          <circle cx="574" cy="368" r="4" fill="#82e7b0" />
+          <path
+            d="M546 380a13 13 0 1 0 2 20v-9h-11"
+            stroke="#e5dcfb"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <rect x="529" y="421" width="24" height="7" rx="3.5" fill="#08060c" stroke="#655775" />
+        </g>
+      )}
     </svg>
   );
 }
