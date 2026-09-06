@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/home/hero-section";
 import { PrinciplesSection } from "@/components/home/principles-section";
 import { PlatformSection } from "@/components/home/platform-section";
 import { StorySection } from "@/components/home/story-section";
+import { HowItWorks } from "@/components/how-it-works";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { StructuredData } from "@/components/structured-data";
@@ -21,6 +22,7 @@ export default function Home() {
             "@type": "Organization",
             name: siteConfig.name,
             url: siteConfig.url,
+            description: siteConfig.description,
           },
           {
             "@context": "https://schema.org",
@@ -35,6 +37,7 @@ export default function Home() {
       <main>
         <HeroSection product={product} />
         <PrinciplesSection product={product} />
+        <HowItWorks product={product} />
         <StorySection />
         <PlatformSection product={product} />
         <CatalogSection product={product} />

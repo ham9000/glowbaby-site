@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/container";
+import { HowItWorks } from "@/components/how-it-works";
+import { ProductFaq } from "@/components/product-faq";
 import { ProductVisual } from "@/components/product-visual";
+import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { StarOutline } from "@/components/star-outline";
@@ -17,23 +20,38 @@ export function generateStaticParams() {
   return products.map((product) => ({ slug: product.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: ProductPageProps,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const product = getProduct((await params).slug);
 
   if (!product) {
     return {};
   }
 
+  const title = `${product.name} — Details & Development`;
+  const description =
+    "Meet Glowbaby Stroller Light: a bottom-mounted, app-controlled light that shines outward, around, and down. Explore the setup and development status.";
+  const images = (await parent).openGraph?.images;
+
   return {
-    title: product.name,
-    description: product.description,
+    title: { absolute: title },
+    description,
     alternates: { canonical: `/products/${product.slug}` },
     openGraph: {
-      title: `${product.name} — ${product.headline}`,
-      description: product.description,
+      title,
+      description,
+      type: "website",
+      siteName: siteConfig.name,
       url: `/products/${product.slug}`,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images,
     },
   };
 }
@@ -58,111 +76,122 @@ export default async function ProductPage({ params }: ProductPageProps) {
             "@type": "Brand",
             name: siteConfig.name,
           },
-          category: "Modular app-controlled lighting system",
+          category: "App-controlled under-stroller lighting",
         }}
       />
       <SiteHeader />
       <main>
-        <section className="bg-cream pb-20 pt-36 sm:pb-28 sm:pt-44">
+        <section className="bg-cream pb-16 pt-32 sm:pb-20 sm:pt-40">
           <Container className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <p className="eyebrow">{product.eyebrow}</p>
-              <h1 className="mt-5 font-display text-[clamp(4.5rem,10vw,8rem)] leading-[0.86] tracking-[-0.07em] text-ink">
+              <p className="eyebrow leading-relaxed">{product.eyebrow}</p>
+              <h1 className="mt-5 max-w-xl font-display text-[clamp(3.25rem,7vw,6rem)] leading-[0.98] tracking-[-0.055em] text-ink">
                 {product.name}
               </h1>
-              <p className="mt-5 font-display text-3xl leading-tight tracking-[-0.04em] text-coral sm:text-5xl">
+              <p className="mt-5 max-w-xl font-display text-3xl leading-tight tracking-[-0.04em] text-coral">
                 {product.headline}
               </p>
               <p className="mt-7 max-w-xl text-lg leading-8 text-ink/70">
-                {product.description}
+                A bottom-mounted light that shines outward, around your stroller
+                or wagon, and down toward the ground. Connected to a compact
+                Bluetooth controller, external USB-C power, and the Glowbaby
+                companion app.
               </p>
-              <div className="mt-8">
-                <div className="flex items-center gap-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-coral" />
-                  <span className="text-sm font-bold text-ink">{product.status}</span>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-ink/70">
-                  {product.statusDetail}
-                </p>
+              <p className="mt-5 text-sm font-bold text-ink">
+                {product.status} · Not yet available to buy
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="#how-it-works" className="button button-dark">
+                  See how it works <span aria-hidden="true">→</span>
+                </Link>
+                <Link href="#development" className="button button-light">
+                  Development status
+                </Link>
               </div>
             </div>
-            <div className="relative min-h-[500px] sm:min-h-[640px]">
+            <div className="relative aspect-[1.05] w-full">
               <ProductVisual />
             </div>
           </Container>
         </section>
 
-        <section className="bg-white py-24 sm:py-32">
+        <section className="bg-ink py-20 text-cream sm:py-24">
           <Container>
-            <div className="grid gap-12 lg:grid-cols-[0.65fr_1fr]">
-              <div>
-                <p className="eyebrow">Platform principles</p>
-                <h2 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.055em] text-ink sm:text-7xl">
-                  Visible. Personal. Expandable.
-                </h2>
-              </div>
-              <div className="border-t border-ink/15">
-                {product.principles.map((principle) => (
-                  <article
-                    key={principle.number}
-                    className="grid gap-4 border-b border-ink/15 py-8 sm:grid-cols-[4rem_1fr]"
-                  >
-                    <StarOutline className="h-7 w-7 text-violet" />
-                    <div>
-                      <h3 className="font-display text-3xl tracking-[-0.04em] text-ink">
-                        {principle.title}
-                      </h3>
-                      <p className="mt-3 max-w-xl leading-7 text-ink/70">
-                        {principle.description}
-                      </p>
-                    </div>
-                  </article>
-                ))}
-              </div>
+            <div className="[&_.eyebrow]:text-cyan [&_h2]:text-cream [&_p]:text-cream/70">
+              <SectionHeading
+                eyebrow="A closer look"
+                title="Designed around the stroller."
+                description="The intended setup is straightforward. These are the parts we’re developing—and the details we’re still working through."
+              />
             </div>
-          </Container>
-        </section>
-
-        <section className="bg-ink py-24 text-cream sm:py-32">
-          <Container>
-            <p className="eyebrow !text-cyan">Inside the system</p>
-            <h2 className="mt-5 max-w-4xl font-display text-5xl leading-[0.95] tracking-[-0.055em] text-cream sm:text-7xl">
-              Everything works better together.
-            </h2>
-            <div className="mt-14 grid gap-px overflow-hidden rounded-[2rem] border border-cream/15 bg-cream/15 sm:grid-cols-2">
-              {product.platformParts.map((part) => (
-                <article key={part.number} className="bg-ink p-7 sm:p-9">
+            <div className="mt-10 grid gap-px overflow-hidden rounded-[2rem] border border-cream/15 bg-cream/15 sm:grid-cols-2">
+              {product.details.map((detail) => (
+                <article key={detail.title} className="bg-ink p-7 sm:p-9">
                   <StarOutline className="h-7 w-7 text-cyan" />
-                  <h3 className="mt-12 font-display text-3xl tracking-[-0.04em] text-cream">
-                    {part.title}
+                  <h3 className="mt-7 font-display text-3xl tracking-[-0.04em] text-cream">
+                    {detail.title}
                   </h3>
-                  <p className="mt-4 leading-7 text-cream/70">{part.description}</p>
+                  <p className="mt-4 leading-7 text-cream/70">{detail.description}</p>
                 </article>
               ))}
             </div>
           </Container>
         </section>
 
-        <section className="bg-sage py-24 sm:py-32">
-          <Container className="text-center">
-            <p className="eyebrow justify-center">Built beyond one product</p>
-            <h2 className="mx-auto mt-5 max-w-4xl text-balance font-display text-[clamp(3.5rem,8vw,7rem)] leading-[0.9] tracking-[-0.065em] text-ink">
-              From helmets and character ears to the whole family ride.
-            </h2>
-            <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-ink/70">
-              Glowbaby is being designed as a shared lighting platform for
-              wearables, accessories, strollers, wagons, and future compatible gear.
-            </p>
-            <Link
-              href={siteConfig.githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="button button-dark mt-9"
-            >
-              Follow the build <span aria-hidden="true">↗</span>
-            </Link>
+        <HowItWorks product={product} />
+
+        <section id="development" className="scroll-mt-28 bg-sage py-20 sm:py-24">
+          <Container className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+            <SectionHeading
+              eyebrow={product.status}
+              title="Taking shape, one ride at a time."
+              description={product.statusDetail}
+            />
+            <div>
+              <div className="space-y-7">
+                <div>
+                  <h3 className="text-lg font-bold text-ink">An app you can preview</h3>
+                  <p className="mt-2 leading-7 text-ink/70">
+                    The current companion app interface offers a look at the controls
+                    being developed. It is not a public app download or a promise
+                    of final features.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-ink">Fit and hardware still being refined</h3>
+                  <p className="mt-2 leading-7 text-ink/70">
+                    Bottom mounting, supported stroller and wagon models, power requirements,
+                    and final specifications are still being evaluated. The illustration
+                    shows the intended direction, not a finished product photograph.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-ink">One focused first product</h3>
+                  <p className="mt-2 leading-7 text-ink/70">
+                    The stroller light comes first. Linked lights and related stroller
+                    and wagon accessories are future directions being explored, not
+                    additional products available today.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/#app" className="button button-dark">
+                  See the app preview <span aria-hidden="true">→</span>
+                </Link>
+                <Link
+                  href={siteConfig.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="button button-light"
+                >
+                  Follow the build <span aria-hidden="true">↗</span>
+                </Link>
+              </div>
+            </div>
           </Container>
         </section>
+
+        <ProductFaq product={product} />
       </main>
       <SiteFooter />
     </>

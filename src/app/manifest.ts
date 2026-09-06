@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { siteConfig } from "@/content/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Glowbaby",
-    short_name: "Glowbaby",
-    description: "Modular, app-controlled lighting for family gear.",
+    name: siteConfig.title,
+    short_name: siteConfig.name,
+    description: siteConfig.description,
     start_url: "/",
     display: "standalone",
     background_color: "#f8f7fb",

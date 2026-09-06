@@ -3,26 +3,42 @@ import { products, siteConfig } from "@/content/site";
 export const dynamic = "force-static";
 
 export function GET() {
-  const productLines = products.map(
-    (product) =>
-      `- [${product.name}](${siteConfig.url}/products/${product.slug}): ${product.description} Status: ${product.status}.`,
+  const productLines = products.flatMap(
+    (product) => [
+      `### [${product.name}](${siteConfig.url}/products/${product.slug})`,
+      "",
+      product.description,
+      "",
+      `Status: ${product.status}. ${product.statusDetail}`,
+      "",
+      "#### How the system fits together",
+      "",
+      ...product.platformParts.map(({ title, description }) => `- ${title}: ${description}`),
+      "",
+      "#### Practical and playful",
+      "",
+      ...product.principles.map(({ title, description }) => `- ${title}: ${description}`),
+      "",
+      "#### Future stroller and wagon ideas — not currently available",
+      "",
+      ...product.useCases.map(({ title, description }) => `- ${title}: ${description}`),
+      "",
+    ],
   );
 
   const document = [
-    `# ${siteConfig.name}`,
+    `# ${siteConfig.title}`,
     "",
     `> ${siteConfig.description}`,
     "",
-    "Glowbaby is a modular lighting platform in development. It combines flexible",
-    "LED lighting, a compact Bluetooth controller, external USB-C power, and a",
-    "companion mobile app. Initial concepts include children's helmets and",
-    "illuminated character-ear headbands, with potential expansion to strollers,",
-    "wagons, and other family accessories.",
+    "Glowbaby Stroller Light is in development, not currently available to buy.",
+    "Future stroller and wagon lighting or accessories are possibilities being",
+    "explored, not additional available products or compatibility guarantees.",
     "",
-    "The two central product goals are visibility in low-light environments and",
-    "personal expression through selectable colors, animations, and lighting modes.",
     "Specifications, pricing, availability, certifications, and launch dates have",
     "not been published and should not be inferred from the visual concepts.",
+    "Mounting and compatibility are still being evaluated. Glowbaby does not",
+    "replace required lights or reflectors and is not safety equipment.",
     "",
     "## Products",
     "",

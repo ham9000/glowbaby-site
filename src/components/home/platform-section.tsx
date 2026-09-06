@@ -5,16 +5,16 @@ import type { Product } from "@/content/site";
 
 export function PlatformSection({ product }: { product: Product }) {
   return (
-    <section id="platform" className="bg-ink py-24 text-cream sm:py-32">
+    <section id="platform" className="scroll-mt-28 bg-ink py-20 text-cream sm:py-24">
       <Container>
         <div className="[&_.eyebrow]:text-cyan [&_h2]:text-cream [&_p]:text-cream/70">
           <SectionHeading
-            eyebrow="The Glowbaby platform"
-            title="Four parts. One bright idea."
-            description="A modular architecture makes Glowbaby useful beyond a single form factor. The same core system can move across compatible products as the platform grows."
+            eyebrow="The stroller-light system"
+            title="Four parts. One bright ride."
+            description="An under-stroller light, a compact controller, separate power, and a companion app come together around one thing: a more noticeable, more personal stroller or wagon ride."
           />
         </div>
-        <div className="mt-16 border-t border-cream/15">
+        <div className="mt-12 border-t border-cream/15">
           {product.platformParts.map((part) => (
             <article
               key={part.number}

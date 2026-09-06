@@ -19,7 +19,7 @@ export function ProductCard({ product }: { product: Product }) {
           href={`/products/${product.slug}`}
           className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-ink"
         >
-          Explore product
+          Explore the stroller light
           <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">
             →
           </span>

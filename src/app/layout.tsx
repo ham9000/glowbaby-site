@@ -14,14 +14,14 @@ const raleway = Raleway({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Glowbaby — Made to be seen. Built to be theirs.",
+    default: siteConfig.title,
     template: "%s | Glowbaby",
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Glowbaby — Made to be seen. Built to be theirs.",
+    title: siteConfig.title,
     description: siteConfig.description,
     type: "website",
     siteName: siteConfig.name,
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Glowbaby — Made to be seen. Built to be theirs.",
+    title: siteConfig.title,
     description: siteConfig.description,
   },
 };

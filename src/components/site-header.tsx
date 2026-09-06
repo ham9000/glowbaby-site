@@ -16,7 +16,7 @@ export function SiteHeader() {
           Glowbaby
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-5 md:flex lg:gap-8" aria-label="Main navigation">
           {siteConfig.navigation.map((item) => (
             <Link
               key={item.href}
@@ -33,7 +33,7 @@ export function SiteHeader() {
             href={siteConfig.githubUrl}
             target="_blank"
             rel="noreferrer"
-            className="button button-dark"
+            className="button button-light"
           >
             Follow the build
             <span aria-hidden="true">↗</span>
@@ -63,7 +63,7 @@ export function SiteHeader() {
                 href={siteConfig.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="button button-dark mt-2 justify-center"
+                className="button button-light mt-2 justify-center"
               >
                 Follow the build
               </Link>

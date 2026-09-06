@@ -12,12 +12,15 @@ export function SiteFooter() {
           Glowbaby
         </Link>
         <p className="max-w-md text-sm leading-6 text-cream/55">
-          A modular, app-controlled lighting platform for more visible, more
-          expressive family gear. In development.
+          App-controlled under-stroller lighting for strollers and wagons. Made to be seen.
+          Built to be theirs. In development.
         </p>
         <div className="flex gap-5 text-sm font-semibold text-cream/70">
-          <Link href="/products" className="hover:text-cream">
-            Products
+          <Link href="/products/glowbaby" className="hover:text-cream">
+            Product
+          </Link>
+          <Link href="/products/glowbaby#faq" className="hover:text-cream">
+            FAQ
           </Link>
           <Link
             href={siteConfig.githubUrl}

@@ -1,9 +1,18 @@
-# Glowbaby
+# Glowbaby Stroller Light
 
-A reusable, product-first website for Glowbaby: a modular, app-controlled
-lighting platform that adds visibility, personality, and playful lighting
-effects to everyday family gear. It is built with Next.js, React, TypeScript,
-Tailwind CSS, and Vercel Analytics.
+**Made to be seen. Built to be theirs.**
+
+Glowbaby is an app-controlled light that sits on the bottom of a stroller or
+wagon, casting light outward, around, and down. It combines practical visibility
+with colorful modes and animations. It is in development, not currently available
+to buy. The intended system brings together an under-stroller LED light, a compact
+Bluetooth controller, external USB-C power, and a companion app. Glowbaby is not
+safety equipment or a replacement for required lights and reflectors.
+
+The site uses Next.js, React, TypeScript, Tailwind CSS, Vercel Analytics, and
+Speed Insights, retaining the purple, near-black, white, and full-spectrum visual
+identity. Stroller illustrations are labeled development representations, not
+product photographs. The real app interface capture lives in `public\app`.
 
 ## Run locally
 
@@ -14,77 +23,67 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+If another project uses port 3000, run
+`npm run dev -- --hostname 127.0.0.1 --port 3001` and open
+[http://127.0.0.1:3001](http://127.0.0.1:3001) instead.
+
 ## Validate
 
 ```bash
 npm run validate
 ```
 
-## Add another product
+This runs the existing typecheck, ESLint, and production build. They can also be
+run individually with `npm run typecheck`, `npm run lint`, and `npm run build`.
 
-Product content is centralized in `src/content/site.ts`. Add a new record to the
-`products` array and it will automatically appear in:
+## Routes and shared content
 
-- `/products`
-- `/products/[slug]`
-- `/product-catalogue.json`
-- `/llms.txt`
-- `/sitemap.xml`
+- `/` tells the stroller-light story and introduces the app and system.
+- `/products/glowbaby` provides product details, how it works, status, and FAQ.
+- `/products` uses a framework-native redirect to `/products/glowbaby` while
+  there is one public product; the redirect is excluded from the sitemap.
+- `/llms.txt` summarizes the same public product content for language models.
+- `/product-catalogue.json` exposes published product descriptions, status,
+  system parts, use cases, principles, and explicit information limitations.
+- `/openapi.json` documents the two read-only discovery endpoints and their
+  response fields.
+- `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, and `/opengraph-image`
+  support search, browser metadata, and social sharing.
 
-Create a specialized product-detail component only when a future product needs
-content beyond the shared product model.
+Content is centralized in `src\content\site.ts`. Metadata and discovery routes
+reuse that source; pages also include truthful JSON-LD without invented offers,
+ratings, prices, or availability. There is no signup backend, customer database,
+or form endpoint.
 
-## AI and discovery surfaces
+### Adding a future real product
 
-- `/llms.txt` gives language models a concise, explicit summary.
-- `/product-catalogue.json` provides a sanitized machine-readable catalogue.
-- `/openapi.json` documents the public discovery endpoints.
-- Product and organization JSON-LD are embedded in the relevant pages.
+Only add a record to `products` when a real, publicly described product warrants
+its own page. Records feed `/products/[slug]`, the JSON catalogue, `/llms.txt`,
+and the sitemap. They do **not** automatically create a catalogue page: replace
+the current `/products` redirect with a useful listing and update navigation and
+the sitemap when there is genuinely more than one product to show. Exploration
+of future stroller/wagon lights or accessories is not an available product list.
 
-These routes expose only published marketing content. They do not add an agent,
-chatbot, database, MCP server, or customer-data workflow.
+## Factual follow-ups
 
-## Product positioning
-
-The site presents Glowbaby as one connected ecosystem:
-
-- flexible LED lighting for compatible family gear;
-- a compact Bluetooth controller;
-- an external USB-C power source;
-- a companion app for colors, animations, and lighting modes;
-- an expandable path from helmets and character-ear headbands to strollers,
-  wagons, and future accessories.
-
-Product specifications, pricing, certifications, launch timing, and
-availability are intentionally omitted until they are established.
-
-The visual system follows the existing app: Glowbaby purple, near-black
-surfaces, white UI, and full-spectrum color accents. Current app interface
-captures live in `public/app` and are used directly on the homepage.
+- Confirm underside mounting, compatible stroller/wagon models, dimensions, power
+  requirements, and included items before publishing specifications.
+- Establish pricing, launch timing, availability, and any tested or certified
+  claims; none are currently published. Do not infer runtime, weather ratings,
+  universal fit, or finalized linked-light behavior.
+- Add real stroller-light photos or video when approved for public use.
+- Configure a real contact or launch-list destination before adding a signup
+  action. Until then, the product page is the primary CTA and GitHub is the
+  secondary way to follow development.
 
 ## Deployment
 
-Deploy the repository on Vercel and set:
+Deploy on Vercel and set:
 
 ```text
 NEXT_PUBLIC_SITE_URL=https://your-production-domain.com
 ```
 
-The fallback URL is `https://glowbaby-site.vercel.app`. Update the environment
-variable if Vercel assigns a different project URL or a custom domain is added.
-
-## What was reused from the Panama site
-
-The architecture carries forward the strongest general patterns:
-
-- static server rendering and a small client footprint;
-- content passed into reusable presentational sections;
-- product data behind a local content boundary;
-- Vercel Analytics and Speed Insights;
-- metadata, sitemap, robots, JSON-LD, and generated social imagery;
-- security headers and public AI-discovery documents.
-
-Travel-specific systems were intentionally not copied: Supabase administration,
-localization, cron jobs, inquiries, staff roles, concierge AI, WebMCP, and remote
-MCP. They solve real needs in the Panama site but would be premature complexity
-for an early-stage product page.
+The fallback is `https://glowbaby-site.vercel.app`. Set the production URL before
+deployment so canonical links, discovery URLs, and the sitemap share the correct
+origin.

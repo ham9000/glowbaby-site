@@ -13,6 +13,7 @@ export function GET() {
         url: `${siteConfig.url}/products/${product.slug}`,
         description: product.description,
         status: product.status,
+        statusDetail: product.statusDetail,
         platformParts: product.platformParts.map(({ title, description }) => ({
           title,
           description,
@@ -29,6 +30,8 @@ export function GET() {
         availabilityPublished: false,
         certificationsPublished: false,
         launchDatePublished: false,
+        compatibilityGuaranteed: false,
+        replacesRequiredLightsOrReflectors: false,
       },
     },
     {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
 import { ProductVisual } from "@/components/product-visual";
-import type { Product } from "@/content/site";
+import { siteConfig, type Product } from "@/content/site";
 
 export function HeroSection({ product }: { product: Product }) {
   return (
@@ -10,7 +10,7 @@ export function HeroSection({ product }: { product: Product }) {
       <div className="hero-blob hero-blob-two" />
       <Container className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
         <div className="relative z-10 max-w-2xl py-6 lg:py-14">
-          <p className="eyebrow">{product.eyebrow}</p>
+          <p className="eyebrow leading-relaxed">{product.eyebrow}</p>
           <h1 className="mt-5 font-display text-[clamp(3.5rem,7vw,6.5rem)] text-ink">
             <span className="block whitespace-nowrap">Made to be</span>
             <span className="block whitespace-nowrap text-coral">seen.</span>
@@ -20,26 +20,34 @@ export function HeroSection({ product }: { product: Product }) {
           <p className="mt-8 max-w-xl text-pretty text-lg leading-8 text-ink/70">
             {product.description}
           </p>
+          <p className="mt-4 text-sm font-semibold text-ink/70">
+            {product.status} · Not yet available to buy
+          </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href={`/products/${product.slug}`} className="button button-dark">
-              Explore Glowbaby
+            <Link href="#how-it-works" className="button button-dark">
+              See how it works
               <span aria-hidden="true">→</span>
             </Link>
-            <Link href="#approach" className="button button-light">
-              See how it works
+            <Link
+              href={siteConfig.githubUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="button button-light"
+            >
+              Follow the build <span aria-hidden="true">↗</span>
             </Link>
           </div>
         </div>
-        <div className="relative min-h-[510px] sm:min-h-[640px] lg:min-h-[720px]">
+        <div className="relative aspect-[1.05] w-full">
           <ProductVisual />
         </div>
       </Container>
       <Container className="relative mt-6">
         <div className="grid gap-px overflow-hidden rounded-[1.75rem] border border-ink/10 bg-ink/10 sm:grid-cols-3">
           {[
-            ["Flexible LED light", "Designed to adapt to family gear"],
+            ["Under-stroller lighting", "Light shines outward, around, and down"],
             ["App-controlled", "Colors, animations, and modes"],
-            ["Expandable platform", "One ecosystem, more ways to glow"],
+            ["External USB-C power", "Connected through a compact controller"],
           ].map(([title, detail]) => (
             <div key={title} className="bg-cream/90 px-6 py-5 backdrop-blur">
               <p className="text-sm font-bold text-ink">{title}</p>

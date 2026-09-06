@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
+import { StrollerGraphic } from "@/components/stroller-graphic";
 
-export const alt = "Glowbaby — Made to be seen. Built to be theirs.";
+export const alt =
+  "Glowbaby Stroller Light — app-controlled stroller lighting. Concept illustration of a bottom-mounted light casting a soft glow outward, around, and down beneath a stroller, with a separate controller; in development.";
 export const size = {
   width: 1200,
   height: 630,
@@ -19,88 +21,106 @@ export default function OpenGraphImage() {
           height: "100%",
           justifyContent: "space-between",
           overflow: "hidden",
-          padding: "72px 80px",
+          padding: "58px 64px",
           position: "relative",
           width: "100%",
         }}
       >
         <div
           style={{
-            background: "#e3dcff",
+            background: "#eeeafd",
             borderRadius: "999px",
             display: "flex",
-            height: "520px",
+            height: "640px",
             position: "absolute",
-            right: "-70px",
-            top: "-60px",
-            width: "520px",
+            right: "-110px",
+            top: "-50px",
+            width: "640px",
           }}
         />
-        <div style={{ display: "flex", flexDirection: "column", maxWidth: "720px", zIndex: 2 }}>
-          <div style={{ display: "flex", fontSize: "28px", fontWeight: 700 }}>
-            Glowbaby
+        <div style={{ display: "flex", flexDirection: "column", width: "490px" }}>
+          <div
+            style={{
+              color: "#5a0fea",
+              display: "flex",
+              fontSize: "18px",
+              fontWeight: 700,
+              letterSpacing: "1px",
+            }}
+          >
+            APP-CONTROLLED STROLLER LIGHTING
           </div>
           <div
             style={{
               display: "flex",
               fontFamily: "sans-serif",
-              fontWeight: 600,
-              fontSize: "94px",
-              letterSpacing: "-3px",
-              lineHeight: 1.02,
-              marginTop: "52px",
+              fontWeight: 700,
+              fontSize: "76px",
+              letterSpacing: "-3.5px",
+              lineHeight: 1.04,
+              marginTop: "28px",
             }}
           >
-            Made to be seen. Built to be theirs.
+            Glowbaby Stroller Light
           </div>
-          <div style={{ display: "flex", fontSize: "22px", marginTop: "38px", opacity: 0.6 }}>
-            Modular, app-controlled lighting for family gear.
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize: "30px",
+              lineHeight: 1.25,
+              marginTop: "30px",
+            }}
+          >
+            <span>Made to be seen.</span>
+            <span>Built to be theirs.</span>
+          </div>
+          <div style={{ color: "#5d5667", display: "flex", fontSize: "22px", marginTop: "22px" }}>
+            For strollers and wagons.
+          </div>
+          <div
+            style={{
+              alignSelf: "flex-start",
+              background: "#f5b4a4",
+              borderRadius: "100px",
+              display: "flex",
+              fontSize: "17px",
+              fontWeight: 700,
+              marginTop: "24px",
+              padding: "10px 18px",
+            }}
+          >
+            In development
           </div>
         </div>
         <div
           style={{
             alignItems: "center",
-            background: "linear-gradient(145deg, #fffdf8, #c5ccc7)",
-            borderRadius: "58% 52% 22% 20% / 62% 57% 36% 28%",
-            boxShadow: "0 30px 60px rgba(28,41,35,.18)",
+            background: "linear-gradient(145deg, #252035, #141218 60%, #35176c)",
+            borderRadius: "180px 210px 120px 160px",
+            boxShadow: "0 24px 55px rgba(28,16,49,.16)",
             display: "flex",
-            height: "250px",
+            flexDirection: "column",
+            height: "466px",
             justifyContent: "center",
             position: "relative",
-            width: "340px",
-            zIndex: 3,
+            width: "526px",
           }}
         >
+          {StrollerGraphic({ width: 526, height: 427 })}
           <div
             style={{
-              alignItems: "center",
-              background: "#141218",
-              borderRadius: "999px",
-              bottom: "34px",
+              bottom: "23px",
+              color: "#e5dcfb",
               display: "flex",
-              gap: "13px",
-              height: "34px",
+              fontSize: "14px",
               justifyContent: "center",
-              left: "22px",
-              position: "relative",
-              width: "295px",
+              left: 0,
+              position: "absolute",
+              width: "100%",
             }}
           >
-            {["#45d4df", "#7657e8", "#ef8168", "#b5e85c", "#45d4df", "#7657e8", "#ef8168"].map(
-              (color, index) => (
-                <span
-                  key={`${color}-${index}`}
-                  style={{
-                    background: color,
-                    borderRadius: "999px",
-                    boxShadow: `0 0 12px ${color}`,
-                    display: "flex",
-                    height: "12px",
-                    width: "12px",
-                  }}
-                />
-              ),
-            )}
+            Bottom-mounted light + controller concept
           </div>
         </div>
       </div>
