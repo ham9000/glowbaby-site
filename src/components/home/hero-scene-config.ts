@@ -140,5 +140,5 @@ export const heroSceneConfig = {
   },
   // Low three-quarter detail framing; product dimensions and mounting stay unchanged.
   camera: { position: [0.48, 0.235, 0.56] as [number, number, number], target: [0, 0.12, 0.065] as [number, number, number], fov: 38 },
-  interaction: { yaw: Math.PI / 24, pitch: Math.PI / 90, damping: 5, returnDamping: 3, dragSensitivity: 2, touchHoldMs: 160, touchSlop: 8 },
+  interaction: { yaw: Math.PI / 24, pitch: Math.PI / 90, damping: 5, returnDamping: 3, dragSensitivity: 2 },
 };

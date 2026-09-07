@@ -144,6 +144,7 @@ function componentHarness(options = {}) {
   const host = {};
   const width = Object.assign(new Events(), { matches: options.desktop ?? true });
   const motion = Object.assign(new Events(), { matches: options.reducedMotion ?? false });
+  const coarse = Object.assign(new Events(), { matches: options.coarse ?? false });
   const connection = Object.assign(new Events(), { saveData: options.saveData, effectiveType: options.effectiveType });
   const record = { delivery: 0, engine: 0, probe: 0, disposed: 0, active: [], modes: [], order: [], signal: null };
   const document = Object.assign(new Events(), {
@@ -198,7 +199,7 @@ function componentHarness(options = {}) {
   }, {
     isSecureContext: options.secure ?? true, crypto: options.crypto ?? webcrypto, document,
     navigator: { connection, deviceMemory: options.memory ?? 8 },
-    matchMedia: (query) => query.includes("min-width") ? width : motion,
+    matchMedia: (query) => query.includes("min-width") ? width : query.includes("pointer: coarse") ? coarse : motion,
     ResizeObserver: class {},
     IntersectionObserver: class {
       constructor(callback) { observer = callback; }
@@ -220,7 +221,7 @@ function componentHarness(options = {}) {
   };
   render();
   return {
-    record, document, width, motion, connection, render, find,
+    record, document, width, motion, coarse, connection, render, find,
     visible(value = true) { observer?.([{ isIntersecting: value }]); },
     imageLoaded() { find((node) => node.type === "image").props.onLoad(); },
     toggle3D() {
@@ -238,6 +239,12 @@ await flush();
 assert.equal(desktop.record.probe, 0, "Poster LCP must precede even the capability probe");
 assert.equal(desktop.record.delivery, 0);
 assert.ok(lightModes.some(({ id }) => desktop.find((node) => node.type === "image").props.src === `${id}-poster`));
+assert.equal(desktop.find((node) => node.type === "image").props.draggable, false, "The poster must not start native image dragging");
+const viewport = desktop.find((node) => node.props.className === "interactive-hero-stage");
+let contextMenuPrevented = false;
+viewport.props.onContextMenu({ preventDefault() { contextMenuPrevented = true; } });
+assert.equal(contextMenuPrevented, true, "Viewport long presses must not open a native context menu");
+assert.equal(desktop.find((node) => node.props.className === "interactive-hero").props.onContextMenu, undefined, "Selection protection must not include the controls or caption");
 desktop.imageLoaded();
 await flush();
 desktop.render();
@@ -284,6 +291,20 @@ mobile.visible(false); mobile.visible(true);
 await flush();
 assert.equal(mobile.record.delivery, 1, "Explicit image selection suppresses automatic re-entry");
 mobile.unmount();
+
+const wideTouch = componentHarness({ sceneAvailable: true, desktop: true, coarse: true });
+wideTouch.visible(); wideTouch.imageLoaded();
+await flush();
+assert.equal(wideTouch.record.delivery, 0, "Touch devices must opt into inspection even at desktop widths");
+assert.equal(wideTouch.record.engine, 0);
+wideTouch.toggle3D();
+await flush();
+assert.equal(wideTouch.record.delivery, 1);
+wideTouch.coarse.matches = false; wideTouch.coarse.emit("change");
+wideTouch.coarse.matches = true; wideTouch.coarse.emit("change");
+assert.equal(wideTouch.record.disposed, 0, "Explicit inspection persists across input-device changes");
+wideTouch.unmount();
+assert.ok([...wideTouch.coarse.listeners.values()].every((listeners) => listeners.size === 0));
 
 for (const gates of [
   {}, { sceneAvailable: false }, { reducedMotion: true }, { saveData: true }, { effectiveType: "2g" },
@@ -348,7 +369,6 @@ const canvas = Object.assign(new Events(), {
   hasPointerCapture(id) { return this.captures.has(id); },
   releasePointerCapture(id) { this.captures.delete(id); },
 });
-const timers = new Set();
 const pointer = evaluate(`
   let active = true, disposed = false, removeListeners = () => {};
   const lost = () => {};
@@ -359,8 +379,6 @@ const pointer = evaluate(`
 `, {}, {
   canvas, config,
   THREE: { MathUtils: { clamp: (value, min, max) => Math.min(max, Math.max(min, value)) } },
-  setTimeout(callback, time) { assert.equal(time, 160); timers.add(callback); return callback; },
-  clearTimeout(callback) { timers.delete(callback); },
 });
 const emit = (name, properties = {}) => canvas.emit(name, {
   isPrimary: true, pointerId: 1, pointerType: "mouse", button: 0, buttons: 1, clientX: 100, clientY: 100, ...properties,
@@ -394,23 +412,18 @@ emit("pointerdown");
 emit("pointermove", { buttons: 0 });
 assert.equal(pointer.state().pointerId, null);
 emit("pointerdown", { pointerType: "touch" });
-assert.equal(pointer.state().dragging, false);
-assert.equal(canvas.captures.size, 0);
+assert.equal(pointer.state().dragging, true, "Touch inspection starts immediately, without a hold");
+assert.equal(canvas.hasPointerCapture(1), true);
 emit("pointermove", { pointerType: "touch", clientY: 120 });
-assert.equal(pointer.state().pointerId, null, "A scroll before the hold threshold must not capture");
-assert.equal(timers.size, 0);
-emit("pointerdown", { pointerType: "touch" });
-for (const timer of [...timers]) { timers.delete(timer); timer(); }
-assert.equal(pointer.state().dragging, true);
+assert.equal(pointer.state().targetX, 0.08, "Vertical drags inspect instead of scrolling");
 emit("pointermove", { pointerType: "touch", clientX: 200 });
 assert.equal(pointer.state().targetY, 0.4);
 emit("pointercancel", { pointerType: "touch" });
 assert.equal(pointer.state().targetY, 0);
 assert.equal(canvas.captures.size, 0);
-assert.equal(canvas.style.touchAction, "pan-y");
+assert.equal(canvas.style.touchAction, "pinch-zoom", "Reserve single-finger inspection without disabling native pinch zoom");
 emit("pointerdown", { pointerType: "touch" });
 pointer.cleanup();
-assert.equal(timers.size, 0);
 assert.equal(canvas.captures.size, 0);
 assert.ok([...canvas.listeners.values()].every((listeners) => listeners.size === 0));
 assert.equal(config.interaction.yaw, Math.PI / 24);
@@ -421,4 +434,4 @@ assert.ok(Math.exp(-config.interaction.returnDamping) < 0.05, "The camera return
 assert.match(sceneSource, /const damping = dragging \? config\.interaction\.damping : config\.interaction\.returnDamping/);
 assert.match(sceneSource, /loader\.parseAsync\(buffer, ""\)/);
 assert.doesNotMatch(compile(sceneSource), /require\([^)]*hero-asset/);
-console.log("Hero interaction: held-pointer only, limits, re-grab continuity, secondary pointers, touch hold/scroll, capture cleanup and slow return passed.");
+console.log("Hero interaction: immediate two-axis dragging, limits, re-grab continuity, secondary pointers, pinch-zoom policy, capture cleanup and slow return passed.");

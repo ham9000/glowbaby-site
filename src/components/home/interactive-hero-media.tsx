@@ -31,6 +31,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
     if (!element || typeof IntersectionObserver === "undefined") return;
     const width = matchMedia(`(min-width: ${heroSceneConfig.minWidth}px)`);
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
+    const coarse = matchMedia("(pointer: coarse)");
     const device = navigator as Navigator & { connection?: Connection; deviceMemory?: number };
     let generation = 0;
     let visible = false;
@@ -45,7 +46,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       typeof ResizeObserver !== "undefined" && !motion.matches && !device.connection?.saveData &&
       !["slow-2g", "2g"].includes(device.connection?.effectiveType ?? "") &&
       (device.deviceMemory === undefined || device.deviceMemory >= 4);
-    const eligible = () => capable() && (width.matches || optedIn) && !imageOnly;
+    const eligible = () => capable() && ((width.matches && !coarse.matches) || optedIn) && !imageOnly;
     const stop = (next: SceneStatus = "image") => {
       generation++;
       loading = false;
@@ -116,6 +117,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
     observer.observe(element);
     width.addEventListener("change", update);
     motion.addEventListener("change", update);
+    coarse.addEventListener("change", update);
     device.connection?.addEventListener("change", update);
     document.addEventListener("visibilitychange", update);
     return () => {
@@ -124,6 +126,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       observer.disconnect();
       width.removeEventListener("change", update);
       motion.removeEventListener("change", update);
+      coarse.removeEventListener("change", update);
       device.connection?.removeEventListener("change", update);
       document.removeEventListener("visibilitychange", update);
       stop();
@@ -132,13 +135,13 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
 
   return (
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
-      <div className="interactive-hero-stage" style={{ backgroundColor: heroSceneConfig.environment.background }}>
-        <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 562px, (min-width: 1024px) calc((100vw - 7rem) / 2), (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2.5rem)" className="object-contain" onLoad={() => {
+      <div className="interactive-hero-stage" style={{ backgroundColor: heroSceneConfig.environment.background }} onContextMenu={(event) => event.preventDefault()}>
+        <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 562px, (min-width: 1024px) calc((100vw - 7rem) / 2), (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2.5rem)" className="object-contain" onLoad={() => {
           posterLoaded.current = true;
           void controls.current?.refresh();
         }} />
         <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
-        <span className="interactive-hero-badge">{ready ? "Press, hold & drag gently" : "Made for a little more color"}</span>
+        <span className="interactive-hero-badge">{ready ? "Drag to explore" : "Made for a little more color"}</span>
       </div>
       <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">
         {lightModes.map((item) => (
@@ -155,7 +158,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       </div>
       <figcaption className="hero-media-caption">
         <span aria-live="polite">{lightModes.find((item) => item.id === mode)?.description}</span>
-        <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Toggle 3D to try again." : "App-controlled light · Prototype concept"}</span>
+        <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Toggle 3D to try again." : ready ? "Drag to explore · Scroll outside the view" : "App-controlled light · Prototype concept"}</span>
       </figcaption>
     </figure>
   );

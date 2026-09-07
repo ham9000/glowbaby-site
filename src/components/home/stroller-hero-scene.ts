@@ -441,9 +441,9 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     let targetX = 0, targetY = 0, pitch = 0, yaw = 0;
     let pointerId: number | null = null;
     let dragging = false;
-    let holdTimer: ReturnType<typeof setTimeout> | undefined;
     let startX = 0, startY = 0, startTargetX = 0, startTargetY = 0;
-    canvas.style.touchAction = "pan-y";
+    // Inspection owns one-finger drags; native page pinch zoom remains available.
+    canvas.style.touchAction = "pinch-zoom";
     const resize = () => {
       const rect = host.getBoundingClientRect();
       const width = Math.max(rect.width, 1), height = Math.max(rect.height, 1);
@@ -454,10 +454,6 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const move = (event: PointerEvent) => {
       if (!active || !event.isPrimary || event.pointerId !== pointerId) return;
       if (event.pointerType !== "touch" && (event.buttons & 1) === 0) { reset(); return; }
-      if (!dragging) {
-        if (Math.hypot(event.clientX - startX, event.clientY - startY) > config.interaction.touchSlop) reset();
-        return;
-      }
       const rect = canvas.getBoundingClientRect();
       const width = Math.max(rect.width, 1), height = Math.max(rect.height, 1);
       targetY = THREE.MathUtils.clamp(startTargetY + (event.clientX - startX) / width * config.interaction.dragSensitivity, -1, 1);
@@ -476,12 +472,9 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       pointerId = event.pointerId;
       startX = event.clientX;
       startY = event.clientY;
-      if (event.pointerType === "touch") holdTimer = setTimeout(beginDrag, config.interaction.touchHoldMs);
-      else beginDrag();
+      beginDrag();
     };
     const reset = () => {
-      clearTimeout(holdTimer);
-      holdTimer = undefined;
       const captured = pointerId;
       pointerId = null;
       dragging = false;
