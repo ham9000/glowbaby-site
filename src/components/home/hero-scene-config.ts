@@ -8,7 +8,7 @@ export const lightModes: { id: LightMode; label: string; description: string }[]
 
 // Meter units. Keep source models untouched; tune the assembly here.
 export const heroSceneConfig = {
-  // Enable only after the body files, licensed delivery model, and matching posters exist.
+  // Actual body assets and matching renders are ready. Public stroller WebGL rights remain unresolved.
   assetsReady: false,
   models: {
     stroller: "/models/hero/stroller.glb",
@@ -19,15 +19,15 @@ export const heroSceneConfig = {
   maxDpr: 1.5,
   strollerHeight: 0.962,
   assembly: {
-    position: [0, 0.17, 0.025] as [number, number, number],
+    position: [0, 0.095, 0.065] as [number, number, number],
     rotation: [0, 0, 0] as [number, number, number],
     scale: 1,
     topOffset: 0.025,
   },
   channel: {
-    radiusX: 0.085,
-    radiusZ: 0.067,
-    y: 0.008,
+    radiusX: 0.094,
+    radiusZ: 0.075,
+    y: 0.012,
     width: 0.01508,
     height: 0.0127,
     profileScale: 1,
@@ -37,6 +37,6 @@ export const heroSceneConfig = {
   lightIntensity: 0.65,
   // Comparable glow treatment: a soft additive ground spill, without a full-screen bloom pass.
   spillOpacity: 0.24,
-  camera: { position: [1.15, 0.67, 1.65] as [number, number, number], target: [0, 0.43, 0] as [number, number, number], fov: 35 },
+  camera: { position: [1.45, 0.59, 1.4] as [number, number, number], target: [0, 0.43, 0] as [number, number, number], fov: 35 },
   interaction: { yaw: Math.PI / 18, pitch: Math.PI / 45, damping: 5 },
 };

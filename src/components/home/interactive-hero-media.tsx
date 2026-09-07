@@ -88,7 +88,7 @@ export function InteractiveHeroMedia() {
   return (
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
       <div className="interactive-hero-stage">
-        <Image src={`/hero/stroller-${mode}.webp`} alt="Stroller concept fitted with a Glowbaby undercarriage light, illuminating the ground below." fill priority sizes="(min-width: 1024px) 48vw, 100vw" className="object-contain" />
+        <Image src={`/hero/stroller-render-${mode}.webp`} alt="3D rendering of a stroller fitted with the Glowbaby prototype beneath its basket, illuminating the ground below." fill priority sizes="(min-width: 1024px) 48vw, 100vw" className="object-contain" />
         <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
         <span className="interactive-hero-badge">{ready ? "Drag gently to explore" : "Made for a little more color"}</span>
       </div>

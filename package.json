@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "validate": "npm run typecheck && npm run lint && npm run build",
     "hero:posters": "node scripts/hero-poster.mjs",
+    "hero:preview": "node scripts/preview-hero.mjs",
     "hero:check": "node scripts/check-hero-channel.mjs"
   },
   "dependencies": {

@@ -32,6 +32,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#eeeafd");
+  scene.fog = new THREE.Fog("#eeeafd", 2.3, 7);
   const camera = new THREE.PerspectiveCamera(config.camera.fov, 1, 0.05, 12);
   camera.position.fromArray(config.camera.position);
   camera.lookAt(...config.camera.target);
@@ -88,6 +89,13 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     });
   }
   assembly.add(bottom, top);
+  // Two restrained prototype attachment bands; these do not specify final hardware.
+  const bandGeometry = new THREE.BoxGeometry(0.018, 0.003, 0.112);
+  for (const x of [-0.046, 0.046]) {
+    const band = new THREE.Mesh(bandGeometry, topMaterial);
+    band.position.set(x, 0.0315, 0);
+    assembly.add(band);
+  }
   const lightMaterial = createLightMaterial();
   const inner = new THREE.Mesh(createChannelGeometry(true), lightMaterial);
   const diffuser = new THREE.Mesh(createChannelGeometry(), new THREE.MeshPhysicalMaterial({
