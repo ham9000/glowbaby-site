@@ -136,6 +136,11 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
 
   return (
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
+      <svg className="interactive-hero-clip" aria-hidden="true">
+        <clipPath id="interactive-hero-window" clipPathUnits="objectBoundingBox">
+          <path d="M0 .067 Q0 0 .06 0 H.8067 Q.8667 0 .8667 .067 H1 V1 H0 Z" />
+        </clipPath>
+      </svg>
       <div className="interactive-hero-stage" onContextMenu={(event) => event.preventDefault()}>
         <div className="interactive-hero-render">
           <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className={`interactive-hero-poster object-contain ${ready ? "is-hidden" : ""}`} onLoad={() => {
