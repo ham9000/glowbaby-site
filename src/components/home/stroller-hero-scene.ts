@@ -385,10 +385,11 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
           vec2 p = vUv - 0.5;
           float radius = length(p);
           float angle = atan(-p.y, p.x) / 6.2831853;
-          vec3 color = lightColor(angle, time, mode);
+          vec3 color = spillLightColor(angle, time, mode);
           float a = exp(-dot(p, p) * falloff) * (1.0 - smoothstep(edge.x, edge.y, radius));
           a *= mix(centerStrength, 1.0, smoothstep(0.0, centerRadius, radius));
           if (mode > 0.5 && mode < 1.5) color = mix(centerColor, color, smoothstep(0.0, centerBlendRadius, radius));
+          if (mode < 0.5) color = mix(holidayColor(0.5), color, smoothstep(0.0, centerBlendRadius, radius));
           gl_FragColor = vec4(color * brightness * sidewalkSurface(vSidewalkWorld.xz).x, a * strength);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -509,7 +510,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const setMode = (next: LightMode) => {
       if (disposed) return;
       mode = next;
-      lightMaterial.uniforms.mode.value = { glow: 0, flow: 1, visibility: 2 }[next];
+      lightMaterial.uniforms.mode.value = { holiday: 0, flow: 1, visibility: 2 }[next];
       for (const { angle, light } of glowSamples) sampleLightColor(light.color, angle, elapsed, mode);
     };
     const updateLighting = (activation: number) => {

@@ -1,19 +1,38 @@
 import * as THREE from "three";
 import { heroSceneConfig, type LightMode } from "./hero-scene-config";
 
+const holiday = heroSceneConfig.holiday;
 // Shared angular palette keeps the diffuser and its surrounding light in phase.
 export const lightPaletteGLSL = `
+  vec3 holidayColor(float stripe) {
+    return mix(vec3(${holiday.red.map(value => value.toFixed(6)).join(", ")}), vec3(${holiday.white.map(value => value.toFixed(6)).join(", ")}), stripe);
+  }
+  vec3 holidayBands(float phase, float softness) {
+    return holidayColor(smoothstep(-softness, softness, sin(6.2831853 * phase * ${holiday.stripes.toFixed(1)})));
+  }
   vec3 lightColor(float angle, float time, float mode) {
     if (mode > 1.5) return vec3(1.0, 0.52, 0.12);
-    if (mode < 0.5) return vec3(0.63, 0.35, 1.0);
-    return 0.5 + 0.5 * cos(6.2831853 * (angle - time * 0.055 + vec3(0.0, 0.33, 0.67)));
+    float phase = angle - time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)};
+    if (mode < 0.5) return holidayBands(phase, ${holiday.softness.toFixed(6)});
+    return 0.5 + 0.5 * cos(6.2831853 * (phase + vec3(0.0, 0.33, 0.67)));
+  }
+  vec3 spillLightColor(float angle, float time, float mode) {
+    if (mode < 0.5) return holidayBands(angle - time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)}, ${holiday.spillSoftness.toFixed(6)});
+    return lightColor(angle, time, mode);
   }
 `;
 
 export function sampleLightColor(target: THREE.Color, angle: number, time: number, mode: LightMode) {
   if (mode === "visibility") return target.setRGB(1, 0.52, 0.12);
-  if (mode === "glow") return target.setRGB(0.63, 0.35, 1);
-  const phase = angle - time * 0.055;
+  const phase = angle - time * heroSceneConfig.colorRotationSpeed;
+  if (mode === "holiday") {
+    const stripe = THREE.MathUtils.smoothstep(Math.sin(Math.PI * 2 * phase * holiday.stripes), -holiday.softness, holiday.softness);
+    return target.setRGB(
+      THREE.MathUtils.lerp(holiday.red[0], holiday.white[0], stripe),
+      THREE.MathUtils.lerp(holiday.red[1], holiday.white[1], stripe),
+      THREE.MathUtils.lerp(holiday.red[2], holiday.white[2], stripe),
+    );
+  }
   return target.setRGB(
     0.5 + 0.5 * Math.cos(Math.PI * 2 * phase),
     0.5 + 0.5 * Math.cos(Math.PI * 2 * (phase + 0.33)),
@@ -92,7 +111,10 @@ export function createLightMaterial() {
         float pulse = exp(-distanceToPulse * distanceToPulse * pulseSharpness);
         float level = mix(idleLevel + pulse * pulseIntensity, 1.0, smoothstep(settleStart, 1.0, activation));
         gl_FragColor = vec4(color * (emissionBase + level * brightness), 1.0);
-        #include <tonemapping_fragment>
+        // Keep candy-cane red saturated rather than tone-mapping it toward orange.
+        if (mode > 0.5) {
+          #include <tonemapping_fragment>
+        }
         #include <colorspace_fragment>
       }`,
   });

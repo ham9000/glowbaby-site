@@ -28,7 +28,7 @@ function evaluate(source, dependencies = {}, globals = {}) {
   return compiledModule.exports;
 }
 const format = evaluate(formatSource);
-const { heroSceneConfig: config } = evaluate(configSource);
+const { heroSceneConfig: config, lightModes } = evaluate(configSource);
 const glbJson = new TextEncoder().encode('{"asset":{"version":"2.0"}}  ');
 const paddedJson = new Uint8Array(Math.ceil(glbJson.length / 4) * 4).fill(32);
 paddedJson.set(glbJson);
@@ -175,9 +175,9 @@ function componentHarness(options = {}) {
     },
     "next/image": { default: "image" },
     "./hero-scene-config": evaluate(configSource),
-    "../../../public/hero/stroller-render-flow.webp": { default: "flow-poster" },
-    "../../../public/hero/stroller-render-glow.webp": { default: "glow-poster" },
-    "../../../public/hero/stroller-render-visibility.webp": { default: "visibility-poster" },
+    ...Object.fromEntries(Array.from(lightModes, ({ id }) => [
+      `../../../public/hero/stroller-render-${id}.webp`, { default: `${id}-poster` },
+    ])),
     "../../lib/hero-asset-client": { async loadHeroModels(signal) {
       record.delivery++; record.signal = signal; record.order.push("delivery");
       if (options.load) await options.load(signal, record.delivery);
@@ -223,10 +223,10 @@ function componentHarness(options = {}) {
     record, document, width, motion, connection, render, find,
     visible(value = true) { observer?.([{ isIntersecting: value }]); },
     imageLoaded() { find((node) => node.type === "image").props.onLoad(); },
-    click(text) {
+    toggle3D() {
       render();
-      const button = find((node) => node.type === "button" && node.props.children === text);
-      assert.ok(button, `Expected button: ${text}`);
+      const button = find((node) => node.props.role === "switch");
+      assert.ok(button, "Expected the compact 3D switch");
       button.props.onClick();
     },
     unmount() { cleanup?.(); },
@@ -237,12 +237,24 @@ desktop.visible();
 await flush();
 assert.equal(desktop.record.probe, 0, "Poster LCP must precede even the capability probe");
 assert.equal(desktop.record.delivery, 0);
-assert.equal(desktop.find((node) => node.type === "image").props.src, "flow-poster");
+assert.ok(lightModes.some(({ id }) => desktop.find((node) => node.type === "image").props.src === `${id}-poster`));
 desktop.imageLoaded();
 await flush();
 desktop.render();
 assert.deepEqual(desktop.record.order, ["delivery", "decrypted", "engine"]);
-assert.ok(desktop.find((node) => node.type === "button" && node.props.children === "Return to image").props["aria-pressed"]);
+assert.ok(desktop.find((node) => node.props.role === "switch").props["aria-checked"]);
+const modeGroup = desktop.find((node) => node.props.className === "hero-mode-controls");
+const modeButtons = modeGroup.props.children.flat().filter((node) => node?.props?.["aria-pressed"] !== undefined);
+assert.deepEqual(Array.from(modeButtons, (node) => node.props.children.at(-1)), Array.from(lightModes, (item) => item.label));
+assert.ok(modeGroup.props.children.flat().some((node) => node?.props?.role === "switch"), "3D belongs beside the modes");
+assert.equal(desktop.find((node) => node.props.className === "interactive-hero-stage").props.children.flat().some((node) => node?.type === "button"), false);
+for (const [index, item] of lightModes.entries()) {
+  modeButtons[index].props.onClick();
+  desktop.render();
+  assert.equal(desktop.record.modes.at(-1), item.id, "Mode selection reaches the live scene");
+  assert.equal(desktop.find((node) => node.type === "image").props.src, `${item.id}-poster`, "Every mode has the matching fallback");
+  assert.equal(desktop.find((node) => node.props["aria-live"] === "polite").props.children, item.description);
+}
 desktop.document.hidden = true;
 desktop.document.emit("visibilitychange");
 assert.equal(desktop.record.active.at(-1), false);
@@ -261,10 +273,10 @@ mobile.visible(); mobile.imageLoaded();
 await flush();
 assert.equal(mobile.record.delivery, 0);
 assert.equal(mobile.record.engine, 0);
-mobile.click("Explore in 3D");
+mobile.toggle3D();
 await flush();
 assert.equal(mobile.record.delivery, 1);
-mobile.click("Return to image");
+mobile.toggle3D();
 assert.equal(mobile.record.signal.aborted, true);
 assert.equal(mobile.record.disposed, 1);
 mobile.width.matches = true; mobile.width.emit("change");
@@ -283,7 +295,7 @@ for (const gates of [
   fallback.render();
   assert.equal(fallback.record.delivery, 0);
   assert.equal(fallback.record.engine, 0);
-  assert.equal(fallback.find((node) => node.type === "button" && node.props.children === "Explore in 3D"), undefined);
+  assert.equal(fallback.find((node) => node.props.role === "switch"), undefined);
   fallback.unmount();
 }
 const retry = componentHarness({ sceneAvailable: true, load(_signal, attempt) { if (attempt === 1) throw new Error("Denied"); } });
@@ -292,12 +304,12 @@ await flush();
 assert.equal(retry.record.engine, 0, "Access failure must not download Three");
 retry.render();
 assert.match(retry.find((node) => node.props.role === "status").props.children, /couldn’t load/);
-retry.click("Retry 3D");
+retry.toggle3D();
 await flush();
 assert.equal(retry.record.engine, 1);
 retry.record.fail();
 retry.render();
-assert.ok(retry.find((node) => node.type === "button" && node.props.children === "Retry 3D"));
+assert.equal(retry.find((node) => node.props.role === "switch").props["aria-checked"], false);
 retry.unmount();
 
 for (const reason of ["cancel", "unmount", "motion", "hidden"]) {
@@ -305,7 +317,7 @@ for (const reason of ["cancel", "unmount", "motion", "hidden"]) {
   const pending = componentHarness({ sceneAvailable: true, load: () => new Promise((resolve) => { release = resolve; }) });
   pending.visible(); pending.imageLoaded();
   await flush();
-  if (reason === "cancel") pending.click("Cancel 3D loading");
+  if (reason === "cancel") pending.toggle3D();
   if (reason === "unmount") pending.unmount();
   if (reason === "motion") { pending.motion.matches = true; pending.motion.emit("change"); }
   if (reason === "hidden") { pending.document.hidden = true; pending.document.emit("visibilitychange"); }
@@ -319,7 +331,7 @@ let releaseScene;
 const lateScene = componentHarness({ sceneAvailable: true, create: () => new Promise((resolve) => { releaseScene = resolve; }) });
 lateScene.visible(); lateScene.imageLoaded();
 await flush();
-lateScene.click("Cancel 3D loading");
+lateScene.toggle3D();
 releaseScene();
 await flush();
 assert.equal(lateScene.record.disposed, 1, "A scene resolving after cancellation must be disposed");

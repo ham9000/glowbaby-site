@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import assert from "node:assert/strict";
 import ts from "typescript";
+import { Color } from "three";
 
 await fs.mkdir(".local-assets/channel-check", { recursive: true });
 for (const name of ["hero-scene-config", "glowbaby-channel"]) {
@@ -8,10 +9,28 @@ for (const name of ["hero-scene-config", "glowbaby-channel"]) {
   const output = ts.transpileModule(input, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText.replace('"./hero-scene-config"', '"./hero-scene-config.mjs"');
   await fs.writeFile(`.local-assets/channel-check/${name}.mjs`, output);
 }
-const { createChannelGeometry, createLightMaterial } = await import("../.local-assets/channel-check/glowbaby-channel.mjs");
+const { createChannelGeometry, createLightMaterial, sampleLightColor, lightPaletteGLSL } = await import("../.local-assets/channel-check/glowbaby-channel.mjs");
 const { heroSceneConfig } = await import("../.local-assets/channel-check/hero-scene-config.mjs");
 const c = heroSceneConfig.channel;
 const material = createLightMaterial();
+const holiday = heroSceneConfig.holiday;
+for (let stripe = 0; stripe < holiday.stripes; stripe++) {
+  for (const [offset, color] of [[0.25, holiday.white], [0.75, holiday.red]]) {
+    const sampled = sampleLightColor(new Color(), (stripe + offset) / holiday.stripes, 0, "holiday");
+    assert.deepEqual(sampled.toArray(), color, "Candy-cane bands alternate between the configured colors");
+    const revolution = 1 / heroSceneConfig.colorRotationSpeed;
+    assert.deepEqual(sampleLightColor(new Color(), (stripe + offset) / holiday.stripes, revolution, "holiday").toArray(), color, "Holiday bands complete a full rotation");
+    const opposite = offset === 0.25 ? holiday.red : holiday.white;
+    assert.deepEqual(sampleLightColor(new Color(), (stripe + offset) / holiday.stripes, revolution / (holiday.stripes * 2), "holiday").toArray(), opposite, "Red and white bands rotate past a fixed point");
+  }
+}
+const seamStart = sampleLightColor(new Color(), 0, 0, "holiday");
+const seamEnd = sampleLightColor(new Color(), 1, 0, "holiday");
+assert.ok(seamStart.toArray().every((value, index) => Math.abs(value - seamEnd.toArray()[index]) < 1e-10), "Holiday palette closes around the ring");
+for (const color of [...holiday.red, ...holiday.white]) assert.ok(lightPaletteGLSL.includes(color.toFixed(6)), "GPU and CPU use the same holiday colors");
+assert.doesNotMatch(material.fragmentShader, /vUv\.y/, "Color divisions stay straight across the diffuser profile");
+assert.ok(holiday.spillSoftness > holiday.softness && holiday.spillSoftness < 1, "Ground transitions soften the bands without losing full red and white");
+assert.ok(lightPaletteGLSL.includes(`time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)}`), "GPU bands use the shared rotation speed");
 for (const [key, value] of Object.entries(heroSceneConfig.emission)) {
   if (key === "activationSeconds") continue;
   assert.equal(material.uniforms[key === "base" ? "emissionBase" : key].value, value, "Emission tuning must reach the light shader");

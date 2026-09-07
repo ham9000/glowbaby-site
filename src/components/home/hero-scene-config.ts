@@ -1,9 +1,9 @@
-export type LightMode = "glow" | "flow" | "visibility";
+export type LightMode = "visibility" | "flow" | "holiday";
 
 export const lightModes: { id: LightMode; label: string; description: string }[] = [
-  { id: "glow", label: "Glow", description: "A soft, steady lavender glow." },
-  { id: "flow", label: "Color flow", description: "A playful blend of colors around the whole light." },
   { id: "visibility", label: "Visibility", description: "A steady warm amber light." },
+  { id: "flow", label: "Gradient", description: "A playful blend of colors around the whole light." },
+  { id: "holiday", label: "Holiday", description: "Rotating red and white bands around the light." },
 ];
 
 // Meter units. Keep source models untouched; tune the assembly here.
@@ -72,6 +72,14 @@ export const heroSceneConfig = {
     pulseSharpness: 220,
     settleStart: 0.85,
     activationSeconds: 2.4,
+  },
+  colorRotationSpeed: 0.055,
+  holiday: {
+    stripes: 8,
+    softness: 0.12,
+    spillSoftness: 0.8,
+    red: [1, 0.008, 0.02] as [number, number, number],
+    white: [1, 1, 1] as [number, number, number],
   },
   environment: {
     background: "#171827",

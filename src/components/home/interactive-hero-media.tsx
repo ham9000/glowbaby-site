@@ -5,11 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { heroSceneConfig, lightModes, type LightMode } from "./hero-scene-config";
 import type { HeroSceneHandle } from "./stroller-hero-scene";
 import flowPoster from "../../../public/hero/stroller-render-flow.webp";
-import glowPoster from "../../../public/hero/stroller-render-glow.webp";
+import holidayPoster from "../../../public/hero/stroller-render-holiday.webp";
 import visibilityPoster from "../../../public/hero/stroller-render-visibility.webp";
 
 // Static imports fingerprint regenerated renders so deployed image caches stay current.
-const posters = { flow: flowPoster, glow: glowPoster, visibility: visibilityPoster };
+const posters: Record<LightMode, typeof flowPoster> = { flow: flowPoster, holiday: holidayPoster, visibility: visibilityPoster };
 
 type Connection = EventTarget & { saveData?: boolean; effectiveType?: string };
 type SceneStatus = "image" | "loading" | "ready" | "error";
@@ -139,13 +139,6 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
         }} />
         <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
         <span className="interactive-hero-badge">{ready ? "Press, hold & drag gently" : "Made for a little more color"}</span>
-        {canExplore && <div className="hero-view-controls">
-          <button type="button" aria-pressed={ready} onClick={() => {
-            if (status === "ready" || status === "loading") controls.current?.showImage();
-            else controls.current?.explore();
-          }}>{ready ? "Return to image" : status === "loading" ? "Cancel 3D loading" : status === "error" ? "Retry 3D" : "Explore in 3D"}</button>
-          <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Enjoy the image or try again." : ready ? "Release to gently return · Swipe vertically to scroll" : ""}</span>
-        </div>}
       </div>
       <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">
         {lightModes.map((item) => (
@@ -155,10 +148,14 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
             scene.current?.setMode(item.id);
           }}><span className={`hero-mode-dot hero-mode-dot-${item.id}`} aria-hidden="true" />{item.label}</button>
         ))}
+        {canExplore && <button type="button" className="hero-3d-switch" role="switch" aria-label="3D preview" aria-checked={ready || status === "loading"} title={status === "loading" ? "Turn off to cancel loading" : status === "error" ? "Turn on to retry 3D" : "Toggle interactive 3D"} onClick={() => {
+          if (status === "ready" || status === "loading") controls.current?.showImage();
+          else controls.current?.explore();
+        }}><span className="hero-switch-track" aria-hidden="true" />3D</button>}
       </div>
       <figcaption className="hero-media-caption">
         <span aria-live="polite">{lightModes.find((item) => item.id === mode)?.description}</span>
-        <span>App-controlled light · Prototype concept</span>
+        <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Toggle 3D to try again." : "App-controlled light · Prototype concept"}</span>
       </figcaption>
     </figure>
   );

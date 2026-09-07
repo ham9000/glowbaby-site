@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import sharp from "sharp";
 import { previewServer } from "./preview-hero.mjs";
+import { lightModes } from "../src/components/home/hero-scene-config.ts";
 
 async function findBrowser() {
   const candidates = process.env.HERO_BROWSER_PATH ? [process.env.HERO_BROWSER_PATH] : [
@@ -110,7 +111,7 @@ try {
   await protocol.send("Emulation.setDeviceMetricsOverride", { width: 1200, height: 1072, deviceScaleFactor: 1, mobile: false });
 
   const renders = [];
-  for (const mode of ["flow", "glow", "visibility"]) {
+  for (const { id: mode } of lightModes) {
     protocol.errors.length = 0;
     const url = `${origin}/?capture=1&mode=${mode}`;
     await protocol.send("Page.navigate", { url });

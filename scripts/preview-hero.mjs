@@ -1,17 +1,18 @@
 // Local-only assembly review. Never serves the invoice or the source archives.
-// Geometry is not copied to public or bundled into the site's build.
+// Plaintext purchased geometry is never copied to public.
 import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { lightModes } from "../src/components/home/hero-scene-config.ts";
 
 const root = process.cwd();
 const modules = ["hero-scene-config", "glowbaby-channel", "stroller-hero-scene"];
 const assets = { "stroller.glb": "stroller-optimized.glb", "bottom.glb": "bottom.glb", "top.glb": "top.glb" };
 const html = `<!doctype html><html lang="en"><meta charset="utf-8"><title>Glowbaby local assembly preview</title>
 <style>body{margin:0;background:#171827;color:#e2d8f6;font:14px system-ui}#scene{width:100vw;height:calc(100vw / 1.12);max-height:90vh}nav{display:flex;gap:8px;justify-content:center;padding:12px}button{padding:12px 20px;border-radius:24px;border:1px solid #cbbce4;background:white}#status{text-align:center}body[data-capture] #scene{width:100vw;height:100vh;max-height:none}body[data-capture] nav,body[data-capture] #status{display:none}</style>
-<div id="scene"></div><nav><button data-mode="glow">Glow</button><button data-mode="flow">Color flow</button><button data-mode="visibility">Visibility</button><button id="freeze">Freeze for poster</button></nav><p id="status">Loading local models…</p>
+<div id="scene"></div><nav>${lightModes.map(mode => `<button data-mode="${mode.id}">${mode.label}</button>`).join("")}<button id="freeze">Freeze for poster</button></nav><p id="status">Loading local models…</p>
 <script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
 <script type="module">import {createHeroScene} from '/modules/stroller-hero-scene.js'; import {heroSceneConfig as config} from '/modules/hero-scene-config.js';
 const status=document.querySelector('#status'),params=new URLSearchParams(location.search);
