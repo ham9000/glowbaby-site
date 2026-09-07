@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { heroSceneConfig, lightModes, type LightMode } from "./hero-scene-config";
+import { gradientColors, heroSceneConfig, lightModes, type LightMode } from "./hero-scene-config";
 import type { HeroSceneHandle } from "./stroller-hero-scene";
 import flowPoster from "../../../public/hero/stroller-render-flow.webp";
 import holidayPoster from "../../../public/hero/stroller-render-holiday.webp";
@@ -138,7 +138,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
       <div className="interactive-hero-stage" onContextMenu={(event) => event.preventDefault()}>
         <div className="interactive-hero-render">
-          <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className="object-contain" onLoad={() => {
+          <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className={`interactive-hero-poster object-contain ${ready ? "is-hidden" : ""}`} onLoad={() => {
             posterLoaded.current = true;
             void controls.current?.refresh();
           }} />
@@ -147,23 +147,25 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
         <span ref={viewport} className="interactive-hero-frame" aria-hidden="true" />
         <span className="interactive-hero-badge">{ready ? "Drag to explore" : "Made for a little more color"}</span>
       </div>
-      <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">
-        {lightModes.map((item) => (
-          <button key={item.id} type="button" aria-pressed={mode === item.id} onClick={() => {
-            modeRef.current = item.id;
-            setMode(item.id);
-            scene.current?.setMode(item.id);
-          }}><span className={`hero-mode-dot hero-mode-dot-${item.id}`} aria-hidden="true" />{item.label}</button>
-        ))}
-        {canExplore && <button type="button" className="hero-3d-switch" role="switch" aria-label="3D preview" aria-checked={ready || status === "loading"} title={status === "loading" ? "Turn off to cancel loading" : status === "error" ? "Turn on to retry 3D" : "Toggle interactive 3D"} onClick={() => {
-          if (status === "ready" || status === "loading") controls.current?.showImage();
-          else controls.current?.explore();
-        }}><span className="hero-switch-track" aria-hidden="true" />3D</button>}
+      <div className="interactive-hero-panel">
+        <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">
+          {lightModes.map((item) => (
+            <button key={item.id} type="button" aria-pressed={mode === item.id} onClick={() => {
+              modeRef.current = item.id;
+              setMode(item.id);
+              scene.current?.setMode(item.id);
+            }}><span className={`hero-mode-dot hero-mode-dot-${item.id}`} style={item.id === "flow" ? { background: `conic-gradient(${gradientColors.join(", ")}, ${gradientColors[0]})` } : undefined} aria-hidden="true" />{item.label}</button>
+          ))}
+          {canExplore && <button type="button" className="hero-3d-switch" role="switch" aria-label="3D preview" aria-checked={ready || status === "loading"} title={status === "loading" ? "Turn off to cancel loading" : status === "error" ? "Turn on to retry 3D" : "Toggle interactive 3D"} onClick={() => {
+            if (status === "ready" || status === "loading") controls.current?.showImage();
+            else controls.current?.explore();
+          }}><span className="hero-switch-track" aria-hidden="true" />3D</button>}
+        </div>
+        <figcaption className="hero-media-caption">
+          <span aria-live="polite">{lightModes.find((item) => item.id === mode)?.description}</span>
+          <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Toggle 3D to try again." : ready ? "Drag to explore · Scroll outside the view" : "App-controlled light · Prototype concept"}</span>
+        </figcaption>
       </div>
-      <figcaption className="hero-media-caption">
-        <span aria-live="polite">{lightModes.find((item) => item.id === mode)?.description}</span>
-        <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Toggle 3D to try again." : ready ? "Drag to explore · Scroll outside the view" : "App-controlled light · Prototype concept"}</span>
-      </figcaption>
     </figure>
   );
 }

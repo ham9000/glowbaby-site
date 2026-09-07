@@ -370,7 +370,6 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
         time: lightMaterial.uniforms.time, mode: lightMaterial.uniforms.mode, strength: { value: 0 },
         brightness: { value: config.spill.brightness }, falloff: { value: config.spill.falloff },
         edge: { value: new THREE.Vector2(config.spill.edgeStart, config.spill.edgeEnd) },
-        centerColor: { value: new THREE.Vector3().fromArray(config.spill.centerColor) },
         centerBlendRadius: { value: config.spill.centerBlendRadius },
         centerStrength: { value: config.spill.centerStrength }, centerRadius: { value: config.spill.centerRadius },
       },
@@ -378,7 +377,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       vertexShader: `varying vec2 vUv; varying vec3 vSidewalkWorld;
         void main(){ vUv=uv; vSidewalkWorld=(modelMatrix*vec4(position,1.0)).xyz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
       fragmentShader: `varying vec2 vUv; varying vec3 vSidewalkWorld; uniform float time; uniform float mode; uniform float strength;
-        uniform float brightness; uniform float falloff; uniform vec2 edge; uniform vec3 centerColor;
+        uniform float brightness; uniform float falloff; uniform vec2 edge;
         uniform float centerBlendRadius; uniform float centerStrength; uniform float centerRadius;
         ${lightPaletteGLSL}
         ${sidewalkPatternGLSL}
@@ -389,7 +388,6 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
           vec3 color = spillLightColor(angle, time, mode);
           float a = exp(-dot(p, p) * falloff) * (1.0 - smoothstep(edge.x, edge.y, radius));
           a *= mix(centerStrength, 1.0, smoothstep(0.0, centerRadius, radius));
-          if (mode > 0.5 && mode < 1.5) color = mix(centerColor, color, smoothstep(0.0, centerBlendRadius, radius));
           if (mode < 0.5) color = mix(holidayColor(0.5), color, smoothstep(0.0, centerBlendRadius, radius));
           gl_FragColor = vec4(color * brightness * sidewalkSurface(vSidewalkWorld.xz).x, a * strength);
           #include <tonemapping_fragment>
@@ -444,7 +442,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     });
     camera.layers.enable(overflowLayer);
 
-    let mode = initialMode, elapsed = 0, activationElapsed = 0, previous = 0;
+    let mode = initialMode, elapsed = 3.2, activationElapsed = config.emission.activationSeconds, previous = 0;
     let renderWidth = 1, renderHeight = 1;
     let viewportX = 0, viewportY = 0, viewportWidth = 1, viewportHeight = 1;
     let targetX = 0, targetY = 0, pitch = 0, yaw = 0;
@@ -584,6 +582,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     if (viewport !== host) observer.observe(viewport);
     resize();
     setMode(initialMode);
+    updateLighting(1);
     // No canvas is attached until textures, setup, and the first frame all succeed.
     draw();
     if (contextLost || view.getContext().isContextLost()) throw new Error("Hero WebGL context was lost");

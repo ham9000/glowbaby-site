@@ -1,8 +1,10 @@
 export type LightMode = "visibility" | "flow" | "holiday";
 
+export const gradientColors = ["#ff0000", "#ff4500", "#ffff00", "#006400", "#0000ff", "#800080"] as const;
+
 export const lightModes: { id: LightMode; label: string; description: string }[] = [
   { id: "visibility", label: "Visibility", description: "A steady warm amber light." },
-  { id: "flow", label: "Gradient", description: "A playful blend of colors around the whole light." },
+  { id: "flow", label: "Gradient", description: "A rotating rainbow around the whole light." },
   { id: "holiday", label: "Holiday", description: "Rotating red and white bands around the light." },
 ];
 
@@ -133,7 +135,6 @@ export const heroSceneConfig = {
     falloff: 1,
     edgeStart: 0.3,
     edgeEnd: 0.5,
-    centerColor: [0.66, 0.52, 0.82] as [number, number, number],
     centerBlendRadius: 0.15,
     centerStrength: 1,
     centerRadius: 0.16,

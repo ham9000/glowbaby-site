@@ -10,7 +10,7 @@ for (const name of ["hero-scene-config", "glowbaby-channel"]) {
   await fs.writeFile(`.local-assets/channel-check/${name}.mjs`, output);
 }
 const { createChannelGeometry, createLightMaterial, sampleLightColor, lightPaletteGLSL } = await import("../.local-assets/channel-check/glowbaby-channel.mjs");
-const { heroSceneConfig } = await import("../.local-assets/channel-check/hero-scene-config.mjs");
+const { gradientColors, heroSceneConfig } = await import("../.local-assets/channel-check/hero-scene-config.mjs");
 const c = heroSceneConfig.channel;
 const material = createLightMaterial();
 const holiday = heroSceneConfig.holiday;
@@ -28,6 +28,14 @@ const seamStart = sampleLightColor(new Color(), 0, 0, "holiday");
 const seamEnd = sampleLightColor(new Color(), 1, 0, "holiday");
 assert.ok(seamStart.toArray().every((value, index) => Math.abs(value - seamEnd.toArray()[index]) < 1e-10), "Holiday palette closes around the ring");
 for (const color of [...holiday.red, ...holiday.white]) assert.ok(lightPaletteGLSL.includes(color.toFixed(6)), "GPU and CPU use the same holiday colors");
+for (const [index, color] of gradientColors.entries()) {
+  const expected = new Color(color);
+  const sampled = sampleLightColor(new Color(), index / gradientColors.length, 0, "flow");
+  assert.ok(sampled.toArray().every((value, channel) => Math.abs(value - expected.toArray()[channel]) < 1e-10), "Gradient stops use the configured colors");
+  for (const value of expected.toArray()) assert.ok(lightPaletteGLSL.includes(value.toFixed(6)), "GPU and CPU use the same gradient colors");
+}
+const gradientSeam = sampleLightColor(new Color(), 1, 0, "flow");
+assert.ok(gradientSeam.toArray().every((value, index) => Math.abs(value - new Color(gradientColors[0]).toArray()[index]) < 1e-10), "Gradient palette closes around the ring");
 assert.doesNotMatch(material.fragmentShader, /vUv\.y/, "Color divisions stay straight across the diffuser profile");
 assert.ok(holiday.spillSoftness > holiday.softness && holiday.spillSoftness < 1, "Ground transitions soften the bands without losing full red and white");
 assert.ok(lightPaletteGLSL.includes(`time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)}`), "GPU bands use the shared rotation speed");
