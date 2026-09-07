@@ -12,17 +12,23 @@ import visibilityPoster from "../../../public/hero/stroller-render-visibility.we
 const posters = { flow: flowPoster, glow: glowPoster, visibility: visibilityPoster };
 
 type Connection = EventTarget & { saveData?: boolean; effectiveType?: string };
+type SceneStatus = "image" | "loading" | "ready" | "error";
+type HeroControls = { refresh(): Promise<void>; explore(): void; showImage(): void };
 
-export function InteractiveHeroMedia() {
+export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailable?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<HeroSceneHandle | null>(null);
+  const controls = useRef<HeroControls | null>(null);
+  const posterLoaded = useRef(false);
   const modeRef = useRef<LightMode>("flow");
   const [mode, setMode] = useState<LightMode>("flow");
-  const [ready, setReady] = useState(false);
+  const [status, setStatus] = useState<SceneStatus>("image");
+  const [canExplore, setCanExplore] = useState(false);
+  const ready = status === "ready";
 
   useEffect(() => {
     const element = host.current;
-    if (!element || !heroSceneConfig.assetsReady) return;
+    if (!element || typeof IntersectionObserver === "undefined") return;
     const width = matchMedia(`(min-width: ${heroSceneConfig.minWidth}px)`);
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
     const device = navigator as Navigator & { connection?: Connection; deviceMemory?: number };
@@ -31,46 +37,80 @@ export function InteractiveHeroMedia() {
     let loading = false;
     let failed = false;
     let disposed = false;
-    const eligible = () => width.matches && !motion.matches && !device.connection?.saveData &&
+    let optedIn = false;
+    let imageOnly = false;
+    let webglCapable: boolean | null = null;
+    let request: AbortController | null = null;
+    const capable = () => sceneAvailable && globalThis.isSecureContext && !!globalThis.crypto?.subtle &&
+      typeof ResizeObserver !== "undefined" && !motion.matches && !device.connection?.saveData &&
       !["slow-2g", "2g"].includes(device.connection?.effectiveType ?? "") &&
       (device.deviceMemory === undefined || device.deviceMemory >= 4);
-    const stop = () => {
+    const eligible = () => capable() && (width.matches || optedIn) && !imageOnly;
+    const stop = (next: SceneStatus = "image") => {
       generation++;
       loading = false;
+      request?.abort();
+      request = null;
       scene.current?.dispose();
       scene.current = null;
-      setReady(false);
+      if (!disposed) setStatus(next);
     };
     const update = async () => {
       if (disposed) return;
-      if (!eligible()) { stop(); return; }
+      if (!capable()) { setCanExplore(false); stop(); return; }
+      if (!eligible() && (scene.current || loading)) stop();
+      if (!posterLoaded.current) return;
       const active = visible && !document.hidden;
-      if (scene.current) { scene.current.setActive(active); return; }
-      if (!active || loading || failed) return;
+      if (!active) {
+        scene.current?.setActive(false);
+        if (loading) stop();
+        return;
+      }
+      if (webglCapable === null) {
+        try {
+          const probe = document.createElement("canvas");
+          const gl = probe.getContext("webgl2", { failIfMajorPerformanceCaveat: true });
+          webglCapable = !!gl;
+          gl?.getExtension("WEBGL_lose_context")?.loseContext();
+        } catch { webglCapable = false; }
+      }
+      setCanExplore(webglCapable);
+      if (!webglCapable || !eligible()) { stop(); return; }
+      if (scene.current) { scene.current.setActive(true); return; }
+      if (loading || failed) return;
       loading = true;
+      setStatus("loading");
       const attempt = ++generation;
+      const abort = new AbortController();
+      request = abort;
       try {
-        // Probe before fetching any 3D code or geometry.
-        const probe = document.createElement("canvas");
-        const gl = probe.getContext("webgl2", { failIfMajorPerformanceCaveat: true });
-        if (!gl) throw new Error("WebGL unavailable");
-        gl.getExtension("WEBGL_lose_context")?.loseContext();
+        // Access, decryption, and embedded-model validation precede the heavy engine.
+        const { loadHeroModels } = await import("../../lib/hero-asset-client");
+        if (disposed || attempt !== generation) return;
+        const models = await loadHeroModels(abort.signal);
+        if (disposed || attempt !== generation) return;
         const { createHeroScene } = await import("./stroller-hero-scene");
         if (disposed || attempt !== generation) return;
         const handle = await createHeroScene(element, modeRef.current, () => {
+          if (disposed || attempt !== generation) return;
           failed = true;
-          stop();
-        });
+          stop("error");
+        }, models, abort.signal);
         if (disposed || attempt !== generation || !eligible()) { handle.dispose(); return; }
         scene.current = handle;
         handle.setMode(modeRef.current);
         handle.setActive(visible && !document.hidden);
-        setReady(true);
+        setStatus("ready");
       } catch {
-        if (!disposed && attempt === generation) { failed = true; stop(); }
+        if (!disposed && attempt === generation) { failed = true; stop("error"); }
       } finally {
         if (attempt === generation) loading = false;
       }
+    };
+    controls.current = {
+      refresh: update,
+      explore() { optedIn = true; imageOnly = false; failed = false; void update(); },
+      showImage() { imageOnly = true; optedIn = false; failed = false; stop(); },
     };
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; void update(); });
     observer.observe(element);
@@ -80,23 +120,32 @@ export function InteractiveHeroMedia() {
     document.addEventListener("visibilitychange", update);
     return () => {
       disposed = true;
-      generation++;
+      controls.current = null;
       observer.disconnect();
       width.removeEventListener("change", update);
       motion.removeEventListener("change", update);
       device.connection?.removeEventListener("change", update);
       document.removeEventListener("visibilitychange", update);
-      scene.current?.dispose();
-      scene.current = null;
+      stop();
     };
-  }, []);
+  }, [sceneAvailable]);
 
   return (
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
       <div className="interactive-hero-stage" style={{ backgroundColor: heroSceneConfig.environment.background }}>
-        <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 562px, (min-width: 1024px) calc((100vw - 7rem) / 2), (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2.5rem)" className="object-contain" />
+        <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 562px, (min-width: 1024px) calc((100vw - 7rem) / 2), (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2.5rem)" className="object-contain" onLoad={() => {
+          posterLoaded.current = true;
+          void controls.current?.refresh();
+        }} />
         <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
-        <span className="interactive-hero-badge">{ready ? "Drag gently to explore" : "Made for a little more color"}</span>
+        <span className="interactive-hero-badge">{ready ? "Press, hold & drag gently" : "Made for a little more color"}</span>
+        {canExplore && <div className="hero-view-controls">
+          <button type="button" aria-pressed={ready} onClick={() => {
+            if (status === "ready" || status === "loading") controls.current?.showImage();
+            else controls.current?.explore();
+          }}>{ready ? "Return to image" : status === "loading" ? "Cancel 3D loading" : status === "error" ? "Retry 3D" : "Explore in 3D"}</button>
+          <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Enjoy the image or try again." : ready ? "Release to gently return · Swipe vertically to scroll" : ""}</span>
+        </div>}
       </div>
       <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">
         {lightModes.map((item) => (

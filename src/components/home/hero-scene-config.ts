@@ -8,8 +8,7 @@ export const lightModes: { id: LightMode; label: string; description: string }[]
 
 // Meter units. Keep source models untouched; tune the assembly here.
 export const heroSceneConfig = {
-  // Actual body assets and matching renders are ready. Public stroller WebGL rights remain unresolved.
-  assetsReady: false,
+  // Local preview only. The production controller supplies protected, embedded GLBs.
   models: {
     stroller: "/models/hero/stroller.glb",
     bottom: "/models/hero/bottom.glb",
@@ -133,5 +132,5 @@ export const heroSceneConfig = {
   },
   // Low three-quarter detail framing; product dimensions and mounting stay unchanged.
   camera: { position: [0.48, 0.235, 0.56] as [number, number, number], target: [0, 0.12, 0.065] as [number, number, number], fov: 38 },
-  interaction: { yaw: Math.PI / 24, pitch: Math.PI / 90, damping: 5, dragSensitivity: 2 },
+  interaction: { yaw: Math.PI / 24, pitch: Math.PI / 90, damping: 5, returnDamping: 3, dragSensitivity: 2, touchHoldMs: 160, touchSlop: 8 },
 };

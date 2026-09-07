@@ -3,6 +3,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { createChannelGeometry, createLightMaterial, lightPaletteGLSL, sampleLightColor } from "./glowbaby-channel";
 import { heroSceneConfig as config, type LightMode } from "./hero-scene-config";
+import type { HeroModelBuffers } from "../../lib/hero-asset-format";
 
 export type HeroSceneHandle = {
   setMode(mode: LightMode): void;
@@ -179,7 +180,7 @@ function getGroundContactBounds(root: THREE.Object3D) {
   return contacts;
 }
 
-export async function createHeroScene(host: HTMLElement, initialMode: LightMode, onFailure: () => void): Promise<HeroSceneHandle> {
+export async function createHeroScene(host: HTMLElement, initialMode: LightMode, onFailure: () => void, modelData?: HeroModelBuffers, signal?: AbortSignal): Promise<HeroSceneHandle> {
   const resources = createResourceTracker();
   const scene = new THREE.Scene();
   let renderer: THREE.WebGLRenderer | undefined;
@@ -190,6 +191,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     if (disposed) return;
     disposed = true;
     active = false;
+    signal?.removeEventListener("abort", dispose);
     cancelAnimationFrame(frame);
     observer?.disconnect();
     removeListeners();
@@ -202,6 +204,8 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
   const fail = () => { dispose(); onFailure(); };
 
   try {
+    signal?.throwIfAborted();
+    signal?.addEventListener("abort", dispose, { once: true });
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "low-power", failIfMajorPerformanceCaveat: true });
     const view = renderer;
     const canvas = view.domElement;
@@ -251,8 +255,11 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     });
     // Track dependencies too: a failed parser can still finish other resources
     // after cleanup; the tracker immediately releases those late arrivals.
-    const models = await Promise.allSettled(Object.values(config.models).map((url) => loader.loadAsync(url)));
+    const models = await Promise.allSettled(modelData
+      ? [modelData.stroller, modelData.bottom, modelData.top].map((buffer) => loader.parseAsync(buffer, ""))
+      : Object.values(config.models).map((url) => loader.loadAsync(url)));
     models.forEach((result) => { if (result.status === "fulfilled") resources.track(result.value.scenes); });
+    signal?.throwIfAborted();
     if (assetErrors.size || models.some((result) => result.status === "rejected")) throw new Error("Hero assets or textures could not load");
     if (contextLost || view.getContext().isContextLost()) throw new Error("Hero WebGL context was lost");
     const [stroller, bottom, top] = models.map((result) => {
@@ -432,6 +439,8 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     let mode = initialMode, elapsed = 0, activationElapsed = 0, previous = 0;
     let targetX = 0, targetY = 0, pitch = 0, yaw = 0;
     let pointerId: number | null = null;
+    let dragging = false;
+    let holdTimer: ReturnType<typeof setTimeout> | undefined;
     let startX = 0, startY = 0, startTargetX = 0, startTargetY = 0;
     canvas.style.touchAction = "pan-y";
     const resize = () => {
@@ -442,35 +451,45 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       camera.updateProjectionMatrix();
     };
     const move = (event: PointerEvent) => {
+      if (!active || !event.isPrimary || event.pointerId !== pointerId) return;
+      if (event.pointerType !== "touch" && (event.buttons & 1) === 0) { reset(); return; }
+      if (!dragging) {
+        if (Math.hypot(event.clientX - startX, event.clientY - startY) > config.interaction.touchSlop) reset();
+        return;
+      }
       const rect = canvas.getBoundingClientRect();
       const width = Math.max(rect.width, 1), height = Math.max(rect.height, 1);
-      if (pointerId !== null) {
-        if (event.pointerId !== pointerId) return;
-        targetY = THREE.MathUtils.clamp(startTargetY + (event.clientX - startX) / width * config.interaction.dragSensitivity, -1, 1);
-        targetX = THREE.MathUtils.clamp(startTargetX + (event.clientY - startY) / height * config.interaction.dragSensitivity, -1, 1);
-      } else if (event.pointerType !== "touch") {
-        targetY = THREE.MathUtils.clamp((event.clientX - rect.left) / width * 2 - 1, -1, 1);
-        targetX = THREE.MathUtils.clamp((event.clientY - rect.top) / height * 2 - 1, -1, 1);
-      }
+      targetY = THREE.MathUtils.clamp(startTargetY + (event.clientX - startX) / width * config.interaction.dragSensitivity, -1, 1);
+      targetX = THREE.MathUtils.clamp(startTargetX + (event.clientY - startY) / height * config.interaction.dragSensitivity, -1, 1);
+    };
+    const beginDrag = () => {
+      if (pointerId === null || disposed || !active) return;
+      // A new press takes over the current camera angle, including during return.
+      targetX = startTargetX = pitch / config.interaction.pitch;
+      targetY = startTargetY = yaw / config.interaction.yaw;
+      dragging = true;
+      try { canvas.setPointerCapture(pointerId); } catch { reset(); }
     };
     const down = (event: PointerEvent) => {
-      if (!event.isPrimary || event.button !== 0 || pointerId !== null) return;
+      if (!active || !event.isPrimary || event.button !== 0 || pointerId !== null) return;
       pointerId = event.pointerId;
       startX = event.clientX;
       startY = event.clientY;
-      startTargetX = targetX;
-      startTargetY = targetY;
-      canvas.setPointerCapture(event.pointerId);
+      if (event.pointerType === "touch") holdTimer = setTimeout(beginDrag, config.interaction.touchHoldMs);
+      else beginDrag();
     };
     const reset = () => {
+      clearTimeout(holdTimer);
+      holdTimer = undefined;
       const captured = pointerId;
       pointerId = null;
+      dragging = false;
       targetX = 0;
       targetY = 0;
       if (captured !== null && canvas.hasPointerCapture(captured)) canvas.releasePointerCapture(captured);
     };
     const release = (event: PointerEvent) => { if (event.pointerId === pointerId) reset(); };
-    const leave = () => { if (pointerId === null) reset(); };
+    const leave = () => { if (!dragging) reset(); };
     removeListeners = () => {
       canvas.removeEventListener("pointermove", move);
       canvas.removeEventListener("pointerdown", down);
@@ -509,8 +528,9 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       elapsed += dt;
       activationElapsed = Math.min(activationElapsed + dt, config.emission.activationSeconds);
       updateLighting(activationElapsed / config.emission.activationSeconds);
-      yaw = THREE.MathUtils.damp(yaw, targetY * config.interaction.yaw, config.interaction.damping, dt);
-      pitch = THREE.MathUtils.damp(pitch, targetX * config.interaction.pitch, config.interaction.damping, dt);
+      const damping = dragging ? config.interaction.damping : config.interaction.returnDamping;
+      yaw = THREE.MathUtils.damp(yaw, targetY * config.interaction.yaw, damping, dt);
+      pitch = THREE.MathUtils.damp(pitch, targetX * config.interaction.pitch, damping, dt);
       // Move only the camera: wheels, floor shadows, and light directions stay grounded.
       orbit.theta = baseOrbit.theta - yaw;
       orbit.phi = baseOrbit.phi + pitch;

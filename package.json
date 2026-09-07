@@ -11,7 +11,8 @@
     "validate": "npm run typecheck && npm run lint && npm run build",
     "hero:posters": "node scripts/hero-poster.mjs",
     "hero:preview": "node scripts/preview-hero.mjs",
-    "hero:check": "node scripts/check-hero-channel.mjs && node scripts/check-hero-optimizer.mjs && node scripts/check-hero-preview.mjs"
+    "hero:package": "node scripts/package-hero-assets.mjs",
+    "hero:check": "node scripts/check-hero-channel.mjs && node scripts/check-hero-optimizer.mjs && node scripts/check-hero-preview.mjs && node scripts/check-hero-format.mjs && node scripts/check-hero-delivery.mjs && node scripts/check-hero-client.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

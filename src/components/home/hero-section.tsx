@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container } from "@/components/container";
 import { InteractiveHeroMedia } from "./interactive-hero-media";
 import { siteConfig, type Product } from "@/content/site";
+import { hasProtectedHeroScene } from "@/lib/hero-assets-server";
 
 export function HeroSection({ product }: { product: Product }) {
   return (
@@ -19,7 +20,7 @@ export function HeroSection({ product }: { product: Product }) {
           </h1>
         </div>
         <div className="hero-media relative z-10 w-full">
-          <InteractiveHeroMedia />
+          <InteractiveHeroMedia sceneAvailable={hasProtectedHeroScene()} />
         </div>
         <div className="hero-details relative z-10 max-w-2xl lg:pb-14">
           <p className="max-w-xl text-pretty text-lg leading-8 text-ink/70 lg:mt-8">

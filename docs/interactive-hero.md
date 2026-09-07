@@ -2,17 +2,40 @@
 
 Branch: `codex/interactive-stroller-hero`.
 
-The hero now focuses on the actual Glowbaby CAD assembly beneath the stroller, seen from a low three-quarter angle over a concrete sidewalk at dusk. The site uses three matching rendered posters with accessible mode buttons. The same scene works in the local Three.js preview. Public WebGL remains disabled (`heroSceneConfig.assetsReady = false`) because the purchased stroller's license does not establish permission to distribute a retrievable GLB. Public interactive delivery remains license-blocked.
+The hero focuses on the actual Glowbaby CAD assembly beneath the stroller, seen from a low three-quarter angle over a concrete sidewalk at dusk. Three matching rendered posters and accessible mode buttons appear immediately. When protected delivery is configured, capable desktops enhance the loaded poster into a real Three.js scene; capable narrow devices can explicitly choose **Explore in 3D**. Hold and drag to inspect, then release for a gentle return. The same scene works in the private local preview.
 
-## License conclusion
+## License and asset protection
 
 The supplied invoice identifies model 6931082, **Modern Baby Stroller Realistic Foldable Pram 3D Model**, seller **blackorgrey**, license **Royalty Free, No AI**. The invoice is not copied into the repository.
 
-[CGTrader's terms](https://www.cgtrader.com/pages/terms-and-conditions), sections 21A.2, 21A.3 and 21B.1, allow rendered still/moving images and require commercially reasonable protection against access to geometry embedded in software. No AI carries the same royalty-free terms with an additional machine-learning/training restriction. A publicly served GLB would be directly retrievable; purchase alone does not establish permission for that delivery method. Rendered hero images are used instead. The original implementation brief also explicitly requires checking permission before public GLB delivery.
+[CGTrader's terms](https://www.cgtrader.com/pages/terms-and-conditions), sections 21A.2, 21A.3 and 21B.1, permit incorporated commercial uses, including software examples, while requiring commercially reasonable protection against standalone asset retrieval. No AI carries an additional machine-learning/training restriction. Purchase does not authorize unrestricted redistribution of the source model.
 
-Ask the seller or CGTrader: "May I use model 6931082 in a commercial Glowbaby website WebGL hero? Visitors' browsers would download an optimized GLB that could be extracted. There would be no separate download button or resale. Please confirm permission for this delivery method or offer the appropriate custom license."
+The interactive implementation combines the stroller and Glowbaby parts into an encrypted application bundle, keeps the master key server-only, and requires short-lived same-origin delivery grants. It exposes neither a public stroller GLB nor a model download control. These measures deter direct downloads and hotlinking; they are not legal certification or extraction-proof DRM. A determined viewer can recover geometry that their browser must render. The applicable purchase agreement and licensor's interpretation remain authoritative.
 
-No stroller geometry, textures, invoice, receipt, or account information is tracked or served by the production site. The local preview binds only to 127.0.0.1.
+Unencrypted purchased geometry, textures, source archives, and purchase/account documents remain private and untracked. Only the encrypted application artifact is included for deployment, outside `public`. The local plaintext preview binds only to 127.0.0.1.
+
+## Protected delivery setup
+
+Use Node.js **22.18+** (or Node 24) for the native-TypeScript development scripts. With the three optimized models already in `.local-assets`, run:
+
+```powershell
+npm run hero:package -- --init-key
+npm run dev
+```
+
+The first command creates a random 32-byte `HERO_ASSET_KEY` in Git-ignored `.env.local` if no key is configured, then writes `assets\hero\scene.gbe`. It does not print the key, modify the original models, or put a stroller GLB in `public`. Subsequent `npm run hero:package` runs reuse the configured key and verify a lossless encrypt/decrypt round trip before replacing the artifact. Do not commit `.env.local` or put the key in a `NEXT_PUBLIC_` variable.
+
+Configure the **same server-only `HERO_ASSET_KEY`** on the deployment host at build and runtime; it is exactly 64 hexadecimal characters. The encrypted artifact is included in both API routes' Next.js output traces. No key means the normal poster-only experience. A configured but invalid key, missing artifact, or authentication failure is a configuration error, not a successful live setup. To rotate the master key, repackage and deploy the new artifact together with the new key.
+
+The delivery sequence is:
+
+1. `POST /api/hero/session` requires a matching `Origin` and `x-glowbaby-viewer: 1`. It issues a 90-second signed HttpOnly, SameSite=Strict cookie scoped to a unique asset path, and returns that path plus a per-grant decryption key.
+2. `POST /api/hero/asset/[id]` requires the same origin/intent, matching `x-glowbaby-grant`, and valid scoped cookie. It returns an AES-256-GCM envelope and clears that path's cookie. GET is not an asset delivery method.
+3. WebCrypto decrypts the response in memory. The client validates all three self-contained GLBs before importing the heavier Three.js scene module. No keys or models are persisted in browser storage.
+
+Responses are private/no-store, same-origin-only, and nosniff. HTTPS is required except on local loopback. Different per-grant cookie paths let concurrent tabs load independently. Clearing a cookie is not distributed single-use enforcement: captured credentials can be replayed within their lifetime. Origin/intent checks prevent ordinary cross-site browser use, not requests forged by an automated client. Anonymous visitors are intended viewers, not authenticated model owners.
+
+At rest, the `GBE1` envelope contains a 12-byte IV, authenticated ciphertext, and 16-byte tag. Its plaintext `GBH1` bundle contains three length-delimited embedded GLBs; external texture/buffer URLs and malformed framing are rejected. Delivery uses a distinct per-grant key rather than exposing the at-rest master key. CSP permits `blob:` image fetches and narrowly allows WebAssembly compilation (`wasm-unsafe-eval`) for Meshopt; JavaScript `unsafe-eval` remains development-only.
 
 ## Assets and measured geometry
 
@@ -45,8 +68,8 @@ All artistic values live in `hero-scene-config.ts`:
 - Broad overlapping downward cones approximate one continuous diffuser instead of three outward-pointing beams. Each perimeter sample aims straight down with an 88-degree half-angle, a 2-degree margin below the horizon, and zero distance-decay exponent; this intentionally models an even area-light appearance rather than point-source photometry. Total intensity 0.9, range 1.6 m, penumbra 0.15. Their 512 squared shadow maps are reused while geometry is static; shadows originate beneath the stroller, never from the overhead fill.
 - A separate 1.8 x 1.55 m floor-only spill supplies the continuous all-around footprint (opacity 0.7, brightness 0.95). Its broad radial profile has a filled center and a gentle outer fade, removing the former isolated hotspots. Color flow is a smooth color gradient, not separate pools of brightness. Concrete detail remains visible. Faint wheel-contact patches (opacity 0.14) are derived from actual near-ground geometry, not a projected stroller outline.
 - Concrete sidewalk: one two-triangle plane with procedural grain, mottling, roughness variation and shallow 6 mm joints between 1.15 x 1.35 m slabs. No extra texture downloads or dense pavement geometry.
-- Camera (0.48, 0.235, 0.56) m, target (0, 0.12, 0.065), FOV 38 degrees. The actual device is the focal point; lower frame, basket and wheels provide stroller context. Device dimensions are not enlarged. Damped camera-only inspection is limited to +/-7.5 degrees yaw and +/-2 degrees pitch, so the stroller remains grounded. Dragging preserves the existing hover angle; touch keeps vertical scrolling.
-- Gating: width at least 900px, no reduced motion or explicit data saving/2G, at least 4 GB device memory when reported, WebGL2 available. Ineligible clients do not import 3D code or request GLBs. IntersectionObserver/document visibility pause rendering; DPR capped at 1.5. Failures retain the poster.
+- Camera (0.48, 0.235, 0.56) m, target (0, 0.12, 0.065), FOV 38 degrees. The actual device is the focal point; lower frame, basket and wheels provide stroller context. Device dimensions are not enlarged. Held-drag camera-only inspection is limited to +/-7.5 degrees yaw and +/-2 degrees pitch, so the stroller remains grounded. Hover alone does not move it. Release eases back over roughly a second; re-grabbing preserves the current angle. Touch keeps vertical scrolling.
+- Gating: server delivery configured, no reduced motion or explicit data saving/2G, at least 4 GB device memory when reported, secure WebCrypto and WebGL2 available. Width at least 900px enhances automatically after the poster loads; narrower eligible clients require explicit opt-in. Opt-in overrides only width, never the other gates. Ineligible clients do not import 3D code or request protected payloads. IntersectionObserver/document visibility pause rendering; DPR capped at 1.5. Failures retain the poster.
 
 The three models plus both channel layers total **140,936 triangles**, before the small floor, strap and contact meshes: approximately **141k** for the scene, below the preferred 150k geometry budget and down from about 266k. Combined optimized model files are **1,294,504 bytes**. Shadow rendering still has a runtime cost; the geometry budget is not an FPS guarantee.
 
@@ -71,10 +94,10 @@ All three fresh 1200x1072 renders must succeed before any poster is replaced. Mo
 ## Validation and outstanding work
 
 - `npm run validate` runs TypeScript, ESLint and the production build.
-- `npm run hero:check` covers closed seam positions/normals, actual oval rotation at multiple angles/scales, shader tuning, optimizer budgets/default CAD topology/materials/UVs/source privacy, and successful/failed capture readiness.
+- `npm run hero:check` covers closed seam positions/normals, actual oval rotation at multiple angles/scales, shader tuning, optimizer budgets/default CAD topology/materials/UVs/source privacy, capture readiness, and protected bundle/delivery invariants.
 - `npm run hero:posters` loads and GPU-renders all actual models in each mode, refusing shader or initialization errors. The current three posters come from this command, not older captures.
 - Fixed-time PNG comparison shows the sampled basket region is pixel-identical across all three modes while the illuminated sidewalk changes substantially. Colored illumination no longer reaches the upper basket/interior.
-- Still pending: public live-WebGL rights, broad device/GPU profiling and public width/data-saver/visibility lifecycle exercise with authorized live assets. Local preview success does not remove the licensing gate or establish physical-device photometry.
+- Broad physical-device/GPU profiling remains advisable. The visualization does not establish physical-device photometry, and technical delivery measures do not replace the applicable asset license.
 - Product-owner review: approximate under-basket mounting, suggested straps, material finish, brightness and channel envelope. These are prototype visualization choices, not final product specifications.
 
 ## Real-stroller photo refinement
