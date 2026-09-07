@@ -180,7 +180,7 @@ function getGroundContactBounds(root: THREE.Object3D) {
   return contacts;
 }
 
-export async function createHeroScene(host: HTMLElement, initialMode: LightMode, onFailure: () => void, modelData?: HeroModelBuffers, signal?: AbortSignal): Promise<HeroSceneHandle> {
+export async function createHeroScene(host: HTMLElement, initialMode: LightMode, onFailure: () => void, modelData?: HeroModelBuffers, signal?: AbortSignal, viewport: HTMLElement = host): Promise<HeroSceneHandle> {
   const resources = createResourceTracker();
   const scene = new THREE.Scene();
   let renderer: THREE.WebGLRenderer | undefined;
@@ -206,7 +206,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
   try {
     signal?.throwIfAborted();
     signal?.addEventListener("abort", dispose, { once: true });
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "low-power", failIfMajorPerformanceCaveat: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power", failIfMajorPerformanceCaveat: true });
     const view = renderer;
     const canvas = view.domElement;
     const lost = (event: Event) => {
@@ -226,7 +226,8 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     view.shadowMap.autoUpdate = false;
     view.shadowMap.needsUpdate = true;
     view.debug.onShaderError = () => { throw new Error("Hero shader initialization failed"); };
-    scene.background = new THREE.Color(config.environment.background);
+    const sceneBackground = new THREE.Color(config.environment.background);
+    scene.background = sceneBackground;
     scene.fog = new THREE.Fog(config.environment.background, config.stage.fogNear, config.stage.fogFar);
     const camera = new THREE.PerspectiveCamera(config.camera.fov, 1, 0.05, 12);
     const cameraTarget = new THREE.Vector3().fromArray(config.camera.target);
@@ -436,17 +437,61 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       scene.add(light, light.target);
       return { angle, light };
     });
+    const overflowLayer = 1;
+    inspection.traverse((object) => object.layers.enable(overflowLayer));
+    scene.traverse((object) => {
+      if (object instanceof THREE.Light) object.layers.enable(overflowLayer);
+    });
+    camera.layers.enable(overflowLayer);
 
     let mode = initialMode, elapsed = 0, activationElapsed = 0, previous = 0;
+    let renderWidth = 1, renderHeight = 1;
+    let viewportX = 0, viewportY = 0, viewportWidth = 1, viewportHeight = 1;
     let targetX = 0, targetY = 0, pitch = 0, yaw = 0;
     let pointerId: number | null = null;
     let dragging = false;
     let startX = 0, startY = 0, startTargetX = 0, startTargetY = 0;
     // Inspection owns one-finger drags; native page pinch zoom remains available.
     canvas.style.touchAction = "pinch-zoom";
+    const draw = () => {
+      const cameraMask = camera.layers.mask;
+      view.setScissorTest(false);
+      view.setClearColor(sceneBackground, 0);
+      view.clear(true, true, true);
+      view.setScissor(viewportX, viewportY, viewportWidth, viewportHeight);
+      view.setScissorTest(true);
+      scene.background = sceneBackground;
+      view.render(scene, camera);
+
+      scene.background = null;
+      camera.layers.set(overflowLayer);
+      const viewportRight = viewportX + viewportWidth;
+      if (viewportRight < renderWidth) {
+        view.setScissor(viewportRight, 0, renderWidth - viewportRight, renderHeight);
+        view.render(scene, camera);
+      }
+      if (viewportY > 0) {
+        view.setScissor(0, 0, Math.min(viewportRight, renderWidth), viewportY);
+        view.render(scene, camera);
+      }
+      camera.layers.mask = cameraMask;
+      scene.background = sceneBackground;
+      view.setScissorTest(false);
+    };
     const resize = () => {
       const rect = host.getBoundingClientRect();
       const width = Math.max(rect.width, 1), height = Math.max(rect.height, 1);
+      const viewportRect = viewport.getBoundingClientRect();
+      const left = THREE.MathUtils.clamp(viewportRect.left - rect.left, 0, width);
+      const top = THREE.MathUtils.clamp(viewportRect.top - rect.top, 0, height);
+      const right = THREE.MathUtils.clamp(viewportRect.right - rect.left, left, width);
+      const bottom = THREE.MathUtils.clamp(viewportRect.bottom - rect.top, top, height);
+      renderWidth = width;
+      renderHeight = height;
+      viewportX = left;
+      viewportY = height - bottom;
+      viewportWidth = Math.max(right - left, 1);
+      viewportHeight = Math.max(bottom - top, 1);
       view.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
@@ -531,15 +576,16 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       orbit.makeSafe();
       camera.position.setFromSpherical(orbit).add(cameraTarget);
       camera.lookAt(cameraTarget);
-      try { view.render(scene, camera); } catch { fail(); return; }
+      try { draw(); } catch { fail(); return; }
       if (!disposed) frame = requestAnimationFrame(render);
     };
     observer = new ResizeObserver(resize);
     observer.observe(host);
+    if (viewport !== host) observer.observe(viewport);
     resize();
     setMode(initialMode);
     // No canvas is attached until textures, setup, and the first frame all succeed.
-    view.render(scene, camera);
+    draw();
     if (contextLost || view.getContext().isContextLost()) throw new Error("Hero WebGL context was lost");
     host.appendChild(canvas);
     initialized = true;
@@ -567,7 +613,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
         activationElapsed = config.emission.activationSeconds;
         updateLighting(1);
         view.shadowMap.needsUpdate = true;
-        try { view.render(scene, camera); } catch (error) { fail(); throw error; }
+        try { draw(); } catch (error) { fail(); throw error; }
       },
       dispose,
     };

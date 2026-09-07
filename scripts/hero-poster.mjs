@@ -109,6 +109,7 @@ try {
   await protocol.send("Page.enable");
   await protocol.send("Runtime.enable");
   await protocol.send("Emulation.setDeviceMetricsOverride", { width: 1200, height: 1072, deviceScaleFactor: 1, mobile: false });
+  await protocol.send("Emulation.setDefaultBackgroundColorOverride", { color: { r: 0, g: 0, b: 0, a: 0 } });
 
   const renders = [];
   for (const { id: mode } of lightModes) {

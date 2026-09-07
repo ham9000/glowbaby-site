@@ -17,6 +17,7 @@ type HeroControls = { refresh(): Promise<void>; explore(): void; showImage(): vo
 
 export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailable?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
+  const viewport = useRef<HTMLSpanElement>(null);
   const scene = useRef<HeroSceneHandle | null>(null);
   const controls = useRef<HeroControls | null>(null);
   const posterLoaded = useRef(false);
@@ -96,7 +97,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
           if (disposed || attempt !== generation) return;
           failed = true;
           stop("error");
-        }, models, abort.signal);
+        }, models, abort.signal, viewport.current ?? element);
         if (disposed || attempt !== generation || !eligible()) { handle.dispose(); return; }
         scene.current = handle;
         handle.setMode(modeRef.current);
@@ -135,7 +136,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
 
   return (
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
-      <div className="interactive-hero-stage" style={{ backgroundColor: heroSceneConfig.environment.background }} onContextMenu={(event) => event.preventDefault()}>
+      <div className="interactive-hero-stage" onContextMenu={(event) => event.preventDefault()}>
         <div className="interactive-hero-render">
           <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className="object-contain" onLoad={() => {
             posterLoaded.current = true;
@@ -143,7 +144,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
           }} />
           <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
         </div>
-        <span className="interactive-hero-frame" aria-hidden="true" />
+        <span ref={viewport} className="interactive-hero-frame" aria-hidden="true" />
         <span className="interactive-hero-badge">{ready ? "Drag to explore" : "Made for a little more color"}</span>
       </div>
       <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">
