@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
-import { ProductVisual } from "@/components/product-visual";
+import { InteractiveHeroMedia } from "./interactive-hero-media";
 import { siteConfig, type Product } from "@/content/site";
 
 export function HeroSection({ product }: { product: Product }) {
@@ -38,8 +38,8 @@ export function HeroSection({ product }: { product: Product }) {
             </Link>
           </div>
         </div>
-        <div className="relative aspect-[1.05] w-full">
-          <ProductVisual />
+        <div className="relative w-full">
+          <InteractiveHeroMedia />
         </div>
       </Container>
       <Container className="relative mt-6">
