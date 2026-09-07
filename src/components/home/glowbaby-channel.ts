@@ -1,5 +1,25 @@
 import * as THREE from "three";
-import { heroSceneConfig } from "./hero-scene-config";
+import { heroSceneConfig, type LightMode } from "./hero-scene-config";
+
+// Shared angular palette keeps the diffuser and its surrounding light in phase.
+export const lightPaletteGLSL = `
+  vec3 lightColor(float angle, float time, float mode) {
+    if (mode > 1.5) return vec3(1.0, 0.52, 0.12);
+    if (mode < 0.5) return vec3(0.63, 0.35, 1.0);
+    return 0.5 + 0.5 * cos(6.2831853 * (angle - time * 0.055 + vec3(0.0, 0.33, 0.67)));
+  }
+`;
+
+export function sampleLightColor(target: THREE.Color, angle: number, time: number, mode: LightMode) {
+  if (mode === "visibility") return target.setRGB(1, 0.52, 0.12);
+  if (mode === "glow") return target.setRGB(0.63, 0.35, 1);
+  const phase = angle - time * 0.055;
+  return target.setRGB(
+    0.5 + 0.5 * Math.cos(Math.PI * 2 * phase),
+    0.5 + 0.5 * Math.cos(Math.PI * 2 * (phase + 0.33)),
+    0.5 + 0.5 * Math.cos(Math.PI * 2 * (phase + 0.67)),
+  );
+}
 
 /** Closed domed channel swept around an ellipse; the seam shares identical positions.
  * Profile follows the supplied 15.08 × 12.7 mm envelope, with a flat foot and domed roof.
@@ -18,7 +38,7 @@ export function createChannelGeometry(inner = false) {
   const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
   const stride = profile.length + 1;
   for (let i = 0; i <= c.segments; i++) {
-    const angle = (i === c.segments ? 0 : i / c.segments * Math.PI * 2) + c.rotation;
+    const angle = i === c.segments ? 0 : i / c.segments * Math.PI * 2;
     const cos = Math.cos(angle), sin = Math.sin(angle);
     // Unit outward normal of an ellipse, not the radial vector.
     const length = Math.hypot(cos / c.radiusX, sin / c.radiusZ);
@@ -47,26 +67,31 @@ export function createChannelGeometry(inner = false) {
     normals.setXYZ(j, normal.x, normal.y, normal.z);
     normals.setXYZ(last, normal.x, normal.y, normal.z);
   }
-  return geometry;
+  return geometry.rotateY(c.rotation);
 }
 
 export function createLightMaterial() {
+  const emission = heroSceneConfig.emission;
   return new THREE.ShaderMaterial({
-    uniforms: { time: { value: 0 }, mode: { value: 1 }, activation: { value: 0 } },
+    uniforms: {
+      time: { value: 0 }, mode: { value: 1 }, activation: { value: 0 },
+      emissionBase: { value: emission.base }, brightness: { value: emission.brightness },
+      idleLevel: { value: emission.idleLevel }, pulseIntensity: { value: emission.pulseIntensity },
+      pulseSharpness: { value: emission.pulseSharpness }, settleStart: { value: emission.settleStart },
+    },
     vertexShader: `varying vec2 vUv;
       void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
     fragmentShader: `varying vec2 vUv;
       uniform float time; uniform float mode; uniform float activation;
+      uniform float emissionBase; uniform float brightness; uniform float idleLevel;
+      uniform float pulseIntensity; uniform float pulseSharpness; uniform float settleStart;
+      ${lightPaletteGLSL}
       void main() {
-        vec3 color = vec3(0.63, 0.35, 1.0);
-        if (mode > 0.5 && mode < 1.5) {
-          color = 0.55 + 0.45 * cos(6.2831853 * (vUv.x - time * 0.055 + vec3(0.0, 0.33, 0.67)));
-        }
-        if (mode > 1.5) color = vec3(1.0, 0.52, 0.12);
+        vec3 color = lightColor(vUv.x, time, mode);
         float distanceToPulse = abs(fract(vUv.x - activation + 0.5) - 0.5);
-        float pulse = exp(-distanceToPulse * distanceToPulse * 220.0);
-        float level = mix(0.06 + pulse * 0.9, 1.0, smoothstep(0.85, 1.0, activation));
-        gl_FragColor = vec4(color * (0.25 + level * 1.35), 1.0);
+        float pulse = exp(-distanceToPulse * distanceToPulse * pulseSharpness);
+        float level = mix(idleLevel + pulse * pulseIntensity, 1.0, smoothstep(settleStart, 1.0, activation));
+        gl_FragColor = vec4(color * (emissionBase + level * brightness), 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,

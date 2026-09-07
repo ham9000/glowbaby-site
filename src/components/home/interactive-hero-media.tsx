@@ -4,6 +4,12 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { heroSceneConfig, lightModes, type LightMode } from "./hero-scene-config";
 import type { HeroSceneHandle } from "./stroller-hero-scene";
+import flowPoster from "../../../public/hero/stroller-render-flow.webp";
+import glowPoster from "../../../public/hero/stroller-render-glow.webp";
+import visibilityPoster from "../../../public/hero/stroller-render-visibility.webp";
+
+// Static imports fingerprint regenerated renders so deployed image caches stay current.
+const posters = { flow: flowPoster, glow: glowPoster, visibility: visibilityPoster };
 
 type Connection = EventTarget & { saveData?: boolean; effectiveType?: string };
 
@@ -87,8 +93,8 @@ export function InteractiveHeroMedia() {
 
   return (
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
-      <div className="interactive-hero-stage">
-        <Image src={`/hero/stroller-render-${mode}.webp`} alt="3D rendering of a stroller fitted with the Glowbaby prototype beneath its basket, illuminating the ground below." fill priority sizes="(min-width: 1024px) 48vw, 100vw" className="object-contain" />
+      <div className="interactive-hero-stage" style={{ backgroundColor: heroSceneConfig.environment.background }}>
+        <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 562px, (min-width: 1024px) calc((100vw - 7rem) / 2), (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2.5rem)" className="object-contain" />
         <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
         <span className="interactive-hero-badge">{ready ? "Drag gently to explore" : "Made for a little more color"}</span>
       </div>
