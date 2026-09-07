@@ -139,6 +139,6 @@ export const heroSceneConfig = {
     centerRadius: 0.16,
   },
   // Low three-quarter detail framing; product dimensions and mounting stay unchanged.
-  camera: { position: [0.48, 0.235, 0.56] as [number, number, number], target: [0, 0.12, 0.065] as [number, number, number], fov: 38 },
+  camera: { position: [0.48, 0.235, 0.56] as [number, number, number], target: [0.02, 0.08, 0.065] as [number, number, number], fov: 42 },
   interaction: { yaw: Math.PI / 24, pitch: Math.PI / 90, damping: 5, returnDamping: 3, dragSensitivity: 2 },
 };

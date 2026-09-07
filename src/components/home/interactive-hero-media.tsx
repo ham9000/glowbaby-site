@@ -136,11 +136,14 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
   return (
     <figure className="interactive-hero" aria-label="Explore the Glowbaby stroller light concept">
       <div className="interactive-hero-stage" style={{ backgroundColor: heroSceneConfig.environment.background }} onContextMenu={(event) => event.preventDefault()}>
-        <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 562px, (min-width: 1024px) calc((100vw - 7rem) / 2), (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2.5rem)" className="object-contain" onLoad={() => {
-          posterLoaded.current = true;
-          void controls.current?.refresh();
-        }} />
-        <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
+        <div className="interactive-hero-render">
+          <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className="object-contain" onLoad={() => {
+            posterLoaded.current = true;
+            void controls.current?.refresh();
+          }} />
+          <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
+        </div>
+        <span className="interactive-hero-frame" aria-hidden="true" />
         <span className="interactive-hero-badge">{ready ? "Drag to explore" : "Made for a little more color"}</span>
       </div>
       <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">

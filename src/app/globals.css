@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
-.interactive-hero { width: 100%; border: 1px solid #ded7ed; border-radius: 2rem; background: #eeeafd; overflow: hidden; box-shadow: 0 24px 70px #5a0fea0c; }
-.interactive-hero-stage { position: relative; aspect-ratio: 1.12; background: #171827; }
+.interactive-hero { --hero-breakout-x: clamp(1.25rem, 5vw, 1.75rem); --hero-breakout-y: clamp(1.1rem, 4.5vw, 1.55rem); --hero-frame-bottom: clamp(2.25rem, 8vw, 2.75rem); position: relative; width: 100%; border: 1px solid #ded7ed; border-radius: 2rem; background: #eeeafd; overflow: visible; box-shadow: 0 24px 70px #5a0fea0c; }
+.interactive-hero-stage { position: relative; z-index: 1; aspect-ratio: 1.12; }
 .interactive-hero-stage, .interactive-hero-stage * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.interactive-hero-render { position: absolute; inset: 0 calc(-1 * var(--hero-breakout-x)) calc(-1 * var(--hero-breakout-y)) 0; overflow: hidden; border-radius: 2rem 2rem 1.5rem .5rem; background: #171827; }
+.interactive-hero-frame { position: absolute; inset: -1px -1px var(--hero-frame-bottom); z-index: 2; border: 1px solid #ded7ed; border-radius: 2rem; pointer-events: none; }
 .interactive-hero-canvas { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 650ms ease; }
 .interactive-hero-canvas.is-ready { opacity: 1; cursor: grab; pointer-events: auto; }
 .interactive-hero-canvas.is-ready:active { cursor: grabbing; }
 .interactive-hero-canvas canvas { display: block; width: 100%; height: 100%; }
-.interactive-hero-badge { position: absolute; top: 1.25rem; left: 1.4rem; font-size: .65rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #e2d8f6; pointer-events: none; }
-.hero-mode-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem; padding: .5rem .35rem; }
+.interactive-hero-badge { position: absolute; top: 1.25rem; left: 1.4rem; z-index: 3; font-size: .65rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #e2d8f6; pointer-events: none; }
+.hero-mode-controls { position: relative; z-index: 2; display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem; margin-top: var(--hero-breakout-y); padding: .5rem .35rem; }
 .hero-mode-controls button { display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: .3rem; min-height: 44px; padding: .6rem .35rem; border-radius: 999px; border: 1px solid #d6cee4; background: #ffffff80; font-size: .72rem; font-weight: 700; color: #30253e; cursor: pointer; white-space: nowrap; }
 .hero-mode-controls button[aria-pressed="true"] { background: #30203e; border-color: #30203e; color: white; }
 .hero-mode-controls .hero-3d-switch { flex: none; background: transparent; border-color: transparent; }
