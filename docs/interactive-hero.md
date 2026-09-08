@@ -41,11 +41,11 @@ At rest, the `GBE1` envelope contains a 12-byte IV, authenticated ciphertext, an
 
 | Asset | Original bytes | Optimized bytes | Triangles | Primitives before / after |
 | --- | ---: | ---: | ---: | ---: |
-| Stroller | 20,178,104 | 870,980 | 74,999 | 2 / 2 |
-| Glowbaby bottom | 1,871,264 | 415,200 | 50,305 | 803 / 1 |
-| Glowbaby top | 44,444 | 8,324 | 1,040 | 29 / 1 |
+| Stroller | 20,178,104 | 589,560 | 74,999 | 2 / 2 |
+| Glowbaby bottom | 1,871,264 | 292,216 | 50,305 | 803 / 1 |
+| Glowbaby top | 44,444 | 7,300 | 1,040 | 29 / 1 |
 
-Stroller source is `.local-assets/stroller-source.glb`; optimized copy is `.local-assets/stroller-optimized.glb`. The single node `polySurface1715` is translated by approximately (0.095024, -0.686888, 2.295369) m. Local bounds are X +/-0.203985 m, Y -0.004982 to 0.957095 m, Z -0.371235 to 0.362484 m. Runtime centers world X/Z bounds, grounds wheels and scales to 0.962 m height. Three embedded textures shrink from 4096 squared to 1024 squared WebP. The separately supplied texture archive is not loaded redundantly.
+Stroller source is `.local-assets/stroller-source.glb`; optimized copy is `.local-assets/stroller-optimized.glb`. The single node `polySurface1715` is translated by approximately (0.095024, -0.686888, 2.295369) m. Local bounds are X +/-0.203985 m, Y -0.004982 to 0.957095 m, Z -0.371235 to 0.362484 m. Runtime centers world X/Z bounds, grounds wheels and scales to 0.962 m height. Three embedded textures shrink from 4096 squared to 512 squared WebP, matching the hero's displayed scale. The separately supplied texture archive is not loaded redundantly.
 
 The explicit 75,000-triangle stroller target reduces its original 199,831 triangles with attribute-aware Meshopt simplification. Material boundaries, UV seams, borders and bounding extrema are retained. The measured relative appearance error is 0.000930, below the configured 0.001 limit; the output bounds match the previous optimized stroller. Insufficient tolerance fails before overwriting the output. Omitting the target preserves triangle counts, as required for both actual Glowbaby CAD parts.
 
@@ -71,7 +71,7 @@ All artistic values live in `hero-scene-config.ts`:
 - Camera (0.48, 0.235, 0.56) m, target (0, 0.12, 0.065), FOV 38 degrees. The actual device is the focal point; lower frame, basket and wheels provide stroller context. Device dimensions are not enlarged. Camera-only dragging is limited to +/-7.5 degrees yaw and +/-2 degrees pitch, so the stroller remains grounded. Hover alone does not move it. Release eases back over roughly a second; re-grabbing preserves the current angle. In 3D mode, one-finger drags immediately inspect both axes without a hold delay. Canvas `touch-action: pinch-zoom` preserves native pinch zoom but reserves single-finger gestures for inspection.
 - Gating: server delivery configured, no reduced motion or explicit data saving/2G, at least 4 GB device memory when reported, secure WebCrypto and WebGL2 available. Fine-pointer layouts at least 900px wide begin enhancement as soon as the hero is visible; touch devices and narrower layouts require explicit opt-in. After the small access check succeeds, encrypted model delivery runs in parallel with the Three.js scene import. Opt-in overrides only these presentation gates, never motion, data-saving, hardware, or security gates. Ineligible clients do not import 3D code or request protected payloads. IntersectionObserver/document visibility pause rendering; DPR capped at 1.5. Failures retain the poster.
 
-The three models plus both channel layers total **140,936 triangles**, before the small floor, strap and contact meshes: approximately **141k** for the scene, below the preferred 150k geometry budget and down from about 266k. Combined optimized model files are **1,294,504 bytes**; the compressed encrypted delivery artifact is **848,224 bytes**. Shadow rendering still has a runtime cost; the geometry budget is not an FPS guarantee.
+The three models plus both channel layers total **140,936 triangles**, before the small floor, strap and contact meshes: approximately **141k** for the scene, below the preferred 150k geometry budget and down from about 266k. High-level Meshopt encoding and 512 px stroller textures reduce the combined optimized model files to **889,076 bytes**; gzip-before-encryption reduces the protected delivery artifact to **539,733 bytes**. Shadow rendering still has a runtime cost; the geometry budget is not an FPS guarantee.
 
 A dedicated loading manager catches texture failures even when Three.js resolves a model with a missing texture. Model, texture, shader and context failures retain the website poster. Partial initialization and normal disposal release owned meshes/materials/textures, shadows, renderer, observers and input listeners.
 
@@ -80,7 +80,7 @@ A dedicated loading manager catches texture failures even when Three.js resolves
 The visual viewport disables text selection, native image dragging, and long-press menus/tap highlights. These restrictions do not extend to the mode controls, captions, or surrounding page text. Swipe outside the live viewer to scroll, or switch 3D off to restore normal scrolling across the image.
 
 ```powershell
-node scripts\prepare-hero-assets.mjs .local-assets\stroller-source.glb .local-assets\stroller-optimized.glb --local-only --target-triangles 75000 --simplify-error 0.001
+node scripts\prepare-hero-assets.mjs .local-assets\stroller-source.glb .local-assets\stroller-optimized.glb --local-only --target-triangles 75000 --simplify-error 0.001 --texture-size 512
 node scripts\prepare-hero-assets.mjs .local-assets\bottom-source.glb .local-assets\bottom.glb --local-only
 node scripts\prepare-hero-assets.mjs .local-assets\top-source.glb .local-assets\top.glb --local-only
 npm run hero:preview

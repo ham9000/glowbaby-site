@@ -76,6 +76,10 @@ try {
   assert.ok(optimized.after.primitiveDetails.every((primitive) => primitive.attributes.includes("NORMAL") && primitive.attributes.includes("TEXCOORD_0")));
   assert.equal(optimized.after.textures.length, 1);
   assert.ok(optimized.after.textures.every((entry) => entry.mimeType === "image/webp" && Math.max(...entry.size) <= 1024));
+  assert.equal(optimized.textureSize, 1024);
+  const reducedTexture = run(source, output, ["--local-only", "--texture-size", "512"]);
+  assert.equal(reducedTexture.textureSize, 512);
+  assert.ok(reducedTexture.after.textures.every((entry) => Math.max(...entry.size) <= 512));
   await MeshoptDecoder.ready;
   const decoded = await new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ "meshopt.decoder": MeshoptDecoder }).read(output);
   assert.ok(decoded.getRoot().listExtensionsRequired().some((extension) => extension.extensionName === "EXT_meshopt_compression"));
@@ -88,10 +92,13 @@ try {
     ["--target-triangles", "400", "--simplify-error", "0.01"],
     ["--target-triangles", "400", "--simplify-error", "0"],
     ["--simplify-error", "0.001"],
+    ["--texture-size", "500"],
+    ["--texture-size", "64"],
+    ["--texture-size", "2048"],
     ["--unknown", "400"],
     ["--target-triangles", "400", "--target-triangles", "200"],
   ]) {
-    run(source, output, ["--local-only", ...options], /positive integer|simplify-error|Invalid or duplicate option/);
+    run(source, output, ["--local-only", ...options], /positive integer|simplify-error|texture-size|Invalid or duplicate option/);
   }
   run(source, output, [], /Usage:/);
   run(source, source, ["--local-only"], /original source separate/);

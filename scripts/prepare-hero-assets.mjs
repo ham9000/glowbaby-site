@@ -7,14 +7,15 @@ import { compactPrimitive, dedup, dequantize, prune, weld, join, meshopt, textur
 import { MeshoptEncoder, MeshoptDecoder, MeshoptSimplifier } from "meshoptimizer";
 import sharp from "sharp";
 
-const usage = `Usage: node scripts\\prepare-hero-assets.mjs INPUT.glb OUTPUT.glb PERMISSION [--target-triangles N] [--simplify-error E]
+const usage = `Usage: node scripts\\prepare-hero-assets.mjs INPUT.glb OUTPUT.glb PERMISSION [--target-triangles N] [--simplify-error E] [--texture-size N]
 PERMISSION: --local-only (output strictly inside .local-assets), or --web-delivery-permitted (verify source license first).
 Without --target-triangles, no triangle simplification is performed: use this for topology-preserving product CAD.
 --target-triangles: positive integer, a hard budget for this explicit input file only; failure leaves output unchanged.
 --simplify-error: positive relative Meshopt appearance-error limit, default/maximum 0.001 (0.1% of mesh extent).
+--texture-size: power-of-two maximum from 128 to 1024 pixels, default 1024.
 Simplification preserves material boundaries, UV seams, borders and bounding extrema; normals/UVs have weight 1.
 The error limit is never increased automatically. A failed budget requires a deliberate target/error change.
-Textures become WebP at most 1024x1024; geometry uses Meshopt with 14-bit positions. Visual review remains required.`;
+Textures become WebP at the selected limit; geometry uses Meshopt with 14-bit positions. Visual review remains required.`;
 const args = process.argv.slice(2);
 if (args.length === 1 && args[0] === "--help") {
   console.log(usage);
@@ -27,13 +28,14 @@ if (!source || !destination || !["--local-only", "--web-delivery-permitted"].inc
 const settings = new Map();
 for (let i = 0; i < options.length; i += 2) {
   const key = options[i], value = options[i + 1];
-  if (!["--target-triangles", "--simplify-error"].includes(key) || settings.has(key) || !value || value.startsWith("--")) {
+  if (!["--target-triangles", "--simplify-error", "--texture-size"].includes(key) || settings.has(key) || !value || value.startsWith("--")) {
     throw new Error(`Invalid or duplicate option: ${key}\n${usage}`);
   }
   settings.set(key, Number(value));
 }
 const targetTriangles = settings.get("--target-triangles");
 const simplifyError = settings.get("--simplify-error") ?? 0.001;
+const textureSize = settings.get("--texture-size") ?? 1024;
 if (targetTriangles !== undefined && (!Number.isSafeInteger(targetTriangles) || targetTriangles < 1)) {
   throw new Error("--target-triangles must be a positive integer.");
 }
@@ -42,6 +44,9 @@ if (settings.has("--simplify-error") && targetTriangles === undefined) {
 }
 if (!Number.isFinite(simplifyError) || simplifyError <= 0 || simplifyError > 0.001) {
   throw new Error("--simplify-error must be greater than 0 and at most 0.001 (0.1%).");
+}
+if (!Number.isSafeInteger(textureSize) || textureSize < 128 || textureSize > 1024 || (textureSize & (textureSize - 1)) !== 0) {
+  throw new Error("--texture-size must be a power-of-two integer from 128 to 1024.");
 }
 
 function inside(directory, filename) {
@@ -208,8 +213,8 @@ const preserved = doc.getRoot().listMeshes().flatMap((mesh) => mesh.listPrimitiv
 }));
 await doc.transform(
   prune({ keepAttributes: true, keepSolidTextures: true }),
-  textureCompress({ encoder: sharp, targetFormat: "webp", resize: [1024, 1024] }),
-  meshopt({ encoder: MeshoptEncoder, level: "medium", quantizePosition: 14 }),
+  textureCompress({ encoder: sharp, targetFormat: "webp", resize: [textureSize, textureSize] }),
+  meshopt({ encoder: MeshoptEncoder, level: "high", quantizePosition: 14 }),
 );
 for (const { primitive, material, semantics } of preserved) {
   if (primitive.getMaterial() !== material) {
@@ -228,13 +233,13 @@ if (targetTriangles !== undefined && after.triangles > targetTriangles) {
 if (targetTriangles === undefined && after.triangles !== before.triangles) {
   throw new Error("Triangle count changed without an explicit simplification target; output not written.");
 }
-if (after.textures.some((texture) => texture.mimeType !== "image/webp" || !texture.size || Math.max(...texture.size) > 1024)) {
-  throw new Error("Encoded textures exceed the WebP/1024px budget; output not written.");
+if (after.textures.some((texture) => texture.mimeType !== "image/webp" || !texture.size || Math.max(...texture.size) > textureSize)) {
+  throw new Error(`Encoded textures exceed the WebP/${textureSize}px budget; output not written.`);
 }
 await fs.mkdir(path.dirname(outputPath), { recursive: true });
 await fs.writeFile(outputPath, outputData);
 console.log(JSON.stringify({
-  before, after, simplification, sourceBytes: sourceData.byteLength, outputBytes: outputData.byteLength,
+  before, after, simplification, textureSize, sourceBytes: sourceData.byteLength, outputBytes: outputData.byteLength,
   sourceSHA256: createHash("sha256").update(sourceData).digest("hex"),
   outputSHA256: createHash("sha256").update(outputData).digest("hex"),
 }, null, 2));
