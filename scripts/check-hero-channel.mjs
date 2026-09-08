@@ -71,6 +71,9 @@ try {
         assert.ok(Math.abs(bounds.max.y - bounds.min.y - c.height * scale) < 1e-7);
         assert.ok(Math.abs(bounds.max.x - (c.radiusX + c.width * scale / 2)) < 1e-7);
         assert.ok(Math.abs(bounds.max.z - (c.radiusZ + c.width * scale / 2)) < 1e-7);
+        if (scale === original.profileScale) {
+          assert.ok(bounds.min.y < 0 && bounds.max.y > heroSceneConfig.assembly.topOffset, "Diffuser must cover the full printed base height");
+        }
       }
       for (const rotation of [original.rotation, Math.PI / 2, Math.PI / 5]) {
         c.rotation = rotation;

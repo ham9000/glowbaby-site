@@ -50,7 +50,7 @@ export function sampleLightColor(target: THREE.Color, angle: number, time: numbe
 }
 
 /** Closed domed channel swept around an ellipse; the seam shares identical positions.
- * Profile follows the supplied 15.08 × 12.7 mm envelope, with a flat foot and domed roof.
+ * Profile covers the 25 mm printed base, with a flat foot and domed roof.
  * It intentionally does not inherit the base model's edge cutouts.
  */
 export function createChannelGeometry(inner = false) {
