@@ -20,7 +20,6 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
   const viewport = useRef<HTMLSpanElement>(null);
   const scene = useRef<HeroSceneHandle | null>(null);
   const controls = useRef<HeroControls | null>(null);
-  const posterLoaded = useRef(false);
   const modeRef = useRef<LightMode>("flow");
   const [mode, setMode] = useState<LightMode>("flow");
   const [status, setStatus] = useState<SceneStatus>("image");
@@ -61,7 +60,6 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       if (disposed) return;
       if (!capable()) { setCanExplore(false); stop(); return; }
       if (!eligible() && (scene.current || loading)) stop();
-      if (!posterLoaded.current) return;
       const active = visible && !document.hidden;
       if (!active) {
         scene.current?.setActive(false);
@@ -86,12 +84,26 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       const abort = new AbortController();
       request = abort;
       try {
-        // Access, decryption, and embedded-model validation precede the heavy engine.
         const { loadHeroModels } = await import("../../lib/hero-asset-client");
         if (disposed || attempt !== generation) return;
-        const models = await loadHeroModels(abort.signal);
+        type SceneModuleResult =
+          | { module: typeof import("./stroller-hero-scene"); error?: never }
+          | { module?: never; error: unknown };
+        let sceneModule: Promise<SceneModuleResult> | undefined;
+        const loadSceneModule = () => sceneModule ??= import("./stroller-hero-scene").then(
+          (module) => ({ module }),
+          (error: unknown) => {
+            abort.abort();
+            return { error };
+          },
+        );
+        const models = await loadHeroModels(abort.signal, () => {
+          void loadSceneModule();
+        });
         if (disposed || attempt !== generation) return;
-        const { createHeroScene } = await import("./stroller-hero-scene");
+        const loadedScene = await loadSceneModule();
+        if ("error" in loadedScene) throw loadedScene.error;
+        const { createHeroScene } = loadedScene.module;
         if (disposed || attempt !== generation) return;
         const handle = await createHeroScene(element, modeRef.current, () => {
           if (disposed || attempt !== generation) return;
@@ -143,10 +155,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       </svg>
       <div className="interactive-hero-stage" onContextMenu={(event) => event.preventDefault()}>
         <div className="interactive-hero-render">
-          <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className={`interactive-hero-poster object-contain ${ready ? "is-hidden" : ""}`} onLoad={() => {
-            posterLoaded.current = true;
-            void controls.current?.refresh();
-          }} />
+          <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className={`interactive-hero-poster object-contain ${ready ? "is-hidden" : ""}`} />
           <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
         </div>
         <span ref={viewport} className="interactive-hero-frame" aria-hidden="true" />

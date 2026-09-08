@@ -55,7 +55,7 @@ function validateGrant(value: unknown): HeroAccessGrant {
   return { assetUrl: grant.assetUrl, grant: grant.grant, key: grant.key, expiresAt: grant.expiresAt };
 }
 
-export async function loadHeroModels(signal: AbortSignal): Promise<HeroModelBuffers> {
+export async function loadHeroModels(signal: AbortSignal, onDeliveryReady?: () => void): Promise<HeroModelBuffers> {
   signal.throwIfAborted();
   if (!globalThis.isSecureContext || !globalThis.crypto?.subtle) throw new Error("Secure 3D delivery is unavailable");
   const subtle = globalThis.crypto.subtle;
@@ -80,6 +80,7 @@ export async function loadHeroModels(signal: AbortSignal): Promise<HeroModelBuff
       }
       signal.throwIfAborted();
       if (grant.expiresAt <= Date.now()) throw new ExpiredHeroGrant("Hero access expired");
+      onDeliveryReady?.();
       const response = await fetch(grant.assetUrl, {
         method: "POST", headers: { [HERO_VIEWER_HEADER]: "1", [HERO_GRANT_HEADER]: grant.grant },
         credentials: "same-origin", cache: "no-store", redirect: "error", signal,

@@ -77,6 +77,13 @@ for (const name of ["stroller", "bottom", "top"]) assert.deepEqual(Buffer.from(d
 assert.deepEqual(calls, ["/api/hero/session", `/api/hero/asset/${id}`]);
 assert.equal(keyExtractable, false);
 
+let expiredReady = 0;
+await assert.rejects(delivery(async () => jsonResponse({ ...validGrant(), expiresAt: Date.now() - 1 }))(
+  new AbortController().signal,
+  () => { expiredReady++; },
+));
+assert.equal(expiredReady, 0, "Expired access must not start the scene engine");
+
 for (const mutate of [
   (grant) => ({ ...grant, assetUrl: `https://other.example/api/hero/asset/${id}` }),
   (grant) => ({ ...grant, assetUrl: `//other.example/api/hero/asset/${id}` }),
@@ -179,14 +186,17 @@ function componentHarness(options = {}) {
     ...Object.fromEntries(Array.from(lightModes, ({ id }) => [
       `../../../public/hero/stroller-render-${id}.webp`, { default: `${id}-poster` },
     ])),
-    "../../lib/hero-asset-client": { async loadHeroModels(signal) {
+    "../../lib/hero-asset-client": { async loadHeroModels(signal, onDeliveryReady) {
       record.delivery++; record.signal = signal; record.order.push("delivery");
+      if (options.access) await options.access(signal, record.delivery);
+      onDeliveryReady?.();
       if (options.load) await options.load(signal, record.delivery);
       record.order.push("decrypted");
       return models;
     } },
     "./stroller-hero-scene": () => {
       record.engine++; record.order.push("engine");
+      if (options.engineError) throw options.engineError;
       return { async createHeroScene(_host, mode, onFailure, data, signal) {
         assert.equal(data, models, "Production must pass decrypted model buffers");
         assert.equal(signal, record.signal);
@@ -223,7 +233,6 @@ function componentHarness(options = {}) {
   return {
     record, document, width, motion, coarse, connection, render, find,
     visible(value = true) { observer?.([{ isIntersecting: value }]); },
-    imageLoaded() { find((node) => node.type === "image").props.onLoad(); },
     toggle3D() {
       render();
       const button = find((node) => node.props.role === "switch");
@@ -236,8 +245,6 @@ function componentHarness(options = {}) {
 const desktop = componentHarness({ sceneAvailable: true });
 desktop.visible();
 await flush();
-assert.equal(desktop.record.probe, 0, "Poster LCP must precede even the capability probe");
-assert.equal(desktop.record.delivery, 0);
 assert.ok(lightModes.some(({ id }) => desktop.find((node) => node.type === "image").props.src === `${id}-poster`));
 assert.equal(desktop.find((node) => node.type === "image").props.draggable, false, "The poster must not start native image dragging");
 const viewport = desktop.find((node) => node.props.className === "interactive-hero-stage");
@@ -245,10 +252,9 @@ let contextMenuPrevented = false;
 viewport.props.onContextMenu({ preventDefault() { contextMenuPrevented = true; } });
 assert.equal(contextMenuPrevented, true, "Viewport long presses must not open a native context menu");
 assert.equal(desktop.find((node) => node.props.className === "interactive-hero").props.onContextMenu, undefined, "Selection protection must not include the controls or caption");
-desktop.imageLoaded();
-await flush();
 desktop.render();
-assert.deepEqual(desktop.record.order, ["delivery", "decrypted", "engine"]);
+assert.equal(desktop.record.delivery, 1);
+assert.equal(desktop.record.engine, 1);
 assert.ok(desktop.find((node) => node.props.role === "switch").props["aria-checked"]);
 const modeGroup = desktop.find((node) => node.props.className === "hero-mode-controls");
 const modeButtons = modeGroup.props.children.flat().filter((node) => node?.props?.["aria-pressed"] !== undefined);
@@ -276,7 +282,7 @@ assert.equal(desktop.record.signal.aborted, true);
 desktop.unmount();
 
 const mobile = componentHarness({ sceneAvailable: true, desktop: false });
-mobile.visible(); mobile.imageLoaded();
+mobile.visible();
 await flush();
 assert.equal(mobile.record.delivery, 0);
 assert.equal(mobile.record.engine, 0);
@@ -293,7 +299,7 @@ assert.equal(mobile.record.delivery, 1, "Explicit image selection suppresses aut
 mobile.unmount();
 
 const wideTouch = componentHarness({ sceneAvailable: true, desktop: true, coarse: true });
-wideTouch.visible(); wideTouch.imageLoaded();
+wideTouch.visible();
 await flush();
 assert.equal(wideTouch.record.delivery, 0, "Touch devices must opt into inspection even at desktop widths");
 assert.equal(wideTouch.record.engine, 0);
@@ -311,7 +317,7 @@ for (const gates of [
   { effectiveType: "slow-2g" }, { memory: 2 }, { secure: false }, { crypto: {} }, { webgl: false },
 ]) {
   const fallback = componentHarness({ sceneAvailable: true, ...gates, ...(Object.keys(gates).length ? {} : { sceneAvailable: undefined }) });
-  fallback.visible(); fallback.imageLoaded();
+  fallback.visible();
   await flush();
   fallback.render();
   assert.equal(fallback.record.delivery, 0);
@@ -319,8 +325,8 @@ for (const gates of [
   assert.equal(fallback.find((node) => node.props.role === "switch"), undefined);
   fallback.unmount();
 }
-const retry = componentHarness({ sceneAvailable: true, load(_signal, attempt) { if (attempt === 1) throw new Error("Denied"); } });
-retry.visible(); retry.imageLoaded();
+const retry = componentHarness({ sceneAvailable: true, access(_signal, attempt) { if (attempt === 1) throw new Error("Denied"); } });
+retry.visible();
 await flush();
 assert.equal(retry.record.engine, 0, "Access failure must not download Three");
 retry.render();
@@ -336,21 +342,37 @@ retry.unmount();
 for (const reason of ["cancel", "unmount", "motion", "hidden"]) {
   let release;
   const pending = componentHarness({ sceneAvailable: true, load: () => new Promise((resolve) => { release = resolve; }) });
-  pending.visible(); pending.imageLoaded();
+  pending.visible();
   await flush();
   if (reason === "cancel") pending.toggle3D();
   if (reason === "unmount") pending.unmount();
   if (reason === "motion") { pending.motion.matches = true; pending.motion.emit("change"); }
   if (reason === "hidden") { pending.document.hidden = true; pending.document.emit("visibilitychange"); }
   assert.equal(pending.record.signal.aborted, true, `${reason} must abort delivery`);
+  assert.equal(pending.record.engine, 1, "Three starts while encrypted asset delivery is pending");
   release();
   await flush();
-  assert.equal(pending.record.engine, 0, `${reason} must invalidate a late delivery`);
+  assert.equal(pending.record.modes.length, 0, `${reason} must invalidate a late delivery`);
   if (reason !== "unmount") pending.unmount();
 }
+const engineFailure = componentHarness({
+  sceneAvailable: true,
+  engineError: new Error("Chunk failed"),
+  load: (signal) => new Promise((_resolve, reject) => {
+    signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+  }),
+});
+engineFailure.visible();
+await flush();
+await flush();
+assert.equal(engineFailure.record.signal.aborted, true, "Engine failure must abort parallel model delivery");
+engineFailure.render();
+assert.match(engineFailure.find((node) => node.props.role === "status").props.children, /couldn.t load/i);
+engineFailure.unmount();
+
 let releaseScene;
 const lateScene = componentHarness({ sceneAvailable: true, create: () => new Promise((resolve) => { releaseScene = resolve; }) });
-lateScene.visible(); lateScene.imageLoaded();
+lateScene.visible();
 await flush();
 lateScene.toggle3D();
 releaseScene();
