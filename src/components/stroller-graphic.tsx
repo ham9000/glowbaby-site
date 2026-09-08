@@ -3,6 +3,7 @@ type StrollerGraphicProps = {
   width?: number;
   height?: number;
   showController?: boolean;
+  lightMode?: "rainbow" | "visibility";
 };
 
 export function StrollerGraphic({
@@ -10,7 +11,9 @@ export function StrollerGraphic({
   width = 640,
   height = 520,
   showController = true,
+  lightMode = "rainbow",
 }: StrollerGraphicProps) {
+  const visibility = lightMode === "visibility";
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -19,19 +22,19 @@ export function StrollerGraphic({
       height={height}
       className={className}
       role="img"
-      aria-label={`Glowbaby Stroller Light concept: a disc-shaped light with a rounded white rim and LEDs around its edge is mounted below the stroller basket, casting a colorful glow outward, around, and down onto the ground${showController ? "; a separate controller sits alongside" : ""}`}
+      aria-label={`Glowbaby Stroller Light concept: a disc-shaped light with a rounded white rim and LEDs around its edge is mounted below the stroller basket, casting a ${visibility ? "warm amber" : "colorful"} glow outward, around, and down onto the ground${showController ? "; a separate controller sits alongside" : ""}`}
       fill="none"
     >
       <ellipse cx="315" cy="460" rx="235" ry="23" fill="#050309" opacity=".3" />
       {Array.from({ length: 16 }, (_, index) => 1 - index / 16).map((scale) => (
         <g key={scale}>
-          <ellipse cx="310" cy="418" rx={178 * scale} ry={40 * scale} fill="#b695ff" opacity=".06" />
-          <ellipse cx="269" cy="421" rx={130 * scale} ry={34 * scale} fill="#19bff2" opacity=".06" />
-          <ellipse cx="354" cy="421" rx={136 * scale} ry={36 * scale} fill="#f5b4a4" opacity=".045" />
-          <ellipse cx="311" cy="445" rx={135 * scale} ry={30 * scale} fill="#b695ff" opacity=".055" />
-          <ellipse cx="312" cy="465" rx={205 * scale} ry={34 * scale} fill="#a57aff" opacity=".08" />
-          <ellipse cx="255" cy="466" rx={130 * scale} ry={25 * scale} fill="#19bff2" opacity=".08" />
-          <ellipse cx="370" cy="466" rx={112 * scale} ry={25 * scale} fill="#f5b4a4" opacity=".08" />
+          <ellipse cx="310" cy="418" rx={178 * scale} ry={40 * scale} fill={visibility ? "#ffd18a" : "#b695ff"} opacity=".06" />
+          <ellipse cx="269" cy="421" rx={130 * scale} ry={34 * scale} fill={visibility ? "#ffd18a" : "#19bff2"} opacity=".06" />
+          <ellipse cx="354" cy="421" rx={136 * scale} ry={36 * scale} fill={visibility ? "#ffd18a" : "#f5b4a4"} opacity=".045" />
+          <ellipse cx="311" cy="445" rx={135 * scale} ry={30 * scale} fill={visibility ? "#ffd18a" : "#b695ff"} opacity=".055" />
+          <ellipse cx="312" cy="465" rx={205 * scale} ry={34 * scale} fill={visibility ? "#ffd18a" : "#a57aff"} opacity=".08" />
+          <ellipse cx="255" cy="466" rx={130 * scale} ry={25 * scale} fill={visibility ? "#ffd18a" : "#19bff2"} opacity=".08" />
+          <ellipse cx="370" cy="466" rx={112 * scale} ry={25 * scale} fill={visibility ? "#ffd18a" : "#f5b4a4"} opacity=".08" />
         </g>
       ))}
 
@@ -106,7 +109,7 @@ export function StrollerGraphic({
       <circle cx="277" cy="286" r="4" fill="#c9bce1" />
 
       <rect x="303" y="395" width="16" height="12" rx="3" fill="#776a87" />
-      <ellipse cx="311" cy="428" rx="58" ry="11" fill="#c8dcff" opacity=".24" />
+      <ellipse cx="311" cy="428" rx="58" ry="11" fill={visibility ? "#ffd18a" : "#c8dcff"} opacity=".24" />
       <ellipse
         cx="311"
         cy="412"
@@ -123,7 +126,7 @@ export function StrollerGraphic({
         const angle = (index * Math.PI) / 12;
         const cx = 311 - 44 * Math.cos(angle);
         const cy = 415 + 11 * Math.sin(angle);
-        const color = index < 5 ? "#67ddff" : index < 9 ? "#b18aff" : "#ffc3b2";
+        const color = visibility ? "#ffd18a" : index < 5 ? "#67ddff" : index < 9 ? "#b18aff" : "#ffc3b2";
 
         return (
           <g key={index}>

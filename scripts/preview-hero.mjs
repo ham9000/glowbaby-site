@@ -8,7 +8,7 @@ import ts from "typescript";
 import { lightModes } from "../src/components/home/hero-scene-config.ts";
 
 const root = process.cwd();
-const modules = ["hero-scene-config", "glowbaby-channel", "stroller-hero-scene"];
+const modules = ["hero-scene-config", "glowbaby-channel", "glowbaby-model", "stroller-hero-scene"];
 const assets = { "stroller.glb": "stroller-optimized.glb", "bottom.glb": "bottom.glb", "top.glb": "top.glb" };
 const html = `<!doctype html><html lang="en"><meta charset="utf-8"><title>Glowbaby local assembly preview</title>
 <style>body{margin:0;background:#171827;color:#e2d8f6;font:14px system-ui}#scene{position:relative;width:100vw;height:calc(100vw / 1.12);max-height:90vh}#scene canvas,#viewport{position:absolute;inset:0}#viewport{pointer-events:none}nav{display:flex;gap:8px;justify-content:center;padding:12px}button{padding:12px 20px;border-radius:24px;border:1px solid #cbbce4;background:white}#status{text-align:center}body[data-capture]{background:transparent}body[data-capture] #scene{width:100vw;height:100vh;max-height:none}body[data-capture]:not([data-hero]) #viewport{right:13.3333%;bottom:13.3333%}body[data-capture] nav,body[data-capture] #status{display:none}</style>
@@ -19,7 +19,8 @@ const status=document.querySelector('#status'),params=new URLSearchParams(locati
 const fail=message=>{status.textContent=message;document.body.dataset.error=message;delete document.body.dataset.ready;};
 if(params.has('capture'))document.body.dataset.capture='true';
 if(params.has('hero')){document.body.dataset.hero='true';config.camera.position=[1.52,.74,1.8];config.camera.target=[0,.40,0];config.camera.fov=34;}
-if(params.has('detail')){config.strollerHeight=0;config.assembly.position=[0,0.05,0];config.camera.position=[0.29,0.25,0.35];config.camera.target=[0,0.07,0];}
+if(params.has('detail')){config.strollerHeight=0;config.assembly.position=[0,0.05,0];config.attachment.offsetsX=[];config.camera.position=[0.29,0.25,0.35];config.camera.target=[0,0.07,0];}
+if(!params.has('capture'))Object.assign(config.interaction,{yaw:Math.PI,pitch:Math.PI/2,returnDamping:0});
 try{const handle=await createHeroScene(document.querySelector('#scene'),params.get('mode')||'flow',()=>fail('Rendering failed'),undefined,undefined,document.querySelector('#viewport'));
 if(document.body.dataset.error){handle.dispose();throw new Error(document.body.dataset.error);}
 handle.setActive(true);if(!document.body.dataset.error)status.textContent='Actual Glowbaby CAD • local review only';

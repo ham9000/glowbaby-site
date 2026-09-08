@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { previewServer } from "./preview-hero.mjs";
+import { heroSceneConfig } from "../src/components/home/hero-scene-config.ts";
 
 try {
   await new Promise((resolve, reject) => {
@@ -66,6 +67,35 @@ try {
   assert.deepEqual(heroConfig.camera.position, [1.52, .74, 1.8]);
   assert.deepEqual(heroConfig.camera.target, [0, .40, 0]);
   assert.equal(heroConfig.camera.fov, 34);
+  const detailConfig = { camera: {}, assembly: {}, attachment: { offsetsX: [-1, 1] } };
+  await run({
+    body: { dataset: {} },
+    querySelector: (selector) => selector === "#status" ? { textContent: "" } : {},
+    querySelectorAll: () => [],
+  }, { search: "?capture=1&detail=1" }, async () => ({
+    setActive() {}, setMode() {}, dispose() {}, renderStill() {},
+  }), detailConfig, { error() {} });
+  assert.equal(detailConfig.strollerHeight, 0, "Device-only review hides the stroller");
+  assert.deepEqual(detailConfig.attachment.offsetsX, [], "Synthetic stroller straps must not obscure the actual CAD lid in device-only review");
+  const websiteInteraction = structuredClone(heroSceneConfig.interaction);
+  for (const search of ["", "?detail=1", "?capture=1", "?capture=1&detail=1", "?capture=1&hero=1"]) {
+    const previewConfig = structuredClone(heroSceneConfig);
+    await run({
+      body: { dataset: {} },
+      querySelector: (selector) => selector === "#status" ? { textContent: "" } : {},
+      querySelectorAll: () => [],
+    }, { search }, async () => {
+      if (search.includes("capture=1")) {
+        assert.deepEqual(previewConfig.interaction, websiteInteraction, "Poster captures retain the website's interaction settings");
+      } else {
+        assert.equal(previewConfig.interaction.yaw, Math.PI, "Debug dragging covers a full 360-degree horizontal range");
+        assert.equal(previewConfig.interaction.pitch, Math.PI / 2, "Debug dragging allows top and underside inspection");
+        assert.equal(previewConfig.interaction.returnDamping, 0, "Debug camera stays at the inspected angle after release");
+      }
+      return { setActive() {}, setMode() {}, dispose() {}, renderStill() {} };
+    }, previewConfig, { error() {} });
+  }
+  assert.deepEqual(heroSceneConfig.interaction, websiteInteraction, "Preview overrides never mutate the shared website defaults");
   console.log("Preview: deterministic capture and five model/render/context failure paths passed.");
 } finally {
   previewServer.closeAllConnections();

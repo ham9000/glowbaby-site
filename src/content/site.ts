@@ -65,13 +65,13 @@ export const realWorldScenarios = [
     scene: "park-path",
     title: "When the path gets a little dim.",
     description:
-      "A shared-path concept, showing the intended glow around the stroller for the ground near you and the people sharing the route.",
+      "Warm visibility light along a winding park path, illuminating the ground around your stroller as the evening settles in.",
   },
   {
     scene: "family-event",
     title: "When the celebration runs late.",
     description:
-      "An evening-event concept: practical light around the stroller, with a little color for the gathering and the walk back.",
+      "The walk home after an evening out, with steady amber light around your stroller as you approach a neighborhood corner.",
   },
 ] as const;
 

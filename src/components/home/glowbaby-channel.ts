@@ -1,14 +1,25 @@
 import * as THREE from "three";
-import { gradientColors, heroSceneConfig, type LightMode } from "./hero-scene-config";
+import { gradientStops, heroSceneConfig, type LightMode } from "./hero-scene-config";
 
 const holiday = heroSceneConfig.holiday;
-const gradient = gradientColors.map((color) => new THREE.Color(color));
+// Blend encoded palette values before converting back to the renderer's linear working space.
+const gradient = gradientStops.map(({ color, position }) => ({
+  color: new THREE.Color().setStyle(color, THREE.LinearSRGBColorSpace), position,
+}));
+const gradientSegments = gradient.map((stop, index) => {
+  const next = gradient[index + 1] ?? { color: gradient[0].color, position: 1 };
+  return { from: stop.color, to: next.color, start: stop.position, end: next.position };
+});
 const glslColor = (color: THREE.Color) => `vec3(${color.toArray().map(value => value.toFixed(6)).join(", ")})`;
-const gradientBranches = gradient.slice(0, -1).map((color, index) =>
-  `if (position < ${(index + 1).toFixed(1)}) return mix(${glslColor(color)}, ${glslColor(gradient[index + 1])}, blend);`,
+const gradientBranches = gradientSegments.map(({ from, to, start, end }, index) =>
+  `${index < gradientSegments.length - 1 ? `if (position < ${end.toFixed(6)}) ` : ""}return gradientBlend(${glslColor(from)}, ${glslColor(to)}, (position - ${start.toFixed(6)}) / ${(end - start).toFixed(6)});`,
 ).join("\n    ");
 // Shared angular palette keeps the diffuser and its surrounding light in phase.
 export const lightPaletteGLSL = `
+  vec3 gradientBlend(vec3 from, vec3 to, float fraction) {
+    vec3 encoded = mix(from, to, smoothstep(0.0, 1.0, fraction));
+    return mix(encoded / 12.92, pow((encoded + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), encoded));
+  }
   vec3 holidayColor(float stripe) {
     return mix(vec3(${holiday.red.map(value => value.toFixed(6)).join(", ")}), vec3(${holiday.white.map(value => value.toFixed(6)).join(", ")}), stripe);
   }
@@ -16,10 +27,8 @@ export const lightPaletteGLSL = `
     return holidayColor(smoothstep(-softness, softness, sin(6.2831853 * phase * ${holiday.stripes.toFixed(1)})));
   }
   vec3 gradientColor(float phase) {
-    float position = fract(phase) * ${gradient.length.toFixed(1)};
-    float blend = fract(position);
+    float position = fract(phase);
     ${gradientBranches}
-    return mix(${glslColor(gradient.at(-1)!)}, ${glslColor(gradient[0])}, blend);
   }
   vec3 lightColor(float angle, float time, float mode) {
     if (mode > 1.5) return vec3(1.0, 0.52, 0.12);
@@ -44,36 +53,44 @@ export function sampleLightColor(target: THREE.Color, angle: number, time: numbe
       THREE.MathUtils.lerp(holiday.red[2], holiday.white[2], stripe),
     );
   }
-  const position = THREE.MathUtils.euclideanModulo(phase, 1) * gradient.length;
-  const index = Math.floor(position);
-  return target.copy(gradient[index]).lerp(gradient[(index + 1) % gradient.length], position - index);
+  const position = THREE.MathUtils.euclideanModulo(phase, 1);
+  const segment = gradientSegments.find(({ end }) => position < end)!;
+  const blend = THREE.MathUtils.smoothstep(position, segment.start, segment.end);
+  return target.copy(segment.from).lerp(segment.to, blend).convertSRGBToLinear();
 }
 
-/** Closed domed channel swept around an ellipse; the seam shares identical positions.
- * Profile covers the 25 mm printed base, with a flat foot and domed roof.
- * It intentionally does not inherit the base model's edge cutouts.
- */
+export function sampleChannelPath(angle: number) {
+  const c = heroSceneConfig.channel;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const radius = c.bodyRadius + c.width * c.profileScale / 2 + c.clearance;
+  return {
+    position: new THREE.Vector3(radius * cos, c.y, radius * sin),
+    normal: new THREE.Vector3(cos, 0, sin),
+  };
+}
+
+/** A circular tube with its flat back inward and its rounded face outward. */
 export function createChannelGeometry(inner = false) {
   const c = heroSceneConfig.channel;
-  const factor = c.profileScale * (inner ? 0.76 : 1);
-  const half = c.width * factor / 2;
-  const height = c.height * factor;
-  const profile: [number, number][] = [[-half, 0], [half, 0], [half, height - half]];
+  const factor = c.profileScale;
+  const inset = inner ? c.wallThickness * factor : 0;
+  const half = c.width * factor / 2 - inset;
+  const halfHeight = c.height * factor / 2 - inset;
+  const centerY = c.y + c.height * factor / 2;
+  const domeCenter = half - halfHeight;
+  const profile: [number, number][] = [[-half, halfHeight], [-half, -halfHeight], [domeCenter, -halfHeight]];
   for (let i = 1; i <= 16; i++) {
-    const angle = i / 16 * Math.PI;
-    profile.push([Math.cos(angle) * half, height - half + Math.sin(angle) * half]);
+    const angle = i / 16 * Math.PI - Math.PI / 2;
+    profile.push([domeCenter + Math.cos(angle) * halfHeight, Math.sin(angle) * halfHeight]);
   }
   const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
   const stride = profile.length + 1;
   for (let i = 0; i <= c.segments; i++) {
     const angle = i === c.segments ? 0 : i / c.segments * Math.PI * 2;
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    // Unit outward normal of an ellipse, not the radial vector.
-    const length = Math.hypot(cos / c.radiusX, sin / c.radiusZ);
-    const nx = cos / c.radiusX / length, nz = sin / c.radiusZ / length;
+    const { position, normal } = sampleChannelPath(angle);
     for (let j = 0; j <= profile.length; j++) {
       const [offset, y] = profile[j % profile.length];
-      positions.push(c.radiusX * cos + nx * offset, c.y + y + (inner ? 0.001 : 0), c.radiusZ * sin + nz * offset);
+      positions.push(position.x + normal.x * offset, centerY + y, position.z + normal.z * offset);
       uvs.push(i / c.segments, j / profile.length);
       if (i < c.segments && j < profile.length) {
         const a = i * stride + j, b = a + stride;

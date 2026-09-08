@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
-import { createChannelGeometry, createLightMaterial, lightPaletteGLSL, sampleLightColor } from "./glowbaby-channel";
+import { createChannelGeometry, createLightMaterial, lightPaletteGLSL, sampleChannelPath, sampleLightColor } from "./glowbaby-channel";
+import { alignGlowbabyParts } from "./glowbaby-model";
 import { heroSceneConfig as config, type LightMode } from "./hero-scene-config";
 import type { HeroModelBuffers } from "../../lib/hero-asset-format";
 
@@ -316,19 +317,14 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     assembly.rotation.set(...config.assembly.rotation);
     assembly.scale.setScalar(config.assembly.scale);
     inspection.add(assembly);
-    // Use one shared X/Z reference to preserve the CAD parts' authored relationship.
-    const baseCenter = new THREE.Box3().setFromObject(bottom).getCenter(new THREE.Vector3());
-    bottom.position.x -= baseCenter.x;
-    bottom.position.z -= baseCenter.z;
-    top.position.x -= baseCenter.x;
-    top.position.z -= baseCenter.z;
-    top.position.y += config.assembly.topOffset;
+    const lid = alignGlowbabyParts(bottom, top);
+    const channelOffset = new THREE.Vector3(bottom.position.x, 0, bottom.position.z);
     const baseMaterial = resources.track(new THREE.MeshStandardMaterial(config.materials.base));
     const topMaterial = resources.track(new THREE.MeshStandardMaterial(config.materials.top));
     for (const [model, replacement] of [[bottom, baseMaterial], [top, topMaterial]] as const) {
       model.traverse((object) => { if (object instanceof THREE.Mesh) object.material = replacement; });
     }
-    assembly.add(bottom, top);
+    assembly.add(bottom, lid);
     // Restrained prototype attachment bands, not a final hardware specification.
     const bandGeometry = resources.track(new THREE.BoxGeometry(...config.attachment.size));
     for (const x of config.attachment.offsetsX) {
@@ -342,6 +338,8 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       ...config.diffuser, transparent: true, metalness: 0, depthWrite: false,
     }));
     const diffuser = new THREE.Mesh(resources.track(createChannelGeometry()), diffuserMaterial);
+    inner.position.copy(channelOffset);
+    diffuser.position.copy(channelOffset);
     assembly.add(inner, diffuser);
     inspection.traverse((object) => { if (object instanceof THREE.Mesh) { object.castShadow = true; object.receiveShadow = true; } });
     inner.castShadow = false;
@@ -450,14 +448,12 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const glowSamples = Array.from({ length: config.underglow.samples }, (_, index) => {
       const angle = index / config.underglow.samples;
       const radians = angle * Math.PI * 2;
-      const outward = new THREE.Vector3(Math.cos(radians) / config.channel.radiusX, 0, Math.sin(radians) / config.channel.radiusZ)
-        .normalize().applyAxisAngle(THREE.Object3D.DEFAULT_UP, config.channel.rotation);
-      const origin = new THREE.Vector3(
-        Math.cos(radians) * config.channel.radiusX,
-        config.channel.y + config.underglow.sourceOffsetY,
-        Math.sin(radians) * config.channel.radiusZ,
-      ).applyAxisAngle(THREE.Object3D.DEFAULT_UP, config.channel.rotation)
-        .addScaledVector(outward, config.channel.width * config.channel.profileScale / 2 + config.underglow.sourceOutset);
+      const { position: origin, normal: outward } = sampleChannelPath(radians);
+      outward.applyAxisAngle(THREE.Object3D.DEFAULT_UP, config.channel.rotation);
+      origin.y += config.underglow.sourceOffsetY;
+      origin.applyAxisAngle(THREE.Object3D.DEFAULT_UP, config.channel.rotation)
+        .addScaledVector(outward, config.channel.width * config.channel.profileScale / 2 + config.underglow.sourceOutset)
+        .add(channelOffset);
       const target = origin.clone().addScaledVector(outward, config.underglow.targetOffset);
       assembly.localToWorld(origin);
       assembly.localToWorld(target);

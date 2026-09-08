@@ -18,7 +18,7 @@ const scenes = {
   },
   "park-path": {
     label:
-      "Concept illustration: a caregiver pushes a stroller on a winding park path among trees, a bench, and path markers after sunset. A white-rimmed disc below the basket casts cyan, purple, and peach light outward and down onto the path.",
+      "Concept illustration: a caregiver pushes a stroller on a winding park path among trees, a bench, and path markers after sunset. A white-rimmed disc below the basket casts warm amber visibility light outward and down onto the path.",
     sky: "#111e30",
     horizon: "#506776",
     stroller: "translate(376 202) scale(.78)",
@@ -27,7 +27,7 @@ const scenes = {
   },
   "family-event": {
     label:
-      "Concept illustration: an adult pushes a stroller along a path beside an outdoor family gathering, with string lights, bunting, and people in the distance. A white-rimmed disc below the basket casts cyan, purple, and peach light outward and down onto the ground.",
+      "Concept illustration: an adult pushes a stroller along a path beside an outdoor family gathering, with string lights, bunting, and people in the distance. A white-rimmed disc below the basket casts warm amber visibility light outward and down onto the ground.",
     sky: "#211832",
     horizon: "#785064",
     stroller: "translate(250 228) scale(.74)",
@@ -232,6 +232,7 @@ function Caregiver({ transform, coat }: { transform: string; coat: string }) {
 export function RealWorldScene({ scene, className }: RealWorldSceneProps) {
   const id = useId();
   const setting = scenes[scene];
+  const visibility = scene !== "evening-walk";
   const sky = `${id}-sky`;
   const glow = `${id}-glow`;
   const beam = `${id}-beam`;
@@ -253,14 +254,14 @@ export function RealWorldScene({ scene, className }: RealWorldSceneProps) {
           <stop offset="1" stopColor={setting.horizon} />
         </linearGradient>
         <radialGradient id={glow}>
-          <stop stopColor="#cebcff" stopOpacity=".76" />
-          <stop offset=".3" stopColor="#ac83f4" stopOpacity=".5" />
-          <stop offset=".66" stopColor="#8671c3" stopOpacity=".24" />
-          <stop offset="1" stopColor="#8671c3" stopOpacity="0" />
+          <stop stopColor={visibility ? "#ffe6b8" : "#cebcff"} stopOpacity=".76" />
+          <stop offset=".3" stopColor={visibility ? "#ffc46b" : "#ac83f4"} stopOpacity=".5" />
+          <stop offset=".66" stopColor={visibility ? "#df9b45" : "#8671c3"} stopOpacity=".24" />
+          <stop offset="1" stopColor={visibility ? "#df9b45" : "#8671c3"} stopOpacity="0" />
         </radialGradient>
         <linearGradient id={beam} x1="311" y1="414" x2="311" y2="488" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#d3c4ff" stopOpacity=".38" />
-          <stop offset="1" stopColor="#ac83f4" stopOpacity="0" />
+          <stop stopColor={visibility ? "#ffe1a8" : "#d3c4ff"} stopOpacity=".38" />
+          <stop offset="1" stopColor={visibility ? "#ffc46b" : "#ac83f4"} stopOpacity="0" />
         </linearGradient>
       </defs>
       <rect width="960" height="640" fill={`url(#${sky})`} />
@@ -278,7 +279,7 @@ export function RealWorldScene({ scene, className }: RealWorldSceneProps) {
       <g transform={setting.stroller} aria-hidden="true">
         <ellipse cx="311" cy="469" rx="264" ry="71" fill={`url(#${glow})`} />
         <path d="m266 414-126 65q171 51 342 0L356 414Z" fill={`url(#${beam})`} />
-        <StrollerGraphic showController={false} />
+        <StrollerGraphic showController={false} lightMode={visibility ? "visibility" : "rainbow"} />
       </g>
     </svg>
   );

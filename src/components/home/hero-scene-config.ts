@@ -2,6 +2,16 @@ export type LightMode = "visibility" | "flow" | "holiday";
 
 export const gradientColors = ["#ff0000", "#ff4500", "#ffff00", "#006400", "#0000ff", "#800080"] as const;
 
+export const gradientStops = [
+  { color: gradientColors[0], position: 0 },
+  { color: gradientColors[1], position: 0.15 },
+  { color: gradientColors[2], position: 0.30 },
+  { color: gradientColors[3], position: 0.43 },
+  { color: gradientColors[3], position: 0.61 },
+  { color: gradientColors[4], position: 0.76 },
+  { color: gradientColors[5], position: 0.88 },
+] as const;
+
 export const lightModes: { id: LightMode; label: string; description: string }[] = [
   { id: "visibility", label: "Visibility", description: "A steady warm amber light." },
   { id: "flow", label: "Gradient", description: "A rotating rainbow around the whole light." },
@@ -19,17 +29,19 @@ export const heroSceneConfig = {
   maxDpr: 1.5,
   strollerHeight: 0.962,
   assembly: {
-    position: [0, 0.1402, 0.065] as [number, number, number],
+    position: [0, 0.1417, 0.065] as [number, number, number],
     rotation: [0, 0, 0] as [number, number, number],
     scale: 1,
     topOffset: 0.025,
+    topInset: 0.002,
   },
   channel: {
-    radiusX: 0.099,
-    radiusZ: 0.081,
-    y: -0.00025,
-    width: 0.01508,
-    height: 0.0255,
+    bodyRadius: 0.0872,
+    clearance: 0.00015,
+    y: 0.002244,
+    width: 0.0127,
+    height: 0.01508,
+    wallThickness: 0.001,
     profileScale: 1,
     rotation: 0,
     segments: 192,
@@ -56,13 +68,13 @@ export const heroSceneConfig = {
     roughnessVariation: 0.1,
   },
   materials: {
-    base: { color: "#eee9e3", roughness: 0.48 },
+    base: { color: "#111111", roughness: 0.48 },
     top: { color: "#24232b", roughness: 0.62 },
   },
   attachment: {
     size: [0.018, 0.003, 0.112] as [number, number, number],
     offsetsX: [-0.046, 0.046],
-    y: 0.0315,
+    y: 0.0295,
   },
   diffuser: { color: "#fffaf1", opacity: 0.12, roughness: 0.4 },
   emission: {
