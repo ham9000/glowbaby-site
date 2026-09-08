@@ -10,6 +10,33 @@ import {
 
 class ExpiredHeroGrant extends Error {}
 
+async function decompressHeroBundle(compressed: ArrayBuffer, signal: AbortSignal): Promise<ArrayBuffer> {
+  if (typeof DecompressionStream === "undefined") throw new Error("Compressed 3D delivery is unavailable");
+  const reader = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip")).getReader();
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  try {
+    for (;;) {
+      signal.throwIfAborted();
+      const { done, value } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > MAX_HERO_BUNDLE_BYTES) throw new Error("Hero bundle exceeds its decompression budget");
+      chunks.push(value);
+    }
+    signal.throwIfAborted();
+    const bundle = new Uint8Array(length);
+    let offset = 0;
+    for (const chunk of chunks) { bundle.set(chunk, offset); offset += chunk.byteLength; }
+    return bundle.buffer;
+  } catch (error) {
+    await reader.cancel().catch(() => {});
+    throw error;
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 async function readBounded(response: Response, maximum: number, signal: AbortSignal): Promise<Uint8Array<ArrayBuffer>> {
   const declared = response.headers.get("content-length");
   if (declared !== null && (!/^\d+$/.test(declared) || Number(declared) > maximum)) {
@@ -96,9 +123,9 @@ export async function loadHeroModels(signal: AbortSignal, onDeliveryReady?: () =
       }
       const envelope = await readBounded(response, MAX_HERO_BUNDLE_BYTES + 32, signal);
       const packet = new Uint8Array(unwrapEncryptedHero(envelope));
-      const plaintext = await subtle.decrypt({ name: "AES-GCM", iv: packet.slice(0, 12), tagLength: 128 }, key, packet.slice(12));
+      const compressed = await subtle.decrypt({ name: "AES-GCM", iv: packet.slice(0, 12), tagLength: 128 }, key, packet.slice(12));
       signal.throwIfAborted();
-      return unpackHeroModels(plaintext);
+      return unpackHeroModels(await decompressHeroBundle(compressed, signal));
     } catch (error) {
       signal.throwIfAborted();
       if (!(error instanceof ExpiredHeroGrant) || attempt !== 0) throw error;

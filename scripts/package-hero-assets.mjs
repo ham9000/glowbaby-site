@@ -3,7 +3,8 @@ import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { parseEnv } from "node:util";
 import { execFileSync } from "node:child_process";
-import { HERO_MODEL_KEYS, packHeroModels, unpackHeroModels, wrapEncryptedHero, unwrapEncryptedHero } from "../src/lib/hero-asset-format.ts";
+import { gunzipSync, gzipSync } from "node:zlib";
+import { HERO_MODEL_KEYS, MAX_HERO_BUNDLE_BYTES, packHeroModels, unpackHeroModels, wrapEncryptedHero, unwrapEncryptedHero } from "../src/lib/hero-asset-format.ts";
 import { decodeHeroKey, encryptHeroPayload, decryptHeroPayload } from "../src/lib/hero-asset-crypto.ts";
 
 const options = process.argv.slice(2);
@@ -33,8 +34,11 @@ if (configuredKey === undefined) {
 }
 const key = decodeHeroKey(configuredKey);
 try {
-  const envelope = wrapEncryptedHero(encryptHeroPayload(new Uint8Array(bundle), key));
-  const verified = decryptHeroPayload(unwrapEncryptedHero(envelope), key);
+  const compressed = gzipSync(new Uint8Array(bundle), { level: 9 });
+  const envelope = wrapEncryptedHero(encryptHeroPayload(compressed, key));
+  const verified = gunzipSync(decryptHeroPayload(unwrapEncryptedHero(envelope), key), {
+    maxOutputLength: MAX_HERO_BUNDLE_BYTES,
+  });
   const unpacked = unpackHeroModels(Uint8Array.from(verified).buffer);
   for (const name of HERO_MODEL_KEYS) {
     if (!Buffer.from(unpacked[name]).equals(Buffer.from(models[name]))) throw new Error(`Encrypted ${name} did not round-trip unchanged`);
@@ -48,7 +52,7 @@ try {
   } finally {
     await fs.rm(temporary, { force: true });
   }
-  console.log(`Packaged ${HERO_MODEL_KEYS.length} models into ${destination}: ${envelope.byteLength} encrypted bytes, no public GLB or embedded master key.`);
+  console.log(`Packaged ${HERO_MODEL_KEYS.length} models into ${destination}: ${envelope.byteLength} compressed encrypted bytes, no public GLB or embedded master key.`);
 } finally {
   key.fill(0);
 }

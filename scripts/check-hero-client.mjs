@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { webcrypto } from "node:crypto";
 import { runInNewContext } from "node:vm";
+import { gzipSync } from "node:zlib";
 import ts from "typescript";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
@@ -23,6 +24,7 @@ function evaluate(source, dependencies = {}, globals = {}) {
       return typeof value === "function" ? value() : value;
     },
     Uint8Array, ArrayBuffer, DataView, TextEncoder, TextDecoder, AbortController, DOMException,
+    Blob, DecompressionStream,
     atob, btoa, ...globals,
   });
   return compiledModule.exports;
@@ -40,10 +42,22 @@ const models = { stroller: glb, bottom: glb.slice(0), top: glb.slice(0) };
 const rawKey = webcrypto.getRandomValues(new Uint8Array(32));
 const key = await webcrypto.subtle.importKey("raw", rawKey, "AES-GCM", false, ["encrypt"]);
 const iv = webcrypto.getRandomValues(new Uint8Array(12));
-const cipher = new Uint8Array(await webcrypto.subtle.encrypt({ name: "AES-GCM", iv, tagLength: 128 }, key, format.packHeroModels(models)));
+const compressedBundle = gzipSync(new Uint8Array(format.packHeroModels(models)), { level: 9 });
+const cipher = new Uint8Array(await webcrypto.subtle.encrypt({ name: "AES-GCM", iv, tagLength: 128 }, key, compressedBundle));
 const packet = new Uint8Array(iv.length + cipher.length);
 packet.set(iv); packet.set(cipher, iv.length);
 const envelope = format.wrapEncryptedHero(packet);
+const oversizedCompressed = gzipSync(new Uint8Array(format.MAX_HERO_BUNDLE_BYTES + 1), { level: 9 });
+const oversizedIv = webcrypto.getRandomValues(new Uint8Array(12));
+const oversizedCipher = new Uint8Array(await webcrypto.subtle.encrypt(
+  { name: "AES-GCM", iv: oversizedIv, tagLength: 128 },
+  key,
+  oversizedCompressed,
+));
+const oversizedPacket = new Uint8Array(oversizedIv.length + oversizedCipher.length);
+oversizedPacket.set(oversizedIv);
+oversizedPacket.set(oversizedCipher, oversizedIv.length);
+const oversizedEnvelope = format.wrapEncryptedHero(oversizedPacket);
 const id = "a".repeat(32);
 const validGrant = () => ({
   assetUrl: `/api/hero/asset/${id}`, grant: id, key: Buffer.from(rawKey).toString("base64"), expiresAt: Date.now() + 90_000,
@@ -112,13 +126,14 @@ for (const expired of ["once", "always", "local"]) {
   assert.equal(sessions, 2, "Grant retry must be bounded to one renewal");
   assert.equal(assets, expired === "local" ? 0 : 2);
 }
-for (const invalid of ["tampered", "wrong-magic", "wrong-mime", "oversize", "denied"]) {
+for (const invalid of ["tampered", "wrong-magic", "wrong-mime", "oversize", "oversized-plain", "denied"]) {
   let requests = 0;
   const broken = delivery(async (url) => {
     requests++;
     if (url === "/api/hero/session") return jsonResponse(validGrant());
     if (invalid === "denied") return new Response(null, { status: 403 });
     if (invalid === "oversize") return new Response(new Uint8Array(format.MAX_HERO_BUNDLE_BYTES + 33), { headers: { "content-type": "application/octet-stream" } });
+    if (invalid === "oversized-plain") return new Response(oversizedEnvelope, { headers: { "content-type": "application/octet-stream" } });
     if (invalid === "wrong-mime") return new Response(envelope, { headers: { "content-type": "text/html" } });
     const corrupted = envelope.slice();
     corrupted[invalid === "wrong-magic" ? 0 : corrupted.length - 1] ^= 1;
@@ -208,6 +223,7 @@ function componentHarness(options = {}) {
     },
   }, {
     isSecureContext: options.secure ?? true, crypto: options.crypto ?? webcrypto, document,
+    DecompressionStream: options.decompression === false ? undefined : DecompressionStream,
     navigator: { connection, deviceMemory: options.memory ?? 8 },
     matchMedia: (query) => query.includes("min-width") ? width : query.includes("pointer: coarse") ? coarse : motion,
     ResizeObserver: class {},
@@ -314,7 +330,7 @@ assert.ok([...wideTouch.coarse.listeners.values()].every((listeners) => listener
 
 for (const gates of [
   {}, { sceneAvailable: false }, { reducedMotion: true }, { saveData: true }, { effectiveType: "2g" },
-  { effectiveType: "slow-2g" }, { memory: 2 }, { secure: false }, { crypto: {} }, { webgl: false },
+  { effectiveType: "slow-2g" }, { memory: 2 }, { secure: false }, { crypto: {} }, { decompression: false }, { webgl: false },
 ]) {
   const fallback = componentHarness({ sceneAvailable: true, ...gates, ...(Object.keys(gates).length ? {} : { sceneAvailable: undefined }) });
   fallback.visible();

@@ -28,14 +28,14 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     if (!master) return heroUnavailable();
     const claims = verifyHeroGrant(cookie, id, heroRequestOrigin(request), master);
     if (!claims) return heroAccessDenied(401);
-    const plain = loadProtectedHeroScene(master);
+    const compressed = loadProtectedHeroScene(master);
     const key = deriveHeroDeliveryKey(master, claims);
     let envelope: Uint8Array;
     try {
-      envelope = wrapEncryptedHero(encryptHeroPayload(plain, key));
+      envelope = wrapEncryptedHero(encryptHeroPayload(compressed, key));
     } finally {
       key.fill(0);
-      plain.fill(0);
+      compressed.fill(0);
     }
     const response = new NextResponse(Uint8Array.from(envelope).buffer, {
       headers: { ...HERO_PRIVATE_HEADERS, "Content-Type": "application/octet-stream" },

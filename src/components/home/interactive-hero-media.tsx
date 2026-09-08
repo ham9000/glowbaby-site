@@ -43,7 +43,8 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
     let webglCapable: boolean | null = null;
     let request: AbortController | null = null;
     const capable = () => sceneAvailable && globalThis.isSecureContext && !!globalThis.crypto?.subtle &&
-      typeof ResizeObserver !== "undefined" && !motion.matches && !device.connection?.saveData &&
+      typeof ResizeObserver !== "undefined" && typeof DecompressionStream !== "undefined" &&
+      !motion.matches && !device.connection?.saveData &&
       !["slow-2g", "2g"].includes(device.connection?.effectiveType ?? "") &&
       (device.deviceMemory === undefined || device.deviceMemory >= 4);
     const eligible = () => capable() && ((width.matches && !coarse.matches) || optedIn) && !imageOnly;

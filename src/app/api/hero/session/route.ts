@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   try {
     master = getHeroMasterKey();
     if (!master) return heroUnavailable();
-    loadProtectedHeroScene(master);
+    loadProtectedHeroScene(master).fill(0);
     const { claims, token, key } = createHeroGrant(master, heroRequestOrigin(request));
     const grant: HeroAccessGrant = {
       assetUrl: heroAssetUrl(claims.id),

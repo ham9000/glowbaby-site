@@ -4,6 +4,7 @@ import { mkdirSync, rmSync, truncateSync, writeFileSync } from "node:fs";
 import { registerHooks } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync, gzipSync } from "node:zlib";
 import {
   createHeroGrant, decodeHeroKey, decryptHeroPayload, deriveHeroDeliveryKey,
   encryptHeroPayload, HERO_GRANT_TTL_MS, isHeroGrantId, verifyHeroGrant,
@@ -197,7 +198,8 @@ function model(index) {
 
 const models = Object.fromEntries(HERO_MODEL_KEYS.map((key, index) => [key, model(index)]));
 const bundle = new Uint8Array(packHeroModels(models));
-const atRest = wrapEncryptedHero(encryptHeroPayload(bundle, master));
+const compressedBundle = gzipSync(bundle, { level: 9 });
+const atRest = wrapEncryptedHero(encryptHeroPayload(compressedBundle, master));
 const originalCwd = process.cwd();
 const previousKey = process.env.HERO_ASSET_KEY;
 const fixtureRoot = join(fileURLToPath(new URL("../", import.meta.url)), `.hero-delivery-check-${randomBytes(8).toString("hex")}`);
@@ -299,8 +301,10 @@ try {
     assert.equal(Buffer.from(delivered).includes(Buffer.from(bundle)), false, "The response does not contain the raw bundle");
     assert.notDeepEqual(delivered, atRest, "Never forward the at-rest ciphertext unchanged");
     const opened = decryptHeroPayload(unwrapEncryptedHero(delivered), grant.deliveryKey);
-    assert.deepEqual(opened, bundle);
-    assert.deepEqual(unpackHeroModels(Uint8Array.from(opened).buffer), models);
+    assert.deepEqual(Buffer.from(opened), compressedBundle);
+    const inflated = gunzipSync(opened, { maxOutputLength: MAX_HERO_BUNDLE_BYTES });
+    assert.deepEqual(inflated, Buffer.from(bundle));
+    assert.deepEqual(unpackHeroModels(Uint8Array.from(inflated).buffer), models);
     assert.throws(() => decryptHeroPayload(unwrapEncryptedHero(delivered), master), /authentication/);
     assert.throws(() => decryptHeroPayload(unwrapEncryptedHero(atRest), grant.deliveryKey), /authentication/);
     const cleared = response.cookies.get(server.HERO_GRANT_COOKIE);
@@ -327,10 +331,10 @@ try {
     }, host), assetContext(localGrant));
     assert.equal(localAsset.status, 200);
     assert.equal(localAsset.cookies.get(server.HERO_GRANT_COOKIE).secure, false);
-    assert.deepEqual(
+    assert.deepEqual(gunzipSync(
       decryptHeroPayload(unwrapEncryptedHero(new Uint8Array(await localAsset.arrayBuffer())), Buffer.from(localGrant.key, "base64")),
-      bundle,
-    );
+      { maxOutputLength: MAX_HERO_BUNDLE_BYTES },
+    ), Buffer.from(bundle));
   }
 
   process.env.HERO_ASSET_KEY = otherMaster.toString("hex");
@@ -342,6 +346,7 @@ try {
     corrupt,
     new Uint8Array(models.stroller),
     wrapEncryptedHero(encryptHeroPayload(new Uint8Array(32), master)),
+    wrapEncryptedHero(encryptHeroPayload(gzipSync(new Uint8Array(MAX_HERO_BUNDLE_BYTES + 1), { level: 9 }), master)),
   ]) {
     writeFileSync(fixtureAsset, bytes);
     assert.throws(() => server.hasProtectedHeroScene(), /corrupt|size limit/);

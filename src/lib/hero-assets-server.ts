@@ -2,6 +2,7 @@ import "server-only";
 
 import { closeSync, fstatSync, openSync, readSync } from "node:fs";
 import { join } from "node:path";
+import { gunzipSync } from "node:zlib";
 import { NextResponse } from "next/server";
 import { decodeHeroKey, decryptHeroPayload, isHeroGrantId } from "@/lib/hero-asset-crypto";
 import {
@@ -58,9 +59,11 @@ export function loadProtectedHeroScene(master: Uint8Array): Uint8Array {
     if (descriptor !== undefined) closeSync(descriptor);
   }
   try {
-    const plain = decryptHeroPayload(unwrapEncryptedHero(envelope), master);
+    const compressed = decryptHeroPayload(unwrapEncryptedHero(envelope), master);
+    const plain = gunzipSync(compressed, { maxOutputLength: MAX_HERO_BUNDLE_BYTES });
     unpackHeroModels(Uint8Array.from(plain).buffer);
-    return plain;
+    plain.fill(0);
+    return compressed;
   } catch {
     throw new HeroAssetConfigurationError(
       "Protected hero asset is corrupt or does not match HERO_ASSET_KEY. Repackage assets/hero/scene.gbe with the deployment key.",
