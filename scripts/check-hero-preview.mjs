@@ -53,6 +53,19 @@ try {
       assert.equal(status.textContent, dataset.error);
     }
   }
+  const heroDataset = {};
+  const heroConfig = { camera: { position: [], target: [], fov: 0 } };
+  await run({
+    body: { dataset: heroDataset },
+    querySelector: (selector) => selector === "#status" ? { textContent: "" } : {},
+    querySelectorAll: () => [],
+  }, { search: "?capture=1&mode=flow&hero=1" }, async () => ({
+    setActive() {}, setMode() {}, dispose() {}, renderStill() {},
+  }), heroConfig, { error() {} });
+  assert.equal(heroDataset.hero, "true");
+  assert.deepEqual(heroConfig.camera.position, [1.05, .72, 1.72]);
+  assert.deepEqual(heroConfig.camera.target, [0, .43, 0]);
+  assert.equal(heroConfig.camera.fov, 34);
   console.log("Preview: deterministic capture and five model/render/context failure paths passed.");
 } finally {
   previewServer.closeAllConnections();

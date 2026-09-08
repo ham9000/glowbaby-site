@@ -249,12 +249,6 @@ function componentHarness(options = {}) {
   return {
     record, document, width, motion, coarse, connection, render, find,
     visible(value = true) { observer?.([{ isIntersecting: value }]); },
-    toggle3D() {
-      render();
-      const button = find((node) => node.props.role === "switch");
-      assert.ok(button, "Expected the compact 3D switch");
-      button.props.onClick();
-    },
     unmount() { cleanup?.(); },
   };
 }
@@ -271,11 +265,11 @@ assert.equal(desktop.find((node) => node.props.className === "interactive-hero")
 desktop.render();
 assert.equal(desktop.record.delivery, 1);
 assert.equal(desktop.record.engine, 1);
-assert.ok(desktop.find((node) => node.props.role === "switch").props["aria-checked"]);
+assert.equal(desktop.find((node) => node.props.role === "switch"), undefined, "3D loads by default without a switch");
 const modeGroup = desktop.find((node) => node.props.className === "hero-mode-controls");
 const modeButtons = modeGroup.props.children.flat().filter((node) => node?.props?.["aria-pressed"] !== undefined);
 assert.deepEqual(Array.from(modeButtons, (node) => node.props.children.at(-1)), Array.from(lightModes, (item) => item.label));
-assert.ok(modeGroup.props.children.flat().some((node) => node?.props?.role === "switch"), "3D belongs beside the modes");
+assert.equal(modeGroup.props.children.flat().some((node) => node?.props?.role === "switch"), false);
 assert.equal(desktop.find((node) => node.props.className === "interactive-hero-stage").props.children.flat().some((node) => node?.type === "button"), false);
 for (const [index, item] of lightModes.entries()) {
   modeButtons[index].props.onClick();
@@ -291,40 +285,26 @@ desktop.document.hidden = false;
 desktop.document.emit("visibilitychange");
 assert.equal(desktop.record.active.at(-1), true);
 desktop.visible(false);
-desktop.width.matches = false;
-desktop.width.emit("change");
-assert.equal(desktop.record.disposed, 1, "Width ineligibility must dispose even offscreen");
+assert.equal(desktop.record.active.at(-1), false, "Offscreen scenes pause without discarding the loaded renderer");
+desktop.motion.matches = true;
+desktop.motion.emit("change");
+assert.equal(desktop.record.disposed, 1, "A newly unsupported capability must dispose the scene");
 assert.equal(desktop.record.signal.aborted, true);
 desktop.unmount();
 
 const mobile = componentHarness({ sceneAvailable: true, desktop: false });
 mobile.visible();
 await flush();
-assert.equal(mobile.record.delivery, 0);
-assert.equal(mobile.record.engine, 0);
-mobile.toggle3D();
-await flush();
 assert.equal(mobile.record.delivery, 1);
-mobile.toggle3D();
-assert.equal(mobile.record.signal.aborted, true);
-assert.equal(mobile.record.disposed, 1);
-mobile.width.matches = true; mobile.width.emit("change");
-mobile.visible(false); mobile.visible(true);
-await flush();
-assert.equal(mobile.record.delivery, 1, "Explicit image selection suppresses automatic re-entry");
+assert.equal(mobile.record.engine, 1, "Narrow devices default to 3D when capable");
+assert.equal(mobile.find((node) => node.props.role === "switch"), undefined);
 mobile.unmount();
 
 const wideTouch = componentHarness({ sceneAvailable: true, desktop: true, coarse: true });
 wideTouch.visible();
 await flush();
-assert.equal(wideTouch.record.delivery, 0, "Touch devices must opt into inspection even at desktop widths");
-assert.equal(wideTouch.record.engine, 0);
-wideTouch.toggle3D();
-await flush();
 assert.equal(wideTouch.record.delivery, 1);
-wideTouch.coarse.matches = false; wideTouch.coarse.emit("change");
-wideTouch.coarse.matches = true; wideTouch.coarse.emit("change");
-assert.equal(wideTouch.record.disposed, 0, "Explicit inspection persists across input-device changes");
+assert.equal(wideTouch.record.engine, 1, "Touch devices default to 3D when capable");
 wideTouch.unmount();
 assert.ok([...wideTouch.coarse.listeners.values()].every((listeners) => listeners.size === 0));
 
@@ -347,20 +327,16 @@ await flush();
 assert.equal(retry.record.engine, 0, "Access failure must not download Three");
 retry.render();
 assert.match(retry.find((node) => node.props.role === "status").props.children, /couldn’t load/);
-retry.toggle3D();
-await flush();
-assert.equal(retry.record.engine, 1);
-retry.record.fail();
-retry.render();
-assert.equal(retry.find((node) => node.props.role === "switch").props["aria-checked"], false);
+assert.equal(retry.find((node) => node.props.role === "switch"), undefined);
+assert.equal(retry.find((node) => node.type === "image").props.className.includes("is-hidden"), false, "Failures retain the 2D poster");
 retry.unmount();
 
-for (const reason of ["cancel", "unmount", "motion", "hidden"]) {
+for (const reason of ["offscreen", "unmount", "motion", "hidden"]) {
   let release;
   const pending = componentHarness({ sceneAvailable: true, load: () => new Promise((resolve) => { release = resolve; }) });
   pending.visible();
   await flush();
-  if (reason === "cancel") pending.toggle3D();
+  if (reason === "offscreen") pending.visible(false);
   if (reason === "unmount") pending.unmount();
   if (reason === "motion") { pending.motion.matches = true; pending.motion.emit("change"); }
   if (reason === "hidden") { pending.document.hidden = true; pending.document.emit("visibilitychange"); }
@@ -390,12 +366,12 @@ let releaseScene;
 const lateScene = componentHarness({ sceneAvailable: true, create: () => new Promise((resolve) => { releaseScene = resolve; }) });
 lateScene.visible();
 await flush();
-lateScene.toggle3D();
+lateScene.visible(false);
 releaseScene();
 await flush();
 assert.equal(lateScene.record.disposed, 1, "A scene resolving after cancellation must be disposed");
 lateScene.unmount();
-console.log("Hero controller: deterministic poster, desktop progression, mobile opt-in, all capability gates, pause, cancel, retries and stale-generation cleanup passed.");
+console.log("Hero controller: deterministic fallback, default 3D on mouse/touch, capability gates, pause, cancellation and stale-generation cleanup passed.");
 
 const pointerStart = sceneSource.indexOf("    let targetX =");
 const pointerEnd = sceneSource.indexOf("    const setMode =", pointerStart);
@@ -453,13 +429,13 @@ emit("pointerdown", { pointerType: "touch" });
 assert.equal(pointer.state().dragging, true, "Touch inspection starts immediately, without a hold");
 assert.equal(canvas.hasPointerCapture(1), true);
 emit("pointermove", { pointerType: "touch", clientY: 120 });
-assert.equal(pointer.state().targetX, 0.08, "Vertical drags inspect instead of scrolling");
+assert.equal(pointer.state().targetX, 0, "Touch vertical movement remains available for page scrolling");
 emit("pointermove", { pointerType: "touch", clientX: 200 });
 assert.equal(pointer.state().targetY, 0.4);
 emit("pointercancel", { pointerType: "touch" });
 assert.equal(pointer.state().targetY, 0);
 assert.equal(canvas.captures.size, 0);
-assert.equal(canvas.style.touchAction, "pinch-zoom", "Reserve single-finger inspection without disabling native pinch zoom");
+assert.equal(canvas.style.touchAction, "pan-y pinch-zoom", "Keep vertical scrolling and native pinch zoom on touch devices");
 emit("pointerdown", { pointerType: "touch" });
 pointer.cleanup();
 assert.equal(canvas.captures.size, 0);
@@ -472,4 +448,4 @@ assert.ok(Math.exp(-config.interaction.returnDamping) < 0.05, "The camera return
 assert.match(sceneSource, /const damping = dragging \? config\.interaction\.damping : config\.interaction\.returnDamping/);
 assert.match(sceneSource, /loader\.parseAsync\(buffer, ""\)/);
 assert.doesNotMatch(compile(sceneSource), /require\([^)]*hero-asset/);
-console.log("Hero interaction: immediate two-axis dragging, limits, re-grab continuity, secondary pointers, pinch-zoom policy, capture cleanup and slow return passed.");
+console.log("Hero interaction: mouse two-axis and touch horizontal dragging, limits, vertical-scroll policy, capture cleanup and slow return passed.");

@@ -112,9 +112,13 @@ try {
   await protocol.send("Emulation.setDefaultBackgroundColorOverride", { color: { r: 0, g: 0, b: 0, a: 0 } });
 
   const renders = [];
-  for (const { id: mode } of lightModes) {
+  const captures = [
+    ...lightModes.map(({ id: mode }) => ({ mode, filename: `stroller-render-${mode}`, hero: false })),
+    { mode: "flow", filename: "stroller-hero-static", hero: true },
+  ];
+  for (const { mode, filename, hero } of captures) {
     protocol.errors.length = 0;
-    const url = `${origin}/?capture=1&mode=${mode}`;
+    const url = `${origin}/?capture=1&mode=${mode}${hero ? "&hero=1" : ""}`;
     await protocol.send("Page.navigate", { url });
     let ready = false;
     for (let attempt = 0; attempt < 300; attempt++) {
@@ -133,14 +137,14 @@ try {
     const png = Buffer.from(data, "base64");
     const meta = await sharp(png).metadata();
     if (meta.width !== 1200 || meta.height !== 1072) throw new Error(`Unexpected ${mode} capture size: ${meta.width}x${meta.height}`);
-    renders.push({ mode, png, webp: await sharp(png).webp({ quality: 88 }).toBuffer() });
+    renders.push({ filename, png, webp: await sharp(png).webp({ quality: 88 }).toBuffer() });
   }
   // Do not overwrite any poster until every mode renders successfully.
   await fs.mkdir(path.join("public", "hero"), { recursive: true });
-  for (const { mode, png, webp } of renders) {
-    await fs.writeFile(path.join(".local-assets", `stroller-${mode}.png`), png);
-    await fs.writeFile(path.join("public", "hero", `stroller-render-${mode}.webp`), webp);
-    console.log(`${mode}: fresh 1200x1072 scene render, ${webp.length} bytes`);
+  for (const { filename, png, webp } of renders) {
+    await fs.writeFile(path.join(".local-assets", `${filename}.png`), png);
+    await fs.writeFile(path.join("public", "hero", `${filename}.webp`), webp);
+    console.log(`${filename}: fresh 1200x1072 scene render, ${webp.length} bytes`);
   }
 } finally {
   try {

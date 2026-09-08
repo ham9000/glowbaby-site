@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { gradientColors, heroSceneConfig, lightModes, type LightMode } from "./hero-scene-config";
+import { gradientColors, lightModes, type LightMode } from "./hero-scene-config";
 import type { HeroSceneHandle } from "./stroller-hero-scene";
 import flowPoster from "../../../public/hero/stroller-render-flow.webp";
 import holidayPoster from "../../../public/hero/stroller-render-holiday.webp";
@@ -13,33 +13,26 @@ const posters: Record<LightMode, typeof flowPoster> = { flow: flowPoster, holida
 
 type Connection = EventTarget & { saveData?: boolean; effectiveType?: string };
 type SceneStatus = "image" | "loading" | "ready" | "error";
-type HeroControls = { refresh(): Promise<void>; explore(): void; showImage(): void };
 
 export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailable?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLSpanElement>(null);
   const scene = useRef<HeroSceneHandle | null>(null);
-  const controls = useRef<HeroControls | null>(null);
   const modeRef = useRef<LightMode>("flow");
   const [mode, setMode] = useState<LightMode>("flow");
   const [status, setStatus] = useState<SceneStatus>("image");
-  const [canExplore, setCanExplore] = useState(false);
   const ready = status === "ready";
 
   useEffect(() => {
     const element = host.current;
     if (!element || typeof IntersectionObserver === "undefined") return;
-    const width = matchMedia(`(min-width: ${heroSceneConfig.minWidth}px)`);
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
-    const coarse = matchMedia("(pointer: coarse)");
     const device = navigator as Navigator & { connection?: Connection; deviceMemory?: number };
     let generation = 0;
     let visible = false;
     let loading = false;
     let failed = false;
     let disposed = false;
-    let optedIn = false;
-    let imageOnly = false;
     let webglCapable: boolean | null = null;
     let request: AbortController | null = null;
     const capable = () => sceneAvailable && globalThis.isSecureContext && !!globalThis.crypto?.subtle &&
@@ -47,7 +40,6 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       !motion.matches && !device.connection?.saveData &&
       !["slow-2g", "2g"].includes(device.connection?.effectiveType ?? "") &&
       (device.deviceMemory === undefined || device.deviceMemory >= 4);
-    const eligible = () => capable() && ((width.matches && !coarse.matches) || optedIn) && !imageOnly;
     const stop = (next: SceneStatus = "image") => {
       generation++;
       loading = false;
@@ -59,8 +51,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
     };
     const update = async () => {
       if (disposed) return;
-      if (!capable()) { setCanExplore(false); stop(); return; }
-      if (!eligible() && (scene.current || loading)) stop();
+      if (!capable()) { stop(); return; }
       const active = visible && !document.hidden;
       if (!active) {
         scene.current?.setActive(false);
@@ -75,8 +66,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
           gl?.getExtension("WEBGL_lose_context")?.loseContext();
         } catch { webglCapable = false; }
       }
-      setCanExplore(webglCapable);
-      if (!webglCapable || !eligible()) { stop(); return; }
+      if (!webglCapable) { stop(); return; }
       if (scene.current) { scene.current.setActive(true); return; }
       if (loading || failed) return;
       loading = true;
@@ -111,7 +101,7 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
           failed = true;
           stop("error");
         }, models, abort.signal, viewport.current ?? element);
-        if (disposed || attempt !== generation || !eligible()) { handle.dispose(); return; }
+        if (disposed || attempt !== generation || !capable()) { handle.dispose(); return; }
         scene.current = handle;
         handle.setMode(modeRef.current);
         handle.setActive(visible && !document.hidden);
@@ -122,25 +112,15 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
         if (attempt === generation) loading = false;
       }
     };
-    controls.current = {
-      refresh: update,
-      explore() { optedIn = true; imageOnly = false; failed = false; void update(); },
-      showImage() { imageOnly = true; optedIn = false; failed = false; stop(); },
-    };
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; void update(); });
     observer.observe(element);
-    width.addEventListener("change", update);
     motion.addEventListener("change", update);
-    coarse.addEventListener("change", update);
     device.connection?.addEventListener("change", update);
     document.addEventListener("visibilitychange", update);
     return () => {
       disposed = true;
-      controls.current = null;
       observer.disconnect();
-      width.removeEventListener("change", update);
       motion.removeEventListener("change", update);
-      coarse.removeEventListener("change", update);
       device.connection?.removeEventListener("change", update);
       document.removeEventListener("visibilitychange", update);
       stop();
@@ -156,11 +136,11 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
       </svg>
       <div className="interactive-hero-stage" onContextMenu={(event) => event.preventDefault()}>
         <div className="interactive-hero-render">
-          <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} loading="eager" fetchPriority="high" sizes="(min-width: 1240px) 600px, (min-width: 1024px) calc((100vw - 5rem) / 2), (min-width: 640px) calc(100vw - 2rem), calc(100vw - .75rem)" className={`interactive-hero-poster object-contain ${ready ? "is-hidden" : ""}`} />
+          <Image src={posters[mode]} alt="Close-up of the Glowbaby prototype beneath a stroller basket, casting colored light across a concrete sidewalk at dusk." fill draggable={false} sizes="(min-width: 1024px) 900px, calc(100vw - 2rem)" className={`interactive-hero-poster object-contain ${ready ? "is-hidden" : ""}`} />
           <div ref={host} className={`interactive-hero-canvas ${ready ? "is-ready" : ""}`} aria-hidden="true" />
         </div>
         <span ref={viewport} className="interactive-hero-frame" aria-hidden="true" />
-        <span className="interactive-hero-badge">{ready ? "Drag to explore" : "Made for a little more color"}</span>
+        <span className="interactive-hero-badge">{ready ? "Drag to explore" : status === "loading" ? "Preparing 3D" : "2D preview"}</span>
       </div>
       <div className="interactive-hero-panel">
         <div className="hero-mode-controls" role="group" aria-label="Preview a light mode">
@@ -171,14 +151,10 @@ export function InteractiveHeroMedia({ sceneAvailable = false }: { sceneAvailabl
               scene.current?.setMode(item.id);
             }}><span className={`hero-mode-dot hero-mode-dot-${item.id}`} style={item.id === "flow" ? { background: `conic-gradient(${gradientColors.join(", ")}, ${gradientColors[0]})` } : undefined} aria-hidden="true" />{item.label}</button>
           ))}
-          {canExplore && <button type="button" className="hero-3d-switch" role="switch" aria-label="3D preview" aria-checked={ready || status === "loading"} title={status === "loading" ? "Turn off to cancel loading" : status === "error" ? "Turn on to retry 3D" : "Toggle interactive 3D"} onClick={() => {
-            if (status === "ready" || status === "loading") controls.current?.showImage();
-            else controls.current?.explore();
-          }}><span className="hero-switch-track" aria-hidden="true" />3D</button>}
         </div>
         <figcaption className="hero-media-caption">
           <span aria-live="polite">{lightModes.find((item) => item.id === mode)?.description}</span>
-          <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load. Toggle 3D to try again." : ready ? "Drag to explore · Scroll outside the view" : "App-controlled light · Prototype concept"}</span>
+          <span role="status">{status === "loading" ? "Loading 3D · Image remains available" : status === "error" ? "3D couldn’t load · Showing the 2D preview" : ready ? "Drag to explore · Scroll outside the view" : "2D preview · 3D loads automatically when supported"}</span>
         </figcaption>
       </div>
     </figure>

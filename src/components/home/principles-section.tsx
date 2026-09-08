@@ -2,6 +2,8 @@ import { Container } from "@/components/container";
 import { SectionHeading } from "@/components/section-heading";
 import { StarOutline } from "@/components/star-outline";
 import { visibilityGuidance, type Product } from "@/content/site";
+import { hasProtectedHeroScene } from "@/lib/hero-assets-server";
+import { InteractiveHeroMedia } from "./interactive-hero-media";
 
 export function PrinciplesSection({ product }: { product: Product }) {
   return (
@@ -12,6 +14,9 @@ export function PrinciplesSection({ product }: { product: Product }) {
           title="Visibility works both ways."
           description="Seeing the space around your ride and being noticed by others both matter after dark. Glowbaby is being designed for both: light underfoot and a more visible presence for people nearby."
         />
+        <div className="visibility-viewer mt-12">
+          <InteractiveHeroMedia sceneAvailable={hasProtectedHeroScene()} />
+        </div>
         <div className="mt-12 grid gap-5 lg:grid-cols-3">
           {product.principles.map((principle, index) => (
             <article

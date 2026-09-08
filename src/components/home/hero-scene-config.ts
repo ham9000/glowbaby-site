@@ -16,7 +16,6 @@ export const heroSceneConfig = {
     bottom: "/models/hero/bottom.glb",
     top: "/models/hero/top.glb",
   },
-  minWidth: 900,
   maxDpr: 1.5,
   strollerHeight: 0.962,
   assembly: {
