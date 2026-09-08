@@ -235,11 +235,9 @@ summary::-webkit-details-marker {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 22% 28%, rgba(25, 191, 242, 0.16), transparent 34%),
-    radial-gradient(circle at 80% 74%, rgba(90, 15, 234, 0.2), transparent 40%);
+    radial-gradient(ellipse at center, transparent 48%, rgba(5, 12, 18, 0.16));
   content: "";
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 
 .static-hero-image {

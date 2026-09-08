@@ -39,12 +39,15 @@ const sidewalkPatternGLSL = `
     vec2 footprint = fwidth(grainUv);
     float grainVisibility = 1.0 - smoothstep(0.5, 1.8, max(footprint.x, footprint.y));
     float grain = (sidewalkNoise(grainUv) - 0.5) * grainVisibility;
+    // Fine aggregate and shallow pores break up the smooth, tiled appearance.
+    float aggregate = sidewalkNoise(world * 38.0) * 0.65 + sidewalkNoise(world * 83.0) * 0.35 - 0.5;
+    float pores = smoothstep(0.72, 0.88, sidewalkNoise(grainUv * 0.75)) * grainVisibility;
     float mottle = sidewalkNoise(world * sidewalkMottleScale) - 0.5;
     float slab = sidewalkHash(floor(grid)) - 0.5;
     float reflectance = (1.0 + slab * sidewalkSlabVariation + mottle * sidewalkMottleStrength
-      + grain * sidewalkGrainStrength) * (1.0 - seam * sidewalkSeamDarkness);
-    return vec3(reflectance, grain * sidewalkGrainDepth - seam * sidewalkSeamDepth,
-      (grain + seam) * sidewalkRoughnessVariation);
+      + grain * sidewalkGrainStrength + aggregate * 0.42 - pores * 0.18) * (1.0 - seam * sidewalkSeamDarkness);
+    return vec3(reflectance, (grain + aggregate * 0.6 - pores * 0.3) * sidewalkGrainDepth - seam * sidewalkSeamDepth,
+      (grain + aggregate + seam) * sidewalkRoughnessVariation);
   }
 `;
 
@@ -68,7 +71,7 @@ function createSidewalkUniforms() {
 }
 
 function createSidewalkMaterial(uniforms: ReturnType<typeof createSidewalkUniforms>) {
-  const material = new THREE.MeshStandardMaterial({ color: config.stage.floor.color, roughness: config.stage.floor.roughness });
+  const material = new THREE.MeshStandardMaterial({ color: config.stage.floor.color, roughness: config.stage.floor.roughness, transparent: true });
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vSidewalkWorld;")
@@ -77,7 +80,13 @@ function createSidewalkMaterial(uniforms: ReturnType<typeof createSidewalkUnifor
       .replace("#include <common>", `#include <common>\nvarying vec3 vSidewalkWorld;\n${sidewalkPatternGLSL}`)
       .replace("#include <color_fragment>", `#include <color_fragment>
         vec3 sidewalkDetail = sidewalkSurface(vSidewalkWorld.xz);
-        diffuseColor.rgb *= sidewalkDetail.x;`)
+        diffuseColor.rgb *= sidewalkDetail.x;
+        // Pull the unlit pavement closer behind the stroller; the separate
+        // device spill still illuminates the nearby concrete at full strength.
+        float pavementDistance = length(vSidewalkWorld.xz);
+        float behindStroller = smoothstep(-0.15, 0.55, -dot(vSidewalkWorld.xz, vec2(0.65, 0.76)));
+        diffuseColor.rgb *= mix(1.0, 0.18, behindStroller * smoothstep(0.45, 1.6, pavementDistance));
+        diffuseColor.a *= 1.0 - smoothstep(1.4, 4.0, pavementDistance);`)
       .replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
         roughnessFactor = clamp(roughnessFactor + sidewalkDetail.z, 0.04, 1.0);`)
       .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
@@ -89,7 +98,7 @@ function createSidewalkMaterial(uniforms: ReturnType<typeof createSidewalkUnifor
           normal = normalize(abs(sidewalkDet) * normal - sign(sidewalkDet) * gradient);
         }`);
   };
-  material.customProgramCacheKey = () => "glowbaby-sidewalk-v1";
+  material.customProgramCacheKey = () => "glowbaby-sidewalk-v4";
   return material;
 }
 
@@ -221,13 +230,20 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     view.toneMapping = THREE.ACESFilmicToneMapping;
     view.toneMappingExposure = config.stage.exposure;
     view.shadowMap.enabled = true;
-    view.shadowMap.type = THREE.PCFSoftShadowMap;
+    view.shadowMap.type = THREE.PCFShadowMap;
     // Only the camera and light colors animate; reuse the static occlusion maps.
     view.shadowMap.autoUpdate = false;
     view.shadowMap.needsUpdate = true;
     view.debug.onShaderError = () => { throw new Error("Hero shader initialization failed"); };
-    const sceneBackground = new THREE.Color(config.environment.background);
+    const sceneBackground = resources.track(await new THREE.TextureLoader().loadAsync("/hero/night-park-environment.webp"));
+    signal?.throwIfAborted();
+    sceneBackground.mapping = THREE.EquirectangularReflectionMapping;
+    sceneBackground.colorSpace = THREE.SRGBColorSpace;
     scene.background = sceneBackground;
+    scene.environment = sceneBackground;
+    scene.environmentIntensity = 0.65;
+    scene.backgroundIntensity = 0.8;
+    scene.backgroundBlurriness = 0.025;
     scene.fog = new THREE.Fog(config.environment.background, config.stage.fogNear, config.stage.fogFar);
     const camera = new THREE.PerspectiveCamera(config.camera.fov, 1, 0.05, 12);
     const cameraTarget = new THREE.Vector3().fromArray(config.camera.target);
@@ -266,6 +282,22 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const [stroller, bottom, top] = models.map((result) => {
       if (result.status !== "fulfilled") throw new Error("Missing model");
       return result.value.scene;
+    });
+    const mutedMaterials = new Set<THREE.Material>();
+    stroller.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+        if (!(material instanceof THREE.MeshStandardMaterial) || mutedMaterials.has(material)) continue;
+        mutedMaterials.add(material);
+        // Retain the original weave, seams and shading; mute the base color only.
+        material.onBeforeCompile = (shader) => {
+          shader.fragmentShader = shader.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+            float strollerLuma = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+            diffuseColor.rgb = mix(vec3(strollerLuma), diffuseColor.rgb, 0.24) * vec3(0.79, 0.82, 0.84);`);
+        };
+        material.customProgramCacheKey = () => "muted-stroller-v1";
+        material.needsUpdate = true;
+      }
     });
     const strollerBounds = new THREE.Box3().setFromObject(stroller);
     const size = strollerBounds.getSize(new THREE.Vector3());
@@ -319,9 +351,20 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const keyConfig = config.environment.key;
     const key = resources.track(new THREE.DirectionalLight(keyConfig.color, keyConfig.intensity));
     key.position.fromArray(keyConfig.position);
-    // Environment lights reveal the stroller, but must not imply an overhead shadow source.
-    key.castShadow = false;
-    scene.add(key);
+    // The warm park lamp shapes the canopy and casts real self-shadows into
+    // the seat and basket, rather than illuminating every surface equally.
+    key.target.position.set(0, 0.4, 0);
+    key.castShadow = true;
+    key.shadow.mapSize.setScalar(2048);
+    key.shadow.camera.left = key.shadow.camera.bottom = -1.5;
+    key.shadow.camera.right = key.shadow.camera.top = 1.5;
+    key.shadow.camera.near = 0.1;
+    key.shadow.camera.far = 8;
+    key.shadow.bias = -0.0001;
+    key.shadow.normalBias = 0.002;
+    key.shadow.radius = 7;
+    key.shadow.intensity = 0.55;
+    scene.add(key, key.target);
     const rim = resources.track(new THREE.DirectionalLight(config.environment.rim.color, config.environment.rim.intensity));
     rim.position.fromArray(config.environment.rim.position);
     scene.add(rim);
@@ -386,6 +429,10 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
           float radius = length(p);
           float angle = atan(-p.y, p.x) / 6.2831853;
           vec3 color = spillLightColor(angle, time, mode);
+          // Angular colors converge softly instead of forming a pinwheel tip.
+          if (mode > 0.5 && mode < 1.5) {
+            color = mix(vec3(dot(color, vec3(0.2126, 0.7152, 0.0722))), color, smoothstep(0.01, 0.09, radius) * 0.85);
+          }
           float a = exp(-dot(p, p) * falloff) * (1.0 - smoothstep(edge.x, edge.y, radius));
           a *= mix(centerStrength, 1.0, smoothstep(0.0, centerRadius, radius));
           if (mode < 0.5) color = mix(holidayColor(0.5), color, smoothstep(0.0, centerBlendRadius, radius));
@@ -433,7 +480,16 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       light.shadow.bias = config.underglow.shadowBias;
       light.shadow.normalBias = config.underglow.shadowNormalBias;
       scene.add(light, light.target);
-      return { angle, light };
+      // A restrained approximation of colored light reflected off the pavement.
+      // Finite range keeps this fill below the seat; it follows the diffuser palette.
+      const bounce = resources.track(new THREE.PointLight("#ffffff", 0, config.bounce.distance, 2));
+      bounce.position.set(
+        config.assembly.position[0] + Math.cos(radians) * config.bounce.radius,
+        config.stage.floor.y + config.bounce.height,
+        config.assembly.position[2] + Math.sin(radians) * config.bounce.radius,
+      );
+      scene.add(bounce);
+      return { angle, light, bounce };
     });
     const overflowLayer = 1;
     inspection.traverse((object) => object.layers.enable(overflowLayer));
@@ -453,7 +509,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const draw = () => {
       const cameraMask = camera.layers.mask;
       view.setScissorTest(false);
-      view.setClearColor(sceneBackground, 0);
+      view.setClearColor(config.environment.background, 0);
       view.clear(true, true, true);
       view.setScissor(viewportX, viewportY, viewportWidth, viewportHeight);
       view.setScissorTest(true);
@@ -547,15 +603,20 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       if (disposed) return;
       mode = next;
       lightMaterial.uniforms.mode.value = { holiday: 0, flow: 1, visibility: 2 }[next];
-      for (const { angle, light } of glowSamples) sampleLightColor(light.color, angle, elapsed, mode);
+      for (const { angle, light, bounce } of glowSamples) {
+        sampleLightColor(light.color, angle, elapsed, mode);
+        bounce.color.copy(light.color);
+      }
     };
     const updateLighting = (activation: number) => {
       lightMaterial.uniforms.time.value = elapsed;
       lightMaterial.uniforms.activation.value = activation;
       spillMaterial.uniforms.strength.value = config.spillOpacity * activation;
-      for (const { angle, light } of glowSamples) {
+      for (const { angle, light, bounce } of glowSamples) {
         light.intensity = config.lightIntensity / glowSamples.length * activation;
         sampleLightColor(light.color, angle, elapsed, mode);
+        bounce.intensity = config.bounce.intensity * activation;
+        bounce.color.copy(light.color);
       }
     };
     const render = (now: number) => {

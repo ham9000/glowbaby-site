@@ -87,7 +87,7 @@ try {
   browser = spawn(executable, [
     "--headless=new", "--no-first-run", "--no-default-browser-check", "--disable-background-networking",
     "--remote-debugging-address=127.0.0.1", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "about:blank",
-  ], { stdio: ["ignore", "ignore", "pipe"] });
+  ], { stdio: ["ignore", "ignore", "pipe"], windowsHide: true });
   browser.once("error", (error) => { startupError = error; });
   browser.stderr.on("data", (data) => { browserLog = (browserLog + data).slice(-4000); });
   let port;
@@ -165,7 +165,12 @@ try {
         else resolve();
       }));
     } finally {
-      await fs.rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      // Windows browser helpers can briefly retain profile files after exit.
+      // Cleanup must not hide the original capture error or invalidate good renders.
+      await fs.rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }).catch(error => {
+        if (!["EBUSY", "EPERM", "ENOTEMPTY"].includes(error.code)) throw error;
+        console.warn(`Temporary browser profile still locked: ${profile}`);
+      });
     }
   }
 }

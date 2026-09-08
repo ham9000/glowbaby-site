@@ -18,7 +18,7 @@ const html = `<!doctype html><html lang="en"><meta charset="utf-8"><title>Glowba
 const status=document.querySelector('#status'),params=new URLSearchParams(location.search);
 const fail=message=>{status.textContent=message;document.body.dataset.error=message;delete document.body.dataset.ready;};
 if(params.has('capture'))document.body.dataset.capture='true';
-if(params.has('hero')){document.body.dataset.hero='true';config.camera.position=[1.05,.72,1.72];config.camera.target=[0,.43,0];config.camera.fov=34;}
+if(params.has('hero')){document.body.dataset.hero='true';config.camera.position=[1.52,.74,1.8];config.camera.target=[0,.40,0];config.camera.fov=34;}
 if(params.has('detail')){config.strollerHeight=0;config.assembly.position=[0,0.05,0];config.camera.position=[0.29,0.25,0.35];config.camera.target=[0,0.07,0];}
 try{const handle=await createHeroScene(document.querySelector('#scene'),params.get('mode')||'flow',()=>fail('Rendering failed'),undefined,undefined,document.querySelector('#viewport'));
 if(document.body.dataset.error){handle.dispose();throw new Error(document.body.dataset.error);}
@@ -36,6 +36,9 @@ export const previewServer = http.createServer(async (request, response) => {
     if (origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`].includes(origin)) { response.writeHead(403).end(); return; }
     response.setHeader("Cache-Control", "no-store");
     if (url.pathname === "/") { response.setHeader("Content-Type", "text/html"); response.end(html); return; }
+    if (url.pathname === "/hero/night-park-environment.webp") {
+      response.setHeader("Content-Type", "image/webp"); response.end(await fs.readFile(path.join(root, "public/hero/night-park-environment.webp"))); return;
+    }
     const name = url.pathname.split("/").pop();
     if (url.pathname === `/models/hero/${name}` && assets[name]) {
       response.setHeader("Content-Type", "model/gltf-binary"); response.end(await fs.readFile(path.join(root, ".local-assets", assets[name]))); return;

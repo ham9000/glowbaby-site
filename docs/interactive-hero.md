@@ -4,6 +4,18 @@ Branch: `codex/interactive-stroller-hero`.
 
 The main hero uses a dedicated static render of the real 3D stroller scene inside the organic artwork treatment, keeping the first view lightweight. The interactive scene appears in **Visibility works both ways**. Three matching rendered fallbacks and accessible mode buttons appear immediately, ordered **Visibility**, **Gradient**, **Holiday**. When protected delivery is configured, supported devices enhance automatically with no 3D switch; unsupported or failed clients keep the 2D render. Mouse and touch users drag in either direction inside the scene; page scrolling starts outside it. Releasing the scene returns it gently to its original view. The controls panel ends with the visible backdrop so the stroller breakout remains visually separate. The same scene works in the private local preview.
 
+## Night park art direction
+
+The full-stroller hero camera is slightly farther back and farther to the side, keeping the wheels within the organic crop and revealing more of the under-basket device. Stroller base colors are desaturated in the material shader while preserving the original textures, stitching, geometry and mounting dimensions. Cooler ambient light and a restrained warm key keep the upholstery readable after dark.
+
+`public/hero/night-park-environment.webp` is an AI-generated scenery-only panorama used as the softly blurred background and reflection environment. No stroller or product geometry was sent to image generation. The rendered concrete foreground fades into the panorama at a distance. The environment loads only with the 3D scene; the initial hero remains a single small static WebP. A failed environment load retains the existing poster fallback.
+
+The colored floor spill now has a subdued, desaturated center, broader coverage and feathered edges. Lower direct-light intensity and softer cones reduce concentrated color hotspots. These are visual treatments, not measured light output. Regenerate all four posters after changing the shared scene so the interactive and static versions stay consistent.
+
+The next local lighting pass expands the spill to 2.7 × 2.45 meters, raises its brightness and shortens the outer fade and subdued center. A directional warm park light now casts filtered self-shadows and a ground shadow, with a weaker cool fill so the stroller has shaded recesses and localized highlights. The shared shadow maps still update only when required, rather than on each animation frame.
+
+The foreground concrete uses larger 2.1 × 2.35 meter slabs, finer joints, a cooler gray base, and procedural aggregate and pores shared by the surface and colored spill. This approximates the panorama's pavement without baking its lighting into the foreground. The park-light shadow is reduced to 55% intensity with a wider filter, retaining wheel contact grounding.
+
 ## License and asset protection
 
 The supplied invoice identifies model 6931082, **Modern Baby Stroller Realistic Foldable Pram 3D Model**, seller **blackorgrey**, license **Royalty Free, No AI**. The invoice is not copied into the repository.
@@ -98,7 +110,7 @@ All four fresh 1200x1072 renders must succeed before any image is replaced. Mode
 - `npm run validate` runs TypeScript, ESLint and the production build.
 - `npm run hero:check` covers closed seam positions/normals, actual oval rotation at multiple angles/scales, shader tuning, optimizer budgets/default CAD topology/materials/UVs/source privacy, capture readiness, and protected bundle/delivery invariants.
 - `npm run hero:posters` loads and GPU-renders all actual models in each mode plus the full-stroller hero view, refusing shader or initialization errors. The current four images come from this command, not older captures.
-- Fixed-time PNG comparison shows the sampled basket region is pixel-identical across all three modes while the illuminated sidewalk changes substantially. Colored illumination no longer reaches the upper basket/interior.
+- Short-range colored pavement bounce now reaches the lower frame, wheels and basket underside. Its color and activation follow the selected diffuser mode; its limited range keeps it below the seat.
 - Broad physical-device/GPU profiling remains advisable. The visualization does not establish physical-device photometry, and technical delivery measures do not replace the applicable asset license.
 - Product-owner review: approximate under-basket mounting, suggested straps, material finish, brightness and channel envelope. These are prototype visualization choices, not final product specifications.
 
@@ -106,4 +118,4 @@ All four fresh 1200x1072 renders must succeed before any image is replaced. Mode
 
 The supplied undercarriage photograph shows a horizontal diffuser below the basket's lower frame, with different colors illuminating the wheels, frame and ground simultaneously. The visible portion supports that orientation but does not establish the full attachment method or precise dimensions on the purchased stroller. Mounting and strap details remain provisional.
 
-The final close-up uses that undercarriage relationship while restricting all colored light to downward/outward cones and the sidewalk. The prominent overhead shadow is removed; faint contact grounding and device-origin shadows remain. Concrete detail stays visible in the broader, brighter-looking glow. The reference informs qualitative color separation and appearance, not measured luminous output, weather resistance or final mounting hardware.
+The close-up uses that undercarriage relationship with downward/outward direct light and subtle short-range pavement bounce onto the underside. The central floor fade has a smaller radius and retains more color. A muted park-light shadow, contact grounding and device-origin shadows remain. Concrete detail stays visible in the broader glow. The reference informs qualitative color separation and appearance, not measured luminous output, weather resistance or final mounting hardware.
