@@ -38,6 +38,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  allowedDevOrigins: ["127.0.0.1", "192.168.50.109"],
   outputFileTracingIncludes: {
     "/": ["./assets/hero/scene.gbe"],
     "/api/hero/**": ["./assets/hero/scene.gbe"],

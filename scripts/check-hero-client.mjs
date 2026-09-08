@@ -6,10 +6,10 @@ import { gzipSync } from "node:zlib";
 import ts from "typescript";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [formatSource, clientSource, mediaSource, sceneSource, configSource] = await Promise.all([
+const [formatSource, clientSource, mediaSource, sceneSource, configSource, stylesSource] = await Promise.all([
   read("../src/lib/hero-asset-format.ts"), read("../src/lib/hero-asset-client.ts"),
   read("../src/components/home/interactive-hero-media.tsx"), read("../src/components/home/stroller-hero-scene.ts"),
-  read("../src/components/home/hero-scene-config.ts"),
+  read("../src/components/home/hero-scene-config.ts"), read("../src/app/globals.css"),
 ]);
 const compile = (source) => ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
@@ -394,8 +394,10 @@ const pointer = evaluate(`
   canvas, config,
   THREE: { MathUtils: { clamp: (value, min, max) => Math.min(max, Math.max(min, value)) } },
 });
+let prevented = 0;
 const emit = (name, properties = {}) => canvas.emit(name, {
-  isPrimary: true, pointerId: 1, pointerType: "mouse", button: 0, buttons: 1, clientX: 100, clientY: 100, ...properties,
+  isPrimary: true, pointerId: 1, pointerType: "mouse", button: 0, buttons: 1, clientX: 100, clientY: 100,
+  cancelable: true, preventDefault() { prevented++; }, ...properties,
 });
 emit("pointermove", { clientX: 400 });
 assert.equal(pointer.state().targetY, 0, "Hover must never move the scene");
@@ -429,13 +431,16 @@ emit("pointerdown", { pointerType: "touch" });
 assert.equal(pointer.state().dragging, true, "Touch inspection starts immediately, without a hold");
 assert.equal(canvas.hasPointerCapture(1), true);
 emit("pointermove", { pointerType: "touch", clientY: 120 });
-assert.equal(pointer.state().targetX, 0, "Touch vertical movement remains available for page scrolling");
+assert.equal(pointer.state().targetX, 0.08, "Touch vertical movement tilts the scene");
+assert.equal(prevented, 1, "Touch dragging must prevent the browser from taking over vertical movement");
 emit("pointermove", { pointerType: "touch", clientX: 200 });
 assert.equal(pointer.state().targetY, 0.4);
 emit("pointercancel", { pointerType: "touch" });
 assert.equal(pointer.state().targetY, 0);
 assert.equal(canvas.captures.size, 0);
-assert.equal(canvas.style.touchAction, "pan-y pinch-zoom", "Keep vertical scrolling and native pinch zoom on touch devices");
+assert.equal(canvas.style.touchAction, "none", "Keep both drag axes under scene control on touch devices");
+assert.match(stylesSource, /\.interactive-hero-panel\s*\{[^}]*width:\s*calc\(100%\s*-\s*var\(--hero-frame-right\)\)/, "The controls panel must end with the visible backdrop");
+assert.match(stylesSource, /@media\s*\(min-width:\s*1024px\)\s*\{[\s\S]*?\.static-hero-visual\s*\{[^}]*width:\s*124%[^}]*margin-left:\s*-22%/, "The desktop hero artwork must expand left without changing the grid");
 emit("pointerdown", { pointerType: "touch" });
 pointer.cleanup();
 assert.equal(canvas.captures.size, 0);
@@ -448,4 +453,4 @@ assert.ok(Math.exp(-config.interaction.returnDamping) < 0.05, "The camera return
 assert.match(sceneSource, /const damping = dragging \? config\.interaction\.damping : config\.interaction\.returnDamping/);
 assert.match(sceneSource, /loader\.parseAsync\(buffer, ""\)/);
 assert.doesNotMatch(compile(sceneSource), /require\([^)]*hero-asset/);
-console.log("Hero interaction: mouse two-axis and touch horizontal dragging, limits, vertical-scroll policy, capture cleanup and slow return passed.");
+console.log("Hero interaction: mouse and touch two-axis dragging, panel alignment, limits, capture cleanup and slow return passed.");

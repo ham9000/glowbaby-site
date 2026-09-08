@@ -2,7 +2,7 @@
 
 Branch: `codex/interactive-stroller-hero`.
 
-The main hero uses a dedicated static render of the real 3D stroller scene inside the organic artwork treatment, keeping the first view lightweight. The interactive scene appears in **Visibility works both ways**. Three matching rendered fallbacks and accessible mode buttons appear immediately, ordered **Visibility**, **Gradient**, **Holiday**. When protected delivery is configured, supported devices enhance automatically with no 3D switch; unsupported or failed clients keep the 2D render. Mouse users drag in either direction; touch users drag horizontally while vertical gestures continue to scroll the page. Releasing the scene returns it gently to its original view. The same scene works in the private local preview.
+The main hero uses a dedicated static render of the real 3D stroller scene inside the organic artwork treatment, keeping the first view lightweight. The interactive scene appears in **Visibility works both ways**. Three matching rendered fallbacks and accessible mode buttons appear immediately, ordered **Visibility**, **Gradient**, **Holiday**. When protected delivery is configured, supported devices enhance automatically with no 3D switch; unsupported or failed clients keep the 2D render. Mouse and touch users drag in either direction inside the scene; page scrolling starts outside it. Releasing the scene returns it gently to its original view. The controls panel ends with the visible backdrop so the stroller breakout remains visually separate. The same scene works in the private local preview.
 
 ## License and asset protection
 

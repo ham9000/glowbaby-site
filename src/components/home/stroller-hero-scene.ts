@@ -449,8 +449,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     let pointerId: number | null = null;
     let dragging = false;
     let startX = 0, startY = 0, startTargetX = 0, startTargetY = 0;
-    // Touch keeps vertical page scrolling; horizontal drags inspect the scene.
-    canvas.style.touchAction = "pan-y pinch-zoom";
+    canvas.style.touchAction = "none";
     const draw = () => {
       const cameraMask = camera.layers.mask;
       view.setScissorTest(false);
@@ -500,9 +499,8 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
       const rect = canvas.getBoundingClientRect();
       const width = Math.max(rect.width, 1), height = Math.max(rect.height, 1);
       targetY = THREE.MathUtils.clamp(startTargetY + (event.clientX - startX) / width * config.interaction.dragSensitivity, -1, 1);
-      if (event.pointerType !== "touch") {
-        targetX = THREE.MathUtils.clamp(startTargetX + (event.clientY - startY) / height * config.interaction.dragSensitivity, -1, 1);
-      }
+      targetX = THREE.MathUtils.clamp(startTargetX + (event.clientY - startY) / height * config.interaction.dragSensitivity, -1, 1);
+      if (event.pointerType === "touch" && event.cancelable) event.preventDefault();
     };
     const beginDrag = () => {
       if (pointerId === null || disposed || !active) return;
