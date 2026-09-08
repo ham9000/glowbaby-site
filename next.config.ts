@@ -8,11 +8,11 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com${isProduction ? "" : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://va.vercel-scripts.com${isProduction ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self' https://va.vercel-scripts.com${isProduction ? "" : " ws: http://localhost:*"}`,
+  `connect-src 'self' blob: https://va.vercel-scripts.com${isProduction ? "" : " ws: http://localhost:*"}`,
   "manifest-src 'self'",
   ...(isProduction ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
@@ -38,6 +38,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  outputFileTracingIncludes: {
+    "/": ["./assets/hero/scene.gbe"],
+    "/api/hero/**": ["./assets/hero/scene.gbe"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

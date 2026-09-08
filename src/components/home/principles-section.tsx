@@ -19,7 +19,7 @@ export function PrinciplesSection({ product }: { product: Product }) {
               className={`principle-card ${index === 1 ? "principle-card-accent" : ""}`}
             >
               <StarOutline className="h-7 w-7 text-violet" />
-              <div className="mt-10">
+              <div className="mt-6">
                 <h3 className="font-display text-4xl leading-none tracking-[-0.045em] text-ink">
                   {principle.title}
                 </h3>

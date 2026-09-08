@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Private supplied geometry, reference media, and local verification outputs
+/.local-assets/

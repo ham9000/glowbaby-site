@@ -1,23 +1,29 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
-import { ProductVisual } from "@/components/product-visual";
+import { InteractiveHeroMedia } from "./interactive-hero-media";
 import { siteConfig, type Product } from "@/content/site";
+import { hasProtectedHeroScene } from "@/lib/hero-assets-server";
 
 export function HeroSection({ product }: { product: Product }) {
   return (
-    <section className="hero-grid relative overflow-hidden bg-cream pb-14 pt-32 sm:pb-20 sm:pt-40">
+    <section className="hero-grid relative overflow-hidden bg-cream pb-14 pt-28 sm:pb-20 sm:pt-40">
       <div className="hero-blob hero-blob-one" />
       <div className="hero-blob hero-blob-two" />
-      <Container className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
-        <div className="relative z-10 max-w-2xl py-6 lg:py-14">
+      <Container className="hero-layout relative grid items-center gap-7 lg:grid-cols-2">
+        <div className="hero-intro relative z-10 max-w-2xl lg:pt-14">
           <p className="eyebrow leading-relaxed">{product.eyebrow}</p>
-          <h1 className="mt-5 font-display text-[clamp(3.5rem,7vw,6.5rem)] text-ink">
+          <h1 className="mt-5 font-display text-[clamp(3rem,7vw,6.5rem)] text-ink">
             <span className="block whitespace-nowrap">Made to be</span>
             <span className="block whitespace-nowrap text-coral">seen.</span>
             <span className="block whitespace-nowrap pl-[0.32em]">Built to be</span>
             <span className="block whitespace-nowrap pl-[0.68em] text-violet">theirs.</span>
           </h1>
-          <p className="mt-8 max-w-xl text-pretty text-lg leading-8 text-ink/70">
+        </div>
+        <div className="hero-media relative z-10 w-full">
+          <InteractiveHeroMedia sceneAvailable={hasProtectedHeroScene()} />
+        </div>
+        <div className="hero-details relative z-10 max-w-2xl lg:pb-14">
+          <p className="max-w-xl text-pretty text-lg leading-8 text-ink/70 lg:mt-8">
             {product.description}
           </p>
           <p className="mt-4 text-sm font-semibold text-ink/70">
@@ -37,9 +43,6 @@ export function HeroSection({ product }: { product: Product }) {
               Follow the build <span aria-hidden="true">↗</span>
             </Link>
           </div>
-        </div>
-        <div className="relative aspect-[1.05] w-full">
-          <ProductVisual />
         </div>
       </Container>
       <Container className="relative mt-6">

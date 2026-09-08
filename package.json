@@ -8,23 +8,34 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "validate": "npm run typecheck && npm run lint && npm run build"
+    "validate": "npm run typecheck && npm run lint && npm run build",
+    "hero:posters": "node scripts/hero-poster.mjs",
+    "hero:preview": "node scripts/preview-hero.mjs",
+    "hero:package": "node scripts/package-hero-assets.mjs",
+    "hero:check": "node scripts/check-hero-channel.mjs && node scripts/check-hero-optimizer.mjs && node scripts/check-hero-preview.mjs && node scripts/check-hero-format.mjs && node scripts/check-hero-delivery.mjs && node scripts/check-hero-client.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "next": "16.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "three": "^0.185.1"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.185.4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "meshoptimizer": "^1.2.0",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
