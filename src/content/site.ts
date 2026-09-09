@@ -157,7 +157,7 @@ export const products: Product[] = [
         number: "01",
         title: "Attach the light",
         description:
-          "Position the light beneath the stroller or wagon so it shines outward, around, and down toward the ground. Exact mounting and compatibility are still in development.",
+          "Position the light beneath the stroller or wagon so it shines outward, around, and down toward the ground. Designed to stay attached between outings, including when folding or storing a compatible stroller. Exact mounting and compatibility are still in development.",
       },
       {
         number: "02",
@@ -228,6 +228,11 @@ export const products: Product[] = [
         question: "Will it fit my stroller or wagon?",
         answer:
           "The light is intended to mount beneath a stroller or wagon. Bottom-mounting hardware, attachment points, and compatibility are still being evaluated; no universal fit or supported-model list is promised at this stage.",
+      },
+      {
+        question: "Do I need to remove it before folding my stroller?",
+        answer:
+          "That's something Glowbaby is being designed to avoid. The goal is for the light to stay attached through folding and storage, without removing and reinstalling it for each walk. Folding clearance and supported stroller models are still being evaluated.",
       },
       {
         question: "Does it replace required lights or reflectors?",
