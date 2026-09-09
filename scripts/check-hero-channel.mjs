@@ -16,21 +16,6 @@ const { gradientColors, gradientStops, heroSceneConfig } = await import("../.loc
 const { alignGlowbabyParts } = await import("../.local-assets/channel-check/glowbaby-model.mjs");
 const c = heroSceneConfig.channel;
 const material = createLightMaterial();
-const holiday = heroSceneConfig.holiday;
-for (let stripe = 0; stripe < holiday.stripes; stripe++) {
-  for (const [offset, color] of [[0.25, holiday.white], [0.75, holiday.red]]) {
-    const sampled = sampleLightColor(new Color(), (stripe + offset) / holiday.stripes, 0, "holiday");
-    assert.deepEqual(sampled.toArray(), color, "Candy-cane bands alternate between the configured colors");
-    const revolution = 1 / heroSceneConfig.colorRotationSpeed;
-    assert.deepEqual(sampleLightColor(new Color(), (stripe + offset) / holiday.stripes, revolution, "holiday").toArray(), color, "Holiday bands complete a full rotation");
-    const opposite = offset === 0.25 ? holiday.red : holiday.white;
-    assert.deepEqual(sampleLightColor(new Color(), (stripe + offset) / holiday.stripes, revolution / (holiday.stripes * 2), "holiday").toArray(), opposite, "Red and white bands rotate past a fixed point");
-  }
-}
-const seamStart = sampleLightColor(new Color(), 0, 0, "holiday");
-const seamEnd = sampleLightColor(new Color(), 1, 0, "holiday");
-assert.ok(seamStart.toArray().every((value, index) => Math.abs(value - seamEnd.toArray()[index]) < 1e-10), "Holiday palette closes around the ring");
-for (const color of [...holiday.red, ...holiday.white]) assert.ok(lightPaletteGLSL.includes(color.toFixed(6)), "GPU and CPU use the same holiday colors");
 assert.equal(gradientStops[0].position, 0);
 assert.deepEqual([...new Set(gradientStops.map(({ color }) => color))], [...gradientColors], "Keep the configured rainbow palette in order");
 for (const [index, { color, position }] of gradientStops.entries()) {
@@ -64,8 +49,7 @@ assert.ok(transition.at(-2).r < 0.001, "The blend eases gently into the green ho
 const gradientSeam = sampleLightColor(new Color(), 1, 0, "flow");
 assert.ok(gradientSeam.toArray().every((value, index) => Math.abs(value - new Color(gradientColors[0]).toArray()[index]) < 1e-10), "Gradient palette closes around the ring");
 assert.doesNotMatch(material.fragmentShader, /vUv\.y/, "Color divisions stay straight across the diffuser profile");
-assert.ok(holiday.spillSoftness > holiday.softness && holiday.spillSoftness < 1, "Ground transitions soften the bands without losing full red and white");
-assert.ok(lightPaletteGLSL.includes(`time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)}`), "GPU bands use the shared rotation speed");
+assert.ok(lightPaletteGLSL.includes(`time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)}`), "GPU gradient uses the shared rotation speed");
 for (const [key, value] of Object.entries(heroSceneConfig.emission)) {
   if (key === "activationSeconds") continue;
   assert.equal(material.uniforms[key === "base" ? "emissionBase" : key].value, value, "Emission tuning must reach the light shader");

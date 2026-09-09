@@ -1,4 +1,4 @@
-export type LightMode = "visibility" | "flow" | "holiday";
+export type LightMode = "visibility" | "flow";
 
 export const gradientColors = ["#ff0000", "#ff4500", "#ffff00", "#006400", "#0000ff", "#800080"] as const;
 
@@ -15,7 +15,6 @@ export const gradientStops = [
 export const lightModes: { id: LightMode; label: string; description: string }[] = [
   { id: "visibility", label: "Visibility", description: "A steady warm amber light." },
   { id: "flow", label: "Gradient", description: "A rotating rainbow around the whole light." },
-  { id: "holiday", label: "Holiday", description: "Rotating red and white bands around the light." },
 ];
 
 // Meter units. Keep source models untouched; tune the assembly here.
@@ -87,13 +86,6 @@ export const heroSceneConfig = {
     activationSeconds: 2.4,
   },
   colorRotationSpeed: 0.055,
-  holiday: {
-    stripes: 8,
-    softness: 0.12,
-    spillSoftness: 0.8,
-    red: [1, 0.008, 0.02] as [number, number, number],
-    white: [1, 1, 1] as [number, number, number],
-  },
   environment: {
     background: "#101b24",
     sky: "#bacde3",
@@ -148,7 +140,6 @@ export const heroSceneConfig = {
     falloff: 2.2,
     edgeStart: 0.32,
     edgeEnd: 0.5,
-    centerBlendRadius: 0.07,
     centerStrength: 0.55,
     centerRadius: 0.075,
   },

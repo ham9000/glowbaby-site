@@ -109,7 +109,7 @@ export const products: Product[] = [
     eyebrow: "App-controlled stroller light",
     headline: "Made to be seen. Built to be theirs.",
     description:
-      "Glowbaby is being designed to help you see the space around your stroller or wagon—and help others see you at night. App-controlled light shines beneath and around your ride, with safety-minded visibility at the center.",
+      "Glowbaby is being designed to help you see the space around your stroller or wagon and help others see you at night. App controlled light shines beneath and around your ride, with safety-minded visibility at the center.",
     status: "In development",
     statusDetail:
       "The under-stroller light, controller, and bottom-mounting approach are still being developed. The hardware is not yet available to buy.",

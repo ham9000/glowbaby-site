@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { gradientStops, heroSceneConfig, type LightMode } from "./hero-scene-config";
 
-const holiday = heroSceneConfig.holiday;
 // Blend encoded palette values before converting back to the renderer's linear working space.
 const gradient = gradientStops.map(({ color, position }) => ({
   color: new THREE.Color().setStyle(color, THREE.LinearSRGBColorSpace), position,
@@ -20,24 +19,16 @@ export const lightPaletteGLSL = `
     vec3 encoded = mix(from, to, smoothstep(0.0, 1.0, fraction));
     return mix(encoded / 12.92, pow((encoded + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), encoded));
   }
-  vec3 holidayColor(float stripe) {
-    return mix(vec3(${holiday.red.map(value => value.toFixed(6)).join(", ")}), vec3(${holiday.white.map(value => value.toFixed(6)).join(", ")}), stripe);
-  }
-  vec3 holidayBands(float phase, float softness) {
-    return holidayColor(smoothstep(-softness, softness, sin(6.2831853 * phase * ${holiday.stripes.toFixed(1)})));
-  }
   vec3 gradientColor(float phase) {
     float position = fract(phase);
     ${gradientBranches}
   }
   vec3 lightColor(float angle, float time, float mode) {
-    if (mode > 1.5) return vec3(1.0, 0.52, 0.12);
+    if (mode > 0.5) return vec3(1.0, 0.52, 0.12);
     float phase = angle - time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)};
-    if (mode < 0.5) return holidayBands(phase, ${holiday.softness.toFixed(6)});
     return gradientColor(phase);
   }
   vec3 spillLightColor(float angle, float time, float mode) {
-    if (mode < 0.5) return holidayBands(angle - time * ${heroSceneConfig.colorRotationSpeed.toFixed(6)}, ${holiday.spillSoftness.toFixed(6)});
     return lightColor(angle, time, mode);
   }
 `;
@@ -45,14 +36,6 @@ export const lightPaletteGLSL = `
 export function sampleLightColor(target: THREE.Color, angle: number, time: number, mode: LightMode) {
   if (mode === "visibility") return target.setRGB(1, 0.52, 0.12);
   const phase = angle - time * heroSceneConfig.colorRotationSpeed;
-  if (mode === "holiday") {
-    const stripe = THREE.MathUtils.smoothstep(Math.sin(Math.PI * 2 * phase * holiday.stripes), -holiday.softness, holiday.softness);
-    return target.setRGB(
-      THREE.MathUtils.lerp(holiday.red[0], holiday.white[0], stripe),
-      THREE.MathUtils.lerp(holiday.red[1], holiday.white[1], stripe),
-      THREE.MathUtils.lerp(holiday.red[2], holiday.white[2], stripe),
-    );
-  }
   const position = THREE.MathUtils.euclideanModulo(phase, 1);
   const segment = gradientSegments.find(({ end }) => position < end)!;
   const blend = THREE.MathUtils.smoothstep(position, segment.start, segment.end);
@@ -119,7 +102,7 @@ export function createLightMaterial() {
   const emission = heroSceneConfig.emission;
   return new THREE.ShaderMaterial({
     uniforms: {
-      time: { value: 0 }, mode: { value: 1 }, activation: { value: 0 },
+      time: { value: 0 }, mode: { value: 0 }, activation: { value: 0 },
       emissionBase: { value: emission.base }, brightness: { value: emission.brightness },
       idleLevel: { value: emission.idleLevel }, pulseIntensity: { value: emission.pulseIntensity },
       pulseSharpness: { value: emission.pulseSharpness }, settleStart: { value: emission.settleStart },
@@ -137,10 +120,7 @@ export function createLightMaterial() {
         float pulse = exp(-distanceToPulse * distanceToPulse * pulseSharpness);
         float level = mix(idleLevel + pulse * pulseIntensity, 1.0, smoothstep(settleStart, 1.0, activation));
         gl_FragColor = vec4(color * (emissionBase + level * brightness), 1.0);
-        // Keep candy-cane red saturated rather than tone-mapping it toward orange.
-        if (mode > 0.5) {
-          #include <tonemapping_fragment>
-        }
+        #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
   });

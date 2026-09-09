@@ -411,7 +411,6 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
         time: lightMaterial.uniforms.time, mode: lightMaterial.uniforms.mode, strength: { value: 0 },
         brightness: { value: config.spill.brightness }, falloff: { value: config.spill.falloff },
         edge: { value: new THREE.Vector2(config.spill.edgeStart, config.spill.edgeEnd) },
-        centerBlendRadius: { value: config.spill.centerBlendRadius },
         centerStrength: { value: config.spill.centerStrength }, centerRadius: { value: config.spill.centerRadius },
       },
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -419,7 +418,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
         void main(){ vUv=uv; vSidewalkWorld=(modelMatrix*vec4(position,1.0)).xyz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
       fragmentShader: `varying vec2 vUv; varying vec3 vSidewalkWorld; uniform float time; uniform float mode; uniform float strength;
         uniform float brightness; uniform float falloff; uniform vec2 edge;
-        uniform float centerBlendRadius; uniform float centerStrength; uniform float centerRadius;
+        uniform float centerStrength; uniform float centerRadius;
         ${lightPaletteGLSL}
         ${sidewalkPatternGLSL}
         void main(){
@@ -428,12 +427,11 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
           float angle = atan(-p.y, p.x) / 6.2831853;
           vec3 color = spillLightColor(angle, time, mode);
           // Angular colors converge softly instead of forming a pinwheel tip.
-          if (mode > 0.5 && mode < 1.5) {
+          if (mode < 0.5) {
             color = mix(vec3(dot(color, vec3(0.2126, 0.7152, 0.0722))), color, smoothstep(0.01, 0.09, radius) * 0.85);
           }
           float a = exp(-dot(p, p) * falloff) * (1.0 - smoothstep(edge.x, edge.y, radius));
           a *= mix(centerStrength, 1.0, smoothstep(0.0, centerRadius, radius));
-          if (mode < 0.5) color = mix(holidayColor(0.5), color, smoothstep(0.0, centerBlendRadius, radius));
           gl_FragColor = vec4(color * brightness * sidewalkSurface(vSidewalkWorld.xz).x, a * strength);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -598,7 +596,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const setMode = (next: LightMode) => {
       if (disposed) return;
       mode = next;
-      lightMaterial.uniforms.mode.value = { holiday: 0, flow: 1, visibility: 2 }[next];
+      lightMaterial.uniforms.mode.value = { flow: 0, visibility: 1 }[next];
       for (const { angle, light, bounce } of glowSamples) {
         sampleLightColor(light.color, angle, elapsed, mode);
         bounce.color.copy(light.color);

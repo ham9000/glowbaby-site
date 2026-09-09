@@ -5,26 +5,24 @@ import { siteConfig, type Product } from "@/content/site";
 
 export function HeroSection({ product }: { product: Product }) {
   return (
-    <section className="hero-grid relative overflow-hidden bg-cream pb-14 pt-32 sm:pb-20 sm:pt-40">
-      <div className="hero-blob hero-blob-one" />
-      <div className="hero-blob hero-blob-two" />
-      <Container className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
-        <div className="relative z-10 max-w-2xl py-6 lg:py-14">
-          <p className="eyebrow leading-relaxed">{product.eyebrow}</p>
-          <h1 className="mt-5 font-display text-[clamp(3.5rem,7vw,6.5rem)] text-ink">
-            <span className="block whitespace-nowrap">Made to be</span>
-            <span className="block whitespace-nowrap text-coral">seen.</span>
-            <span className="block whitespace-nowrap pl-[0.32em]">Built to be</span>
-            <span className="block whitespace-nowrap pl-[0.68em] text-violet">theirs.</span>
+    <section className="illustrated-hero relative overflow-hidden bg-cream pb-14 sm:pb-20">
+      <div className="illustrated-hero-scene">
+        <StaticHeroVisual />
+      <Container className="illustrated-hero-content relative">
+        <div className="illustrated-hero-copy relative z-10">
+          <p className="eyebrow leading-relaxed !text-white/75">{product.eyebrow}</p>
+          <h1 className="mt-5 font-display text-[clamp(2.9rem,5.5vw,5.5rem)] text-white">
+            <span className="block">Made to be <span className="text-[#ff85ad]">seen.</span></span>
+            <span className="block">Built to be <span className="text-[#c6acff]">theirs.</span></span>
           </h1>
-          <p className="mt-8 max-w-xl text-pretty text-lg leading-8 text-ink/70">
+          <p className="mt-8 max-w-xl text-pretty text-base leading-7 text-white/80">
             {product.description}
           </p>
-          <p className="mt-4 text-sm font-semibold text-ink/70">
+          <p className="mt-4 text-sm font-semibold text-white/75">
             {product.status} · Not yet available to buy
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href="#how-it-works" className="button button-dark">
+            <Link href="#how-it-works" className="button hero-primary">
               See how it works
               <span aria-hidden="true">→</span>
             </Link>
@@ -32,16 +30,14 @@ export function HeroSection({ product }: { product: Product }) {
               href={siteConfig.githubUrl}
               target="_blank"
               rel="noreferrer"
-              className="button button-light"
+              className="button hero-secondary"
             >
               Follow the build <span aria-hidden="true">↗</span>
             </Link>
           </div>
         </div>
-        <div className="relative w-full">
-          <StaticHeroVisual />
-        </div>
       </Container>
+      </div>
       <Container className="relative mt-6">
         <div className="grid gap-px overflow-hidden rounded-[1.75rem] border border-ink/10 bg-ink/10 sm:grid-cols-3">
           {[

@@ -5,11 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { gradientColors, lightModes, type LightMode } from "./hero-scene-config";
 import type { HeroSceneHandle } from "./stroller-hero-scene";
 import flowPoster from "../../../public/hero/stroller-render-flow.webp";
-import holidayPoster from "../../../public/hero/stroller-render-holiday.webp";
 import visibilityPoster from "../../../public/hero/stroller-render-visibility.webp";
 
 // Static imports fingerprint regenerated renders so deployed image caches stay current.
-const posters: Record<LightMode, typeof flowPoster> = { flow: flowPoster, holiday: holidayPoster, visibility: visibilityPoster };
+const posters: Record<LightMode, typeof flowPoster> = { flow: flowPoster, visibility: visibilityPoster };
 
 type Connection = EventTarget & { saveData?: boolean; effectiveType?: string };
 type SceneStatus = "image" | "loading" | "ready" | "error";
