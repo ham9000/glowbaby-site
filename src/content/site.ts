@@ -135,21 +135,21 @@ export const products: Product[] = [
     platformParts: [
       {
         number: "01",
-        title: "Under-stroller LED light",
+        title: "Wraparound light",
         description:
           "A bottom-mounted light designed to shine outward, around the stroller or wagon, and down toward the ground.",
       },
       {
         number: "02",
-        title: "Compact controller",
+        title: "Rechargeable inside",
         description:
-          "Connects the lighting hardware to the Glowbaby mobile experience over Bluetooth.",
+          "An internal rechargeable LiPo battery means no separate power bank to mount. Charging details and runtime are still being refined.",
       },
       {
         number: "03",
         title: "Companion app",
         description:
-          "A single place to control brightness, colors, animations, and lighting modes for the ride.",
+          "Bluetooth connects the light to the Glowbaby app for setting brightness, colors, and lighting modes before your walk.",
       },
     ],
     howItWorks: [

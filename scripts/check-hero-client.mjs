@@ -454,3 +454,62 @@ assert.match(sceneSource, /const damping = dragging \? config\.interaction\.damp
 assert.match(sceneSource, /loader\.parseAsync\(buffer, ""\)/);
 assert.doesNotMatch(compile(sceneSource), /require\([^)]*hero-asset/);
 console.log("Hero interaction: mouse and touch two-axis dragging, panel alignment, limits, capture cleanup and slow return passed.");
+
+const product = evaluate(await read("../src/content/site.ts"), {}, { process: { env: {} } }).products[0];
+const sectionJsx = (type, props) => ({ type, props });
+const sectionDependencies = {
+  "react/jsx-runtime": { jsx: sectionJsx, jsxs: sectionJsx },
+  "next/image": { default: "image" },
+  "next/link": { default: "link" },
+  "@/components/container": { Container: "container" },
+  "@/components/section-heading": { SectionHeading: "heading" },
+  "@/components/star-outline": { StarOutline: "star" },
+  "@/components/device-render": { DeviceRender: "device-render" },
+  "@/content/site": { visibilityGuidance: { habits: "habits", limitations: "limitations" } },
+};
+function descendants(node) {
+  if (!node || typeof node !== "object") return [];
+  return [node, ...[node.props?.children].flat(Infinity).flatMap(descendants)];
+}
+const { PrinciplesSection } = evaluate(await read("../src/components/home/principles-section.tsx"), {
+  ...sectionDependencies,
+  "../../../public/hero/stroller-visibility-wide.webp": { default: "wide-visibility" },
+});
+const homepage = descendants(PrinciplesSection({ product }));
+assert.equal(homepage.filter(({ type }) => type === "image").length, 1);
+assert.equal(homepage.find(({ type }) => type === "image").props.src, "wide-visibility");
+assert.ok(homepage.some(({ type, props }) => type === "link" && props.href === `/products/${product.slug}#stroller-view`));
+assert.equal(homepage.some(({ type }) => type === "canvas" || type === "button"), false, "Homepage visibility is static, not another viewer");
+
+const { PlatformSection } = evaluate(await read("../src/components/home/platform-section.tsx"), sectionDependencies);
+const platform = descendants(PlatformSection({ product }));
+assert.equal(platform.filter(({ type }) => type === "device-render").length, 1);
+assert.ok(platform.some(({ type, props }) => type === "link" && props.href === `/products/${product.slug}#meet-the-light`));
+
+const { ProductDeviceSection } = evaluate(await read("../src/components/product-device-section.tsx"), sectionDependencies);
+const device = descendants(ProductDeviceSection({ product }));
+assert.equal(device[0].props.id, "meet-the-light");
+assert.equal(device.filter(({ type }) => type === "device-render").length, 1);
+const features = device.filter(({ type }) => type === "li");
+assert.equal(features.length, product.platformParts.length);
+for (const [index, feature] of features.entries()) {
+  const nodes = descendants(feature);
+  assert.equal(nodes.find(({ type }) => type === "h3").props.children, product.platformParts[index].title);
+  assert.equal(nodes.find(({ type }) => type === "p").props.children, product.platformParts[index].description);
+}
+
+for (const available of [false, true]) {
+  let capabilityChecks = 0;
+  const { ProductStrollerSection } = evaluate(await read("../src/components/product-stroller-section.tsx"), {
+    ...sectionDependencies,
+    "@/components/home/interactive-hero-media": { InteractiveHeroMedia: "viewer" },
+    "@/lib/hero-assets-server": { hasProtectedHeroScene() { capabilityChecks++; return available; } },
+  });
+  const fitted = descendants(ProductStrollerSection());
+  assert.equal(fitted[0].props.id, "stroller-view");
+  assert.equal(capabilityChecks, 1);
+  const viewers = fitted.filter(({ type }) => type === "viewer");
+  assert.equal(viewers.length, 1);
+  assert.equal(viewers[0].props.sceneAvailable, available, "The product viewer preserves server-side delivery gating");
+}
+console.log("Product presentation: static homepage, shared device render/content, product links and gated product viewer passed.");

@@ -77,6 +77,30 @@ try {
   }), detailConfig, { error() {} });
   assert.equal(detailConfig.strollerHeight, 0, "Device-only review hides the stroller");
   assert.deepEqual(detailConfig.attachment.offsetsX, [], "Synthetic stroller straps must not obscure the actual CAD lid in device-only review");
+  for (const preset of ["wide", "studio"]) {
+    const dataset = {};
+    const captureConfig = structuredClone(heroSceneConfig);
+    await run({
+      body: { dataset },
+      querySelector: (selector) => selector === "#status" ? { textContent: "" } : {},
+      querySelectorAll: () => [],
+    }, { search: `?capture=1&mode=visibility&${preset}=1` }, async (_host, mode, _failure, _models, _signal, _viewport, options) => {
+      assert.equal(mode, "visibility");
+      assert.equal(options.studio, preset === "studio");
+      if (preset === "studio") {
+        assert.equal(captureConfig.strollerHeight, 0);
+        assert.deepEqual(captureConfig.attachment.offsetsX, []);
+        assert.deepEqual(captureConfig.channel, heroSceneConfig.channel, "Studio presentation must preserve actual device geometry");
+        assert.ok(captureConfig.environment.key.intensity > heroSceneConfig.environment.key.intensity, "Studio light should reveal the dark housing");
+      } else {
+        assert.equal(captureConfig.strollerHeight, heroSceneConfig.strollerHeight);
+        assert.deepEqual(captureConfig.assembly, heroSceneConfig.assembly, "The wide image preserves the actual mounting position");
+      }
+      return { setActive() {}, setMode() {}, dispose() {}, renderStill() {} };
+    }, captureConfig, { error() {} });
+    assert.equal(dataset[preset], "true", "Presentation captures use the full rectangular viewport");
+    assert.equal(dataset.ready, "true");
+  }
   const websiteInteraction = structuredClone(heroSceneConfig.interaction);
   for (const search of ["", "?detail=1", "?capture=1", "?capture=1&detail=1", "?capture=1&hero=1"]) {
     const previewConfig = structuredClone(heroSceneConfig);

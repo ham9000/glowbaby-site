@@ -190,7 +190,7 @@ function getGroundContactBounds(root: THREE.Object3D) {
   return contacts;
 }
 
-export async function createHeroScene(host: HTMLElement, initialMode: LightMode, onFailure: () => void, modelData?: HeroModelBuffers, signal?: AbortSignal, viewport: HTMLElement = host): Promise<HeroSceneHandle> {
+export async function createHeroScene(host: HTMLElement, initialMode: LightMode, onFailure: () => void, modelData?: HeroModelBuffers, signal?: AbortSignal, viewport: HTMLElement = host, { studio = false }: { studio?: boolean } = {}): Promise<HeroSceneHandle> {
   const resources = createResourceTracker();
   const scene = new THREE.Scene();
   let renderer: THREE.WebGLRenderer | undefined;
@@ -236,12 +236,16 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     view.shadowMap.autoUpdate = false;
     view.shadowMap.needsUpdate = true;
     view.debug.onShaderError = () => { throw new Error("Hero shader initialization failed"); };
-    const sceneBackground = resources.track(await new THREE.TextureLoader().loadAsync("/hero/night-park-environment.webp"));
+    const sceneBackground = studio
+      ? new THREE.Color("#e9e6ed")
+      : resources.track(await new THREE.TextureLoader().loadAsync("/hero/night-park-environment.webp"));
     signal?.throwIfAborted();
-    sceneBackground.mapping = THREE.EquirectangularReflectionMapping;
-    sceneBackground.colorSpace = THREE.SRGBColorSpace;
+    if (sceneBackground instanceof THREE.Texture) {
+      sceneBackground.mapping = THREE.EquirectangularReflectionMapping;
+      sceneBackground.colorSpace = THREE.SRGBColorSpace;
+      scene.environment = sceneBackground;
+    }
     scene.background = sceneBackground;
-    scene.environment = sceneBackground;
     scene.environmentIntensity = 0.65;
     scene.backgroundIntensity = 0.8;
     scene.backgroundBlurriness = 0.025;
@@ -351,7 +355,7 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     key.position.fromArray(keyConfig.position);
     // The warm park lamp shapes the canopy and casts real self-shadows into
     // the seat and basket, rather than illuminating every surface equally.
-    key.target.position.set(0, 0.4, 0);
+    key.target.position.set(0, studio ? config.assembly.position[1] : 0.4, 0);
     key.castShadow = true;
     key.shadow.mapSize.setScalar(2048);
     key.shadow.camera.left = key.shadow.camera.bottom = -1.5;
@@ -369,7 +373,9 @@ export async function createHeroScene(host: HTMLElement, initialMode: LightMode,
     const sidewalkUniforms = createSidewalkUniforms();
     const floor = new THREE.Mesh(
       resources.track(new THREE.PlaneGeometry(config.stage.floor.size, config.stage.floor.size)),
-      resources.track(createSidewalkMaterial(sidewalkUniforms)),
+      resources.track(studio
+        ? new THREE.MeshStandardMaterial({ color: "#e9e6ed", roughness: 1 })
+        : createSidewalkMaterial(sidewalkUniforms)),
     );
     floor.name = "ConcreteSidewalk";
     floor.rotation.x = -Math.PI / 2;

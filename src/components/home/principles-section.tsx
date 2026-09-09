@@ -1,9 +1,10 @@
+import Image from "next/image";
+import Link from "next/link";
 import { Container } from "@/components/container";
 import { SectionHeading } from "@/components/section-heading";
 import { StarOutline } from "@/components/star-outline";
 import { visibilityGuidance, type Product } from "@/content/site";
-import { hasProtectedHeroScene } from "@/lib/hero-assets-server";
-import { InteractiveHeroMedia } from "./interactive-hero-media";
+import visibilityRender from "../../../public/hero/stroller-visibility-wide.webp";
 
 export function PrinciplesSection({ product }: { product: Product }) {
   return (
@@ -14,9 +15,20 @@ export function PrinciplesSection({ product }: { product: Product }) {
           title="Visibility works both ways."
           description="Seeing the space around your ride and being noticed by others both matter after dark. Glowbaby is being designed for both: light underfoot and a more visible presence for people nearby."
         />
-        <div className="visibility-viewer mt-12">
-          <InteractiveHeroMedia sceneAvailable={hasProtectedHeroScene()} />
-        </div>
+        <figure className="mt-10">
+          <Image
+            src={visibilityRender}
+            alt="A full stroller with the Glowbaby prototype beneath its basket, casting warm amber light across the surrounding pavement."
+            sizes="(min-width: 1240px) 1160px, calc(100vw - 2.5rem)"
+            className="h-auto w-full rounded-[2rem]"
+          />
+          <figcaption className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm leading-6 text-ink/65">
+            <span>Visibility mode &middot; Prototype render, not measured light output.</span>
+            <Link href={`/products/${product.slug}#stroller-view`} className="font-bold text-violet">
+              Explore the light in place <span aria-hidden="true">&rarr;</span>
+            </Link>
+          </figcaption>
+        </figure>
         <div className="mt-12 grid gap-5 lg:grid-cols-3">
           {product.principles.map((principle, index) => (
             <article

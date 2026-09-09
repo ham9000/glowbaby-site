@@ -7,8 +7,8 @@ wagon, casting light outward, around, and down. The site leads with safety-minde
 visibility after dark: helping families see the space around their ride and
 helping others notice them. Colors and animations are secondary to that purpose.
 The hardware is in development, not currently available
-to buy. The intended system brings together an under-stroller LED light, a compact
-Bluetooth controller, and a companion app. Glowbaby is not
+to buy. The device combines under-stroller lighting with an internal rechargeable
+LiPo battery and Bluetooth control through the companion app. Glowbaby is not
 safety equipment or a replacement for required lights and reflectors.
 
 The companion app is available on iOS as
@@ -46,8 +46,10 @@ run individually with `npm run typecheck`, `npm run lint`, and `npm run build`.
 
 ## Routes and shared content
 
-- `/` tells the stroller-light story and introduces the app and system.
-- `/products/glowbaby` provides product details, how it works, status, and FAQ.
+- `/` tells the stroller-light story with a wide Visibility-mode still, a compact
+  device render, and an introduction to the app. It does not mount the 3D viewer.
+- `/products/glowbaby` provides a device close-up, product details, how it works,
+  the interactive under-stroller viewer, status, and FAQ.
 - `/products` uses a framework-native redirect to `/products/glowbaby` while
   there is one public product; the redirect is excluded from the sitemap.
 - `/llms.txt` summarizes the same public product content for language models.

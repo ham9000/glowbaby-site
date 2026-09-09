@@ -108,17 +108,22 @@ try {
   protocol = await connectProtocol(target.webSocketDebuggerUrl);
   await protocol.send("Page.enable");
   await protocol.send("Runtime.enable");
-  await protocol.send("Emulation.setDeviceMetricsOverride", { width: 1200, height: 1072, deviceScaleFactor: 1, mobile: false });
   await protocol.send("Emulation.setDefaultBackgroundColorOverride", { color: { r: 0, g: 0, b: 0, a: 0 } });
 
   const renders = [];
-  const captures = [
-    ...lightModes.map(({ id: mode }) => ({ mode, filename: `stroller-render-${mode}`, hero: false })),
-    { mode: "flow", filename: "stroller-hero-static", hero: true },
+  const presentationCaptures = [
+    { mode: "visibility", filename: "stroller-visibility-wide", query: "&wide=1", width: 1600, height: 800 },
+    { mode: "visibility", filename: "glowbaby-device", query: "&studio=1", width: 1200, height: 900 },
   ];
-  for (const { mode, filename, hero } of captures) {
+  const captures = [
+    ...lightModes.map(({ id: mode }) => ({ mode, filename: `stroller-render-${mode}`, query: "", width: 1200, height: 1072 })),
+    { mode: "flow", filename: "stroller-hero-static", query: "&hero=1", width: 1200, height: 1072 },
+    ...presentationCaptures,
+  ];
+  for (const { mode, filename, query, width, height } of process.argv.includes("--presentation") ? presentationCaptures : captures) {
     protocol.errors.length = 0;
-    const url = `${origin}/?capture=1&mode=${mode}${hero ? "&hero=1" : ""}`;
+    await protocol.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
+    const url = `${origin}/?capture=1&mode=${mode}${query}`;
     await protocol.send("Page.navigate", { url });
     let ready = false;
     for (let attempt = 0; attempt < 300; attempt++) {
@@ -136,15 +141,15 @@ try {
     if (state.url !== url || state.error || state.ready !== "true") throw new Error(state.error ?? `Scene became unavailable while capturing ${mode}`);
     const png = Buffer.from(data, "base64");
     const meta = await sharp(png).metadata();
-    if (meta.width !== 1200 || meta.height !== 1072) throw new Error(`Unexpected ${mode} capture size: ${meta.width}x${meta.height}`);
-    renders.push({ filename, png, webp: await sharp(png).webp({ quality: 88 }).toBuffer() });
+    if (meta.width !== width || meta.height !== height) throw new Error(`Unexpected ${filename} capture size: ${meta.width}x${meta.height}`);
+    renders.push({ filename, width, height, png, webp: await sharp(png).webp({ quality: 88 }).toBuffer() });
   }
   // Do not overwrite any poster until every mode renders successfully.
   await fs.mkdir(path.join("public", "hero"), { recursive: true });
-  for (const { filename, png, webp } of renders) {
+  for (const { filename, width, height, png, webp } of renders) {
     await fs.writeFile(path.join(".local-assets", `${filename}.png`), png);
     await fs.writeFile(path.join("public", "hero", `${filename}.webp`), webp);
-    console.log(`${filename}: fresh 1200x1072 scene render, ${webp.length} bytes`);
+    console.log(`${filename}: fresh ${width}x${height} scene render, ${webp.length} bytes`);
   }
 } finally {
   try {

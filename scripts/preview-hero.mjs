@@ -11,7 +11,7 @@ const root = process.cwd();
 const modules = ["hero-scene-config", "glowbaby-channel", "glowbaby-model", "stroller-hero-scene"];
 const assets = { "stroller.glb": "stroller-optimized.glb", "bottom.glb": "bottom.glb", "top.glb": "top.glb" };
 const html = `<!doctype html><html lang="en"><meta charset="utf-8"><title>Glowbaby local assembly preview</title>
-<style>body{margin:0;background:#171827;color:#e2d8f6;font:14px system-ui}#scene{position:relative;width:100vw;height:calc(100vw / 1.12);max-height:90vh}#scene canvas,#viewport{position:absolute;inset:0}#viewport{pointer-events:none}nav{display:flex;gap:8px;justify-content:center;padding:12px}button{padding:12px 20px;border-radius:24px;border:1px solid #cbbce4;background:white}#status{text-align:center}body[data-capture]{background:transparent}body[data-capture] #scene{width:100vw;height:100vh;max-height:none}body[data-capture]:not([data-hero]) #viewport{right:13.3333%;bottom:13.3333%}body[data-capture] nav,body[data-capture] #status{display:none}</style>
+<style>body{margin:0;background:#171827;color:#e2d8f6;font:14px system-ui}#scene{position:relative;width:100vw;height:calc(100vw / 1.12);max-height:90vh}#scene canvas,#viewport{position:absolute;inset:0}#viewport{pointer-events:none}nav{display:flex;gap:8px;justify-content:center;padding:12px}button{padding:12px 20px;border-radius:24px;border:1px solid #cbbce4;background:white}#status{text-align:center}body[data-capture]{background:transparent}body[data-capture] #scene{width:100vw;height:100vh;max-height:none}body[data-capture]:not([data-hero]):not([data-wide]):not([data-studio]) #viewport{right:13.3333%;bottom:13.3333%}body[data-capture] nav,body[data-capture] #status{display:none}</style>
 <div id="scene"><div id="viewport"></div></div><nav>${lightModes.map(mode => `<button data-mode="${mode.id}">${mode.label}</button>`).join("")}<button id="freeze">Freeze for poster</button></nav><p id="status">Loading local models…</p>
 <script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
 <script type="module">import {createHeroScene} from '/modules/stroller-hero-scene.js'; import {heroSceneConfig as config} from '/modules/hero-scene-config.js';
@@ -20,8 +20,17 @@ const fail=message=>{status.textContent=message;document.body.dataset.error=mess
 if(params.has('capture'))document.body.dataset.capture='true';
 if(params.has('hero')){document.body.dataset.hero='true';config.camera.position=[1.52,.74,1.8];config.camera.target=[0,.40,0];config.camera.fov=34;}
 if(params.has('detail')){config.strollerHeight=0;config.assembly.position=[0,0.05,0];config.attachment.offsetsX=[];config.camera.position=[0.29,0.25,0.35];config.camera.target=[0,0.07,0];}
+if(params.has('wide')){document.body.dataset.wide='true';config.camera.position=[1.45,.86,1.7];config.camera.target=[0,.37,0];config.camera.fov=34;}
+if(params.has('studio')){
+  document.body.dataset.studio='true';config.strollerHeight=0;config.attachment.offsetsX=[];config.assembly.position=[0,0,0];
+  config.camera.position=[.26,.20,.32];config.camera.target=[0,.012,0];config.camera.fov=32;
+  Object.assign(config.environment,{sky:'#ffffff',ground:'#bdc3d4',intensity:1.8});
+  Object.assign(config.environment.key,{color:'#ffffff',intensity:4,position:[-.5,.9,.7]});
+  Object.assign(config.environment.rim,{color:'#ffffff',intensity:2,position:[.5,.4,-.6]});
+  config.diffuser.opacity=.8;config.emission.base=.08;config.emission.brightness=.3;config.lightIntensity=.08;config.spillOpacity=.04;config.bounce.intensity=0;
+}
 if(!params.has('capture'))Object.assign(config.interaction,{yaw:Math.PI,pitch:Math.PI/2,returnDamping:0});
-try{const handle=await createHeroScene(document.querySelector('#scene'),params.get('mode')||'flow',()=>fail('Rendering failed'),undefined,undefined,document.querySelector('#viewport'));
+try{const handle=await createHeroScene(document.querySelector('#scene'),params.get('mode')||'flow',()=>fail('Rendering failed'),undefined,undefined,document.querySelector('#viewport'),{studio:params.has('studio')});
 if(document.body.dataset.error){handle.dispose();throw new Error(document.body.dataset.error);}
 handle.setActive(true);if(!document.body.dataset.error)status.textContent='Actual Glowbaby CAD • local review only';
 document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>{handle.setMode(button.dataset.mode);handle.setActive(true);});

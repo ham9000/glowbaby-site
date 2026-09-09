@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .interactive-hero { --hero-breakout-x: 5%; --hero-breakout-y: 5%; --hero-frame-right: 9%; --hero-frame-bottom: 9%; position: relative; width: 100%; border-radius: 2rem; overflow: visible; box-shadow: 0 24px 70px #5a0fea0c; }
-.visibility-viewer { width: min(94%, 62rem); margin-inline: auto; }
+.visibility-viewer { width: min(94%, 46rem); margin-inline: auto; }
 .interactive-hero-clip { position: absolute; width: 0; height: 0; }
 .interactive-hero-stage { position: relative; z-index: 2; aspect-ratio: 1.12; }
 .interactive-hero-stage, .interactive-hero-stage * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }

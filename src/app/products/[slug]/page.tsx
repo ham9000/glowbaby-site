@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/container";
 import { HowItWorks } from "@/components/how-it-works";
 import { ProductFaq } from "@/components/product-faq";
+import { ProductDeviceSection } from "@/components/product-device-section";
+import { ProductStrollerSection } from "@/components/product-stroller-section";
 import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -98,8 +100,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="mt-7 max-w-xl text-lg leading-8 text-white/80">
                 Designed to help you see around your stroller or wagon and help
                 others notice you at night. The bottom-mounted disc directs light
-                outward and down, with a compact Bluetooth controller, external
-                USB-C power, and app controls for setting your light before you go.
+                outward and down, with an internal rechargeable LiPo battery
+                and Bluetooth app controls for setting your light before you go.
               </p>
               <p className="mt-5 text-sm font-bold text-white/75">
                 {product.status} · Not yet available to buy
@@ -115,6 +117,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </Container>
         </section>
+
+        <ProductDeviceSection product={product} />
 
         <section className="product-hero-followup bg-cream py-20 sm:py-24">
           <Container>
@@ -140,6 +144,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </section>
 
         <HowItWorks product={product} />
+
+        <ProductStrollerSection />
 
         <section id="development" className="scroll-mt-28 bg-sage py-20 sm:py-24">
           <Container className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
