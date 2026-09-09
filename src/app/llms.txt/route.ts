@@ -62,7 +62,6 @@ export function GET() {
     "",
     `- [Product catalogue](${siteConfig.url}/product-catalogue.json)`,
     `- [OpenAPI document](${siteConfig.url}/openapi.json)`,
-    `- [Source repository](${siteConfig.githubUrl})`,
     "",
   ].join("\n");
 

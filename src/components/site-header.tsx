@@ -1,3 +1,4 @@
+import { ContactSalesButton } from "@/components/contact-sales-button";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { Container } from "@/components/container";
@@ -29,15 +30,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden md:block">
-          <Link
-            href={siteConfig.githubUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="button button-light"
-          >
-            Follow the build
-            <span aria-hidden="true">↗</span>
-          </Link>
+          <ContactSalesButton />
         </div>
 
         <details className="group relative md:hidden">
@@ -59,14 +52,7 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href={siteConfig.githubUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="button button-light mt-2 justify-center"
-              >
-                Follow the build
-              </Link>
+              <ContactSalesButton />
             </nav>
           </div>
         </details>

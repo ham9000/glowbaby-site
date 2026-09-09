@@ -1,6 +1,7 @@
+import { ContactSalesButton } from "@/components/contact-sales-button";
 import Link from "next/link";
 import { Container } from "@/components/container";
-import { companionApp, siteConfig } from "@/content/site";
+import { companionApp } from "@/content/site";
 
 export function CtaSection() {
   return (
@@ -28,14 +29,7 @@ export function CtaSection() {
           <Link href="/products/glowbaby" className="button button-dark">
             Explore the stroller light <span aria-hidden="true">→</span>
           </Link>
-          <Link
-            href={siteConfig.githubUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="button button-light"
-          >
-            Follow the build <span aria-hidden="true">↗</span>
-          </Link>
+          <ContactSalesButton />
         </div>
       </Container>
     </section>

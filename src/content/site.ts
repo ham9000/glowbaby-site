@@ -32,7 +32,6 @@ export const siteConfig = {
   description:
     "Glowbaby is an under-stroller light designed to help you see around your ride and help others notice you at night, with app-controlled brightness and modes.",
   url: configuredUrl || "https://glowbaby-site.vercel.app",
-  githubUrl: "https://github.com/ham9000/glowbaby-site",
   navigation: [
     { label: "Product", href: "/products/glowbaby" },
     { label: "How it works", href: "/#how-it-works" },
@@ -148,12 +147,6 @@ export const products: Product[] = [
       },
       {
         number: "03",
-        title: "External USB-C power",
-        description:
-          "Keeps power separate from the stroller, with an external USB-C source. Power-source requirements and what is included are still being evaluated.",
-      },
-      {
-        number: "04",
         title: "Companion app",
         description:
           "A single place to control brightness, colors, animations, and lighting modes for the ride.",
@@ -170,7 +163,7 @@ export const products: Product[] = [
         number: "02",
         title: "Connect the controller",
         description:
-          "The compact Bluetooth controller links the lighting system to external USB-C power and the Glowbaby app.",
+          "The compact Bluetooth controller links the lighting system to the Glowbaby app.",
       },
       {
         number: "03",
@@ -191,9 +184,9 @@ export const products: Product[] = [
           "A compact Bluetooth controller connects the light to the companion app. Set brightness and lighting modes before your walk, with colors and playful presets available for personal expression.",
       },
       {
-        title: "Power stays separate",
+        title: "Rechargeable and self-contained",
         description:
-          "The system is designed around external USB-C power. Power-source requirements, runtime, and included accessories are still being evaluated.",
+          "An internal rechargeable LiPo battery keeps Glowbaby compact, with no separate power bank to mount or loose cable to manage. Charging details and expected runtime will be shared as development progresses.",
       },
       {
         title: "One part of a safer outing",
@@ -224,12 +217,12 @@ export const products: Product[] = [
       {
         question: "How is it powered?",
         answer:
-          "Glowbaby is designed to use an external USB-C power source connected through its compact controller. Power-source requirements, runtime, and what will be included are not yet finalized.",
+          "Glowbaby is designed with an internal rechargeable power source via USB-C.",
       },
       {
         question: "Can I buy it now?",
         answer:
-          "The stroller-light hardware is not yet available to buy, and pricing and a launch date have not been announced. You can follow the public build on GitHub as the first stroller-light experience takes shape.",
+          "The stroller-light hardware is not yet available to buy, and pricing and a launch date have not been announced. Contact us if you would like to discuss the project or future availability.",
       },
       {
         question: "Will it fit my stroller or wagon?",

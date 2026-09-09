@@ -1,7 +1,8 @@
+import { ContactSalesButton } from "@/components/contact-sales-button";
 import Link from "next/link";
 import { Container } from "@/components/container";
 import { StaticHeroVisual } from "./static-hero-visual";
-import { siteConfig, type Product } from "@/content/site";
+import { type Product } from "@/content/site";
 
 export function HeroSection({ product }: { product: Product }) {
   return (
@@ -26,14 +27,7 @@ export function HeroSection({ product }: { product: Product }) {
               See how it works
               <span aria-hidden="true">→</span>
             </Link>
-            <Link
-              href={siteConfig.githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="button hero-secondary"
-            >
-              Follow the build <span aria-hidden="true">↗</span>
-            </Link>
+            <ContactSalesButton />
           </div>
         </div>
       </Container>

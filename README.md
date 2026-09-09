@@ -8,7 +8,7 @@ visibility after dark: helping families see the space around their ride and
 helping others notice them. Colors and animations are secondary to that purpose.
 The hardware is in development, not currently available
 to buy. The intended system brings together an under-stroller LED light, a compact
-Bluetooth controller, external USB-C power, and a companion app. Glowbaby is not
+Bluetooth controller, and a companion app. Glowbaby is not
 safety equipment or a replacement for required lights and reflectors.
 
 The companion app is available on iOS as

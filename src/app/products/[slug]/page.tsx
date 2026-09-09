@@ -1,16 +1,18 @@
+import { ContactSalesButton } from "@/components/contact-sales-button";
 import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/container";
 import { HowItWorks } from "@/components/how-it-works";
 import { ProductFaq } from "@/components/product-faq";
-import { ProductVisual } from "@/components/product-visual";
 import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { StarOutline } from "@/components/star-outline";
 import { StructuredData } from "@/components/structured-data";
 import { companionApp, getProduct, products, siteConfig } from "@/content/site";
+import parkHero from "../../../../public/concepts/park-visibility.webp";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -81,57 +83,56 @@ export default async function ProductPage({ params }: ProductPageProps) {
       />
       <SiteHeader />
       <main>
-        <section className="bg-cream pb-16 pt-32 sm:pb-20 sm:pt-40">
-          <Container className="grid items-center gap-12 lg:grid-cols-2">
+        <section className="product-illustrated-hero">
+          <Image src={parkHero} alt="A stroller moving through a dim park at night with warm visibility light around it." fill priority sizes="100vw" className="product-illustrated-hero-image" />
+          <div className="product-illustrated-hero-shade" />
+          <Container className="product-illustrated-hero-content relative">
             <div>
-              <p className="eyebrow leading-relaxed">{product.eyebrow}</p>
-              <h1 className="mt-5 max-w-xl font-display text-[clamp(3.25rem,7vw,6rem)] leading-[0.98] tracking-[-0.055em] text-ink">
+              <p className="eyebrow leading-relaxed !text-white/75">{product.eyebrow}</p>
+              <h1 className="mt-5 max-w-xl font-display text-[clamp(3.25rem,7vw,6rem)] leading-[0.98] tracking-[-0.055em] text-white">
                 {product.name}
               </h1>
-              <p className="mt-5 max-w-xl font-display text-3xl leading-tight tracking-[-0.04em] text-coral">
+              <p className="mt-5 max-w-xl font-display text-3xl leading-tight tracking-[-0.04em] text-[#ff9ab9]">
                 {product.headline}
               </p>
-              <p className="mt-7 max-w-xl text-lg leading-8 text-ink/70">
+              <p className="mt-7 max-w-xl text-lg leading-8 text-white/80">
                 Designed to help you see around your stroller or wagon and help
                 others notice you at night. The bottom-mounted disc directs light
                 outward and down, with a compact Bluetooth controller, external
                 USB-C power, and app controls for setting your light before you go.
               </p>
-              <p className="mt-5 text-sm font-bold text-ink">
+              <p className="mt-5 text-sm font-bold text-white/75">
                 {product.status} · Not yet available to buy
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="#how-it-works" className="button button-dark">
+                <Link href="#how-it-works" className="button hero-primary">
                   See how it works <span aria-hidden="true">→</span>
                 </Link>
-                <Link href="#development" className="button button-light">
+                <Link href="#development" className="button hero-secondary">
                   Development status
                 </Link>
               </div>
             </div>
-            <div className="relative aspect-[1.05] w-full">
-              <ProductVisual />
-            </div>
           </Container>
         </section>
 
-        <section className="bg-ink py-20 text-cream sm:py-24">
+        <section className="product-hero-followup bg-cream py-20 sm:py-24">
           <Container>
-            <div className="[&_.eyebrow]:text-cyan [&_h2]:text-cream [&_p]:text-cream/70">
+            <div className="[&_.eyebrow]:text-violet [&_h2]:text-ink [&_p]:text-ink/70">
               <SectionHeading
                 eyebrow="Safety-minded visibility"
                 title="See nearby. Be noticed."
                 description="Evening walks and after-dark outings are the reason for Glowbaby. The goal is light for the space around you and a visible presence for others—not a promise that light alone makes an outing safe."
               />
             </div>
-            <div className="mt-10 grid gap-px overflow-hidden rounded-[2rem] border border-cream/15 bg-cream/15 sm:grid-cols-2">
+            <div className="mt-10 grid gap-px overflow-hidden rounded-[2rem] border border-ink/10 bg-ink/10 sm:grid-cols-2">
               {product.details.map((detail) => (
-                <article key={detail.title} className="bg-ink p-7 sm:p-9">
-                  <StarOutline className="h-7 w-7 text-cyan" />
-                  <h3 className="mt-7 font-display text-3xl tracking-[-0.04em] text-cream">
+                <article key={detail.title} className="bg-sage p-7 sm:p-9">
+                  <StarOutline className="h-7 w-7 text-violet" />
+                  <h3 className="mt-7 font-display text-3xl tracking-[-0.04em] text-ink">
                     {detail.title}
                   </h3>
-                  <p className="mt-4 leading-7 text-cream/70">{detail.description}</p>
+                  <p className="mt-4 leading-7 text-ink/70">{detail.description}</p>
                 </article>
               ))}
             </div>
@@ -183,14 +184,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 >
                   Download on the App Store <span aria-hidden="true">↗</span>
                 </Link>
-                <Link
-                  href={siteConfig.githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="button button-light"
-                >
-                  Follow the build <span aria-hidden="true">↗</span>
-                </Link>
+                <ContactSalesButton />
               </div>
             </div>
           </Container>

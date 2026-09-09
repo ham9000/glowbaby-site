@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { Container } from "@/components/container";
-import { siteConfig } from "@/content/site";
 
 export function SiteFooter() {
   return (
@@ -21,14 +20,6 @@ export function SiteFooter() {
           </Link>
           <Link href="/products/glowbaby#faq" className="hover:text-cream">
             FAQ
-          </Link>
-          <Link
-            href={siteConfig.githubUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-cream"
-          >
-            GitHub ↗
           </Link>
         </div>
       </Container>
