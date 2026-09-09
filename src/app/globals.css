@@ -352,7 +352,8 @@ summary::-webkit-details-marker {
   font-weight: 500;
 }
 
-.principle-card {
+.principle-card,
+.how-it-works-card {
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(20, 18, 24, 0.1);
@@ -362,6 +363,7 @@ summary::-webkit-details-marker {
 }
 
 .principle-card,
+.how-it-works-card,
 .real-world-card {
   transition:
     transform 220ms ease,
@@ -369,9 +371,14 @@ summary::-webkit-details-marker {
 }
 
 .principle-card:hover,
+.how-it-works-card:hover,
 .real-world-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 24px 60px rgba(20, 18, 24, 0.08);
+}
+
+.how-it-works-card {
+  background: white;
 }
 
 .principle-card-accent {

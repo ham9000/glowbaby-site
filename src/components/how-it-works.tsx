@@ -14,7 +14,7 @@ export function HowItWorks({ product }: { product: Product }) {
         />
         <ol className="mt-10 grid list-none gap-8 lg:grid-cols-3">
           {product.howItWorks.map((step) => (
-            <li key={step.number} className="border-t border-ink/15 pt-6">
+            <li key={step.number} className="how-it-works-card">
               <StarOutline className="h-7 w-7 text-violet" />
               <h3 className="mt-6 font-display text-3xl tracking-[-0.04em] text-ink">
                 {step.title}
