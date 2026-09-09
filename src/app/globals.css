@@ -359,12 +359,17 @@ summary::-webkit-details-marker {
   border-radius: 2rem;
   background: var(--cream);
   padding: 2rem;
+}
+
+.principle-card,
+.real-world-card {
   transition:
     transform 220ms ease,
     box-shadow 220ms ease;
 }
 
-.principle-card:hover {
+.principle-card:hover,
+.real-world-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 24px 60px rgba(20, 18, 24, 0.08);
 }

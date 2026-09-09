@@ -26,7 +26,7 @@ export function RealWorldSection() {
           {realWorldScenarios.map((scenario) => (
             <figure
               key={scenario.scene}
-              className="overflow-hidden rounded-[2rem] border border-ink/10 bg-cream"
+              className="real-world-card overflow-hidden rounded-[2rem] border border-ink/10 bg-cream"
             >
               <div className="relative overflow-hidden">
                   <Image
